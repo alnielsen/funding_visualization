@@ -1,7 +1,7 @@
 streamlit
 streamlit-option-menu
 numpy
-opencv-python
+opencv-python-headless
 pandas
 streamlit-aggrid
 plotly
