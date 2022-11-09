@@ -5,4 +5,3 @@ opencv-python
 pandas
 streamlit-aggrid
 plotly
-io
