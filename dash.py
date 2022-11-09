@@ -12,7 +12,7 @@ import io
 
 
 # Set page configuration
-st.set_page_config(page_title="Funding Visualization Project", page_icon=":moneybag:", layout="wide", initial_sidebar_state='expanded')
+st.set_page_config(page_title="Funding Visualization Project", page_icon=":moneybag:", layout="centered", initial_sidebar_state='expanded')
 
 # Markdown code to hide "hamburger-menu"
 hide_streamlit_style = """
