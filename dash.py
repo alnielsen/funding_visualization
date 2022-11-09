@@ -25,6 +25,7 @@ footer {visibility: hidden;}
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 
+
 # Creating data objects
 data1 = [
     [x for x in range(3)]
