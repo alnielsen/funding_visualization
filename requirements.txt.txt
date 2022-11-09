@@ -1,0 +1,10 @@
+streamlit
+streamlit_option_menu
+streamlit.components.v1
+PIL
+numpy
+OpenCV
+pandas
+streamlit-aggrid
+plotly
+io
