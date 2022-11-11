@@ -2,17 +2,17 @@ import pandas as pd
 from random_word import Wordnik
 from random import randint
 
-df = pd.DataFrame(columns = [
-    
-    "titel",
-    "beskrivelse",
-    "modtager",
-    "institution",
-    "område",
-    "virkemiddel",
-    "beløb",
-    "år"
-])
+
+df = {
+    "titel": [],
+    "beskrivelse": [],
+    "modtager": [],
+    "institution": [],
+    "område": [],
+    "virkemiddel": [],
+    "beløb": [],
+    "år": []    
+}
 
 
 
@@ -38,18 +38,18 @@ def _generate_random_paragrah(low_len, high_len):
 institutioner = ["AU", "SDU", "AAU", "KU", "ITU", "ROC"]
 områder = [f"område {i}" for i in range(8)]
 virkemidler = [f"virke {i}" for i in range(10)]
-for _ in range(4000):
+for _ in range(3700):
     # All values are in list for eaiser conversion to pandas
-    row = {
-        "titel": [_generate_random_paragrah(5, 15)],
-        "beskrivelse": [_generate_random_paragrah(0, 250)],
-        "modtager": [_generate_random_paragrah(1,  4)],
-        "institution": [institutioner[randint(0, len(institutioner) - 1)]],
-        "område": [områder[randint(0, len(områder) - 1)]],  
-        "virkemiddel": [virkemidler[randint(0, len(virkemidler) - 1)]],
-        "beløb": [randint(10000, 5000000)],
-        "år": [randint(2013, 2022)]       
-    }
+    
+    df["titel"].append(_generate_random_paragrah(5, 15))
+    df["beskrivelse"].append(_generate_random_paragrah(5, 15))
+    df["modtager"].append(_generate_random_paragrah(1,  4))
+    df["institution"].append(institutioner[randint(0, len(institutioner) - 1)])
+    df["område"].append(områder[randint(0, len(områder) - 1)])
+    df["virkemiddel"].append(virkemidler[randint(0, len(virkemidler) - 1)])
+    df["beløb"].append(randint(10000, 5000000))
+    df["år"].append(randint(2013, 2022))
+
     print(_)
-    df = pd.concat([df, pd.DataFrame.from_dict(row)], ignore_index=True)
+df = pd.DataFrame.from_dict(df)
 df.to_csv("../synthetic_data.csv")
