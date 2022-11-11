@@ -12,7 +12,7 @@ import io
 
 
 # Set page configuration
-st.set_page_config(page_title="Funding Visualization Project", page_icon=":moneybag:", layout="centered", initial_sidebar_state='expanded')
+st.set_page_config(page_title="Funding Visualization Project", page_icon=":moneybag:", layout="wide", initial_sidebar_state='expanded')
 
 # Markdown code to hide "hamburger-menu"
 hide_streamlit_style = """
@@ -25,7 +25,12 @@ footer {visibility: hidden;}
 
 st.markdown(hide_streamlit_style, unsafe_allow_html=True, )
 
+col1, col2 = st.columns(2)
 
+
+
+#with col2:
+    #st.write("This i col2")
 
 # Creating data objects
 data1 = [
@@ -64,26 +69,42 @@ if choose == "About":
 
 
 if choose == "Dashboard":
-    st.title("Dashboard")
-    st.write("This is the dashboard")
-    st.markdown("***")
+    with col1:
+        st.title("Danmarks Frie Forskningsfond")
+
+        with st.expander("Expand to see more"):
+            st.title("Dashboard")
+            st.header("Dashboard")
+            st.subheader("Dashboard")
+            st.write("This is the dashboard")
+            st.markdown("***")
     
     
-    sel_box = st.selectbox("Available data", ["--Pick an option--","Data1", "Data2", "Data3"], args=None)
+        
 
     
+    with col2:
+        st.header("Data chart")
+        st.write("This is the data chart section")
+        st.markdown("***")
+        sel_box = st.selectbox("Available data", ["--Pick an option--","Data1", "Data2", "Data3"], args=None)
+        
+        if sel_box == "Data1":
+            with col2:
+                
+                st.write("**Data1**")
+                st.table(data1)
+        
+        if sel_box == "Data2":
+            with col2:
+                st.write("**Data2**")
+                st.table(data2)
+        
+        if sel_box == "Data3":
+            with col2:
 
-    if sel_box == "Data1":
-        st.write("**Data1**")
-        st.table(data1)
-    
-    if sel_box == "Data2":
-        st.write("**Data2**")
-        st.table(data2)
-    
-    if sel_box == "Data3":
-        st.write("**Data3**")
-        st.table(data3)
+                st.write("**Data3**")
+                st.table(data3)
 
 
 
