@@ -9,10 +9,15 @@ import pandas as pd
 from st_aggrid import AgGrid
 import plotly.express as px
 import io
+import pydeck as pdk
+
 
 
 # Set page configuration
-st.set_page_config(page_title="Funding Visualization Project", page_icon=":moneybag:", layout="wide", initial_sidebar_state='expanded')
+st.set_page_config(page_title="Funding Visualization Project", page_icon=":moneybag:", layout="wide", initial_sidebar_state="auto")
+
+
+
 
 # Markdown code to hide "hamburger-menu"
 hide_streamlit_style = """
@@ -23,9 +28,9 @@ footer {visibility: hidden;}
 
 """
 
-st.markdown(hide_streamlit_style, unsafe_allow_html=True, )
+st.markdown(hide_streamlit_style, unsafe_allow_html=True,)
 
-col1, col2 = st.columns(2)
+
 
 
 
@@ -56,8 +61,15 @@ with st.sidebar:
         "icon": {"color": "orange", "font-size": "25px"}, 
         "nav-link": {"font-size": "12px", "text-align": "left", "margin":"0px", "--hover-color": "#eee"},
         "nav-link-selected": {"background-color": "#02ab21"},
-    }, orientation='horizontal'
+    }, orientation='vertical'
     )
+
+
+cities = pd.DataFrame({
+    'Location' : ['Denmark'],
+    'lat' : [55.676098],
+    'lon' : [12.568337]
+})
 
 
 #### Checking for user choice and displaying context of menu ####
@@ -69,42 +81,53 @@ if choose == "About":
 
 
 if choose == "Dashboard":
-    with col1:
-        st.title("Danmarks Frie Forskningsfond")
 
-        with st.expander("Expand to see more"):
-            st.title("Dashboard")
-            st.header("Dashboard")
-            st.subheader("Dashboard")
-            st.write("This is the dashboard")
-            st.markdown("***")
-    
-    
+    st.title("Danmarks Frie Forskningsfond")
+    with st.expander("What is DFF?"):
+        st.header("What is DFF?")
+        st.write("DFF is a funding institution")
+        
+        
         
 
+    st.markdown("***")
     
-    with col2:
-        st.header("Data chart")
-        st.write("This is the data chart section")
-        st.markdown("***")
-        sel_box = st.selectbox("Available data", ["--Pick an option--","Data1", "Data2", "Data3"], args=None)
-        
-        if sel_box == "Data1":
-            with col2:
+    st.header("Explore the data")
+
+
+    maincol, mapcol = st.columns(2)
+    with maincol:
+        with st.expander("About the charts"):
+            st.subheader("Explanation")
+            st.write("SDU = Syddansk Universitet")
+
+
+    with mapcol:
+        cat_select = st.selectbox("Select a parameter for funding", ("Danish Crowns (DKK)", "Percentage (%)"))
+        chart_select = st.selectbox("Select a graph/chart", ("Map", "Heatmap", "Sankey Chart", "Histogram"))
+        if chart_select == "Map":
+            
+            st.pydeck_chart(pdk.Deck(
+                map_style=None,
+                initial_view_state=pdk.ViewState(
+                latitude=56.263920,
+                longitude=10.501785,
+                zoom=6,
+                pitch=None)))
                 
-                st.write("**Data1**")
-                st.table(data1)
+            #st.map(data=None, zoom=10000000000000, use_container_width=False)
+            val = st.slider("Choose a year", min_value=1900, max_value=2022)
         
-        if sel_box == "Data2":
-            with col2:
-                st.write("**Data2**")
-                st.table(data2)
-        
-        if sel_box == "Data3":
-            with col2:
+       
 
-                st.write("**Data3**")
-                st.table(data3)
+        
+            #st.markdown("***")
+    
+    
+        
+
+    
+    
 
 
 
