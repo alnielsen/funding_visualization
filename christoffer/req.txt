@@ -1,2 +1,4 @@
 pandas
 random-word
+matplotlib
+wordcloud
