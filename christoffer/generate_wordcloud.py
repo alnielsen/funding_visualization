@@ -48,7 +48,8 @@ def generate_data(year: int = None, # For filtering
     # Create dict of absolute freqs and funding
     for text, amount in zip(df["title_desc"], df["beløb"]):
         # Split each token/word on whitespace
-        tokens = text.split()
+        tokens = set([token.lower() for token in text.split()]) # Get unique tokens
+
         n_words += len(tokens)
         for token in text.split():
             token = token.lower()
@@ -63,11 +64,11 @@ def generate_data(year: int = None, # For filtering
     for key, val in abs_freqs.items():
         rel_freqs[key] = val/n_words
 
+    # I think there is a mistake here - FIXME
     # Create dict for relative funding
     for key, val in abs_funding.items():
         rel_funding[key] = val/funding_sum
     
-    # Filtering dictionaries
     return (abs_funding, rel_funding, abs_freqs, rel_freqs)
 
 
@@ -77,7 +78,6 @@ for year in range(2013, 2022 + 1):
     
     # Size = abs funding, color = abs freqs
     size_dict = filter_dict(abs_funding, 1000) # At least 1000 kr. in funding
-    
     if dict_is_empty(size_dict):
         size_dict = abs_funding # no filter if empty
     
