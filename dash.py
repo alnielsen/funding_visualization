@@ -101,14 +101,17 @@ def display_map(location, parameter):
 def dashboard():
         ## Section description ##
         st.title("Danmarks Frie Forskningsfond")
-        st.write("Visualization of funding data & funding flows")
+        st.subheader("Visualization of funding data & funding flows")
+
+        for i in range(4):
+            st.write("\n")
         
+        dashcol1, dashcol2 = st.columns([1,4])
+        with dashcol1:
+
+            chart_select = st.selectbox("Select a graph/chart", ("Map", "Heatmap", "Sankey Chart", "Histogram"))
     
         st.markdown("***")
-
-        ## Adding page break ##
-        for i in range(2):
-            st.write('\n')
 
 
         ## Create columns for page split ##
@@ -116,12 +119,7 @@ def dashboard():
         
 
         ## Choosing a visualization ##
-        with maincol:
         
-            chart_select = st.selectbox("Select a graph/chart", ("Map", "Heatmap", "Sankey Chart", "Histogram"))
-            st.markdown("***")
-           
-
         ## Displaying map and data on map
         with mapcol:
             
