@@ -115,7 +115,7 @@ def display_map(location):#, parameter):
         au.add_to(map)
 
 
-    st_map = st_folium(map, width=700, height=450)
+    st_map = st_folium(map, width=900, height=450)
 
 #### Histogram function ####
 def histo_chart():
