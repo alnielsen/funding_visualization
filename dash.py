@@ -93,7 +93,7 @@ def display_map(location, parameter):
         au.add_to(map)
 
 
-    st_map = st_folium(map, width=1000, height=600)
+    st_map = st_folium(map, width=900, height=600)
 
 
 
@@ -112,7 +112,7 @@ def dashboard():
 
 
         ## Create columns for page split ##
-        maincol, mapcol = st.columns([1,3])
+        maincol, mapcol = st.columns([2,4])
         
 
         ## Choosing a visualization ##
@@ -134,6 +134,9 @@ def dashboard():
 
                     par_select = st.selectbox("Select a parameter for funding", ("Danish Crowns (DKK)", "Percentage (%)"))
 
+                    st.markdown("***")
+
+                    st.slider("Year", min_value=min(years), max_value=max(years))
                     
             
                 
@@ -141,7 +144,7 @@ def dashboard():
 
             
         
-            st.slider("Year", min_value=min(years), max_value=max(years))
+                
         
 
 
@@ -159,38 +162,35 @@ def about():
     with st.sidebar:
         
         with st.expander("Creators"):
-            textcol, linkcol = st.columns(2)
+                  
+            # Add Link to your repo
+            aln_git = '''
+            [![Repo](https://badgen.net/badge/icon/GitHub?icon=github&label)](https://github.com/alnielsen) 
 
-            with textcol:
+            '''
+            gc_git = '''
+            [![Repo](https://badgen.net/badge/icon/GitHub?icon=github&label)](https://github.com/gustavchristensen1995) 
 
-                st.write("Andreas LN")
-                st.markdown("***")
-                st.write("Christoffer M.K.")
-                st.markdown("***")
-                st.write("Gustav C.")
-                st.markdown("***")
+            '''
+            cmk_git = '''
+            [![Repo](https://badgen.net/badge/icon/GitHub?icon=github&label)](https://github.com/Chris-Kramer) 
+
+            '''
             
-            with linkcol:
-                # Add Link to your repo
-                aln_git = '''
-                [![Repo](https://badgen.net/badge/icon/GitHub?icon=github&label)](https://github.com/alnielsen) 
 
-                '''
-                gc_git = '''
-                [![Repo](https://badgen.net/badge/icon/GitHub?icon=github&label)](https://github.com/gustavchristensen1995) 
-
-                '''
-                cmk_git = '''
-                [![Repo](https://badgen.net/badge/icon/GitHub?icon=github&label)](https://github.com/Chris-Kramer) 
-
-                '''
-                st.write(aln_git)
-                for i in range(5):
-                    st.write('\n')
-                st.write(cmk_git)
-                for i in range(5):
-                    st.write('\n')
-                st.write(gc_git)
+            st.write("Andreas LN")
+            st.write(aln_git)
+            st.markdown("***")
+            st.write("Christoffer M.K.")
+            st.write(cmk_git)
+            st.markdown("***")
+            st.write("Gustav C.")
+            st.write(gc_git)
+            st.markdown("***")
+            
+      
+           
+                
                
 
 
