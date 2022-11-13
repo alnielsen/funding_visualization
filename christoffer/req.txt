@@ -1,0 +1,7 @@
+pandas
+numpy
+pillow
+random-word
+matplotlib
+wordcloud
+
