@@ -13,12 +13,30 @@ import folium
 import random as rd
 import csv
 
+
 # Set page configuration
 st.set_page_config(page_title="Funding Visualization Project", page_icon=":moneybag:", layout="wide", initial_sidebar_state="auto")
 
 st.markdown("***")
 
 years = [x for x in range(1900,2023)]
+
+df = pd.read_csv('gustav/dff.csv')
+
+institution = []
+
+for i in df['Institution']:
+    if i not in institution:
+        institution.append(i)
+
+
+omraade = []
+
+for i in df['Område']:
+     if i not in omraade:
+        omraade.append(i)
+
+
 
 
 #nums_dat.drop(nums_dat.filter(regex="Unname"),axis=1, inplace=True)
@@ -90,15 +108,15 @@ def display_map(location, parameter):
         ruc.add_to(map)
         au.add_to(map)
 
-    if location == 'Copenhagen University':
+    if location == 'Københavns Universitet':
 
         ku.add_to(map)
         
-    if location == "Roskilde University":
+    if location == "Roskilde Universitet":
 
         ruc.add_to(map)
 
-    if location == "Aarhus University":
+    if location == "Aarhus Universitet":
 
         au.add_to(map)
 
@@ -117,7 +135,7 @@ def dashboard():
         dashcol1, dashcol2 = st.columns([1,4])
         with dashcol1:
 
-            chart_select = st.selectbox("Select a graph/chart", ("Map", "Heatmap", "Sankey Chart", "Histogram"))
+            chart_select = st.selectbox("Select a graph/chart", ("Overview", "Map", "Heatmap", "Sankey Chart", "Histogram"))
     
         st.markdown("***")
 
@@ -133,25 +151,37 @@ def dashboard():
 
             
             ## Add configuration to map ##
-            if chart_select == "Map":
+            if chart_select == "Overview":
 
                 with maincol:
-                    
-                    locations = st.selectbox("Choose location to mark", ("All","Copenhagen University", "Roskilde University", "Aarhus University"))
+
+
+
+                    locations = st.selectbox("Choose an institution", (institution))
+
+                    theme = st.selectbox("Choose a theme", (omraade))
 
                     par_select = st.selectbox("Select a parameter for funding", ("Danish Crowns (DKK)", "Percentage (%)"))
 
 
+                with mapcol:
 
+                    st.table(df.loc[(df['Institution'] == locations)])
 
-                    var_usd = st.metric("",f"DKK ")
-
-                   
-                    
 
                     
             
-                
+
+            if chart_select == "Map":
+
+
+                with maincol:
+
+                    locations = st.selectbox("Choose an institution", (institution))
+
+                    par_select = st.selectbox("Select a parameter for funding", ("Danish Crowns (DKK)", "Percentage (%)"))
+
+
                 display_map(locations, par_select)
     
                 #st.select_slider("Year", years)    
@@ -215,7 +245,7 @@ if choose == "Dashboard":
 
 if choose == "About":
     about()
-    st.table(nums_dat)
+    st.table(df)
 
 
 #### ADD SUMMARY!!! ####
