@@ -112,7 +112,7 @@ def dashboard():
 
 
         ## Create columns for page split ##
-        maincol, mapcol = st.columns([2,5])
+        maincol, mapcol = st.columns([2,4])
         
 
         ## Choosing a visualization ##
@@ -120,7 +120,7 @@ def dashboard():
         
             chart_select = st.selectbox("Select a graph/chart", ("Map", "Heatmap", "Sankey Chart", "Histogram"))
             st.markdown("***")
-            
+           
 
         ## Displaying map and data on map
         with mapcol:
@@ -134,13 +134,12 @@ def dashboard():
 
                     par_select = st.selectbox("Select a parameter for funding", ("Danish Crowns (DKK)", "Percentage (%)"))
 
-                    st.markdown("***")
-
-                    st.slider("Year", min_value=min(years), max_value=max(years))
                     
             
                 
                 display_map(locations, par_select)
+    
+                st.slider("Year", min_value=min(years), max_value=max(years))
 
             
         
