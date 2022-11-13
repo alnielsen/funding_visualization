@@ -115,7 +115,7 @@ def dashboard():
 
 
         ## Create columns for page split ##
-        maincol, mapcol = st.columns([2,4])
+        maincol, mapcol = st.columns([3,4])
         
 
         ## Choosing a visualization ##
@@ -137,7 +137,7 @@ def dashboard():
                 
                 display_map(locations, par_select)
     
-                st.slider("Year", min_value=min(years), max_value=max(years))
+                st.slider("Year", min_value=min(years), max_value=max(years))    
 
             
         
