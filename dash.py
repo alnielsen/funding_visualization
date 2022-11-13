@@ -103,7 +103,7 @@ def dashboard():
         st.title("Danmarks Frie Forskningsfond")
         st.subheader("Visualization of funding data & funding flows")
 
-        for i in range(4):
+        for i in range(3):
             st.write("\n")
         
         dashcol1, dashcol2 = st.columns([1,4])
