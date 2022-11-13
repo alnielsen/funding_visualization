@@ -2,12 +2,9 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
 import numpy as np
-import cv2
 import pandas as pd
 from st_aggrid import AgGrid
 import plotly.express as px
-import io
-import pydeck as pdk
 from streamlit_folium import st_folium
 import folium
 import random as rd

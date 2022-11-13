@@ -1,9 +1,9 @@
 streamlit
 streamlit-option-menu
 numpy
-opencv-python-headless
 pandas
 streamlit-aggrid
 plotly
 folium
 streamlit_folium
+matplotlib
