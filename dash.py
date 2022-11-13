@@ -10,11 +10,21 @@ import io
 import pydeck as pdk
 from streamlit_folium import st_folium
 import folium
+import random as rd
+import csv
 
 # Set page configuration
 st.set_page_config(page_title="Funding Visualization Project", page_icon=":moneybag:", layout="wide", initial_sidebar_state="auto")
 
+st.markdown("***")
+
 years = [x for x in range(1900,2023)]
+
+
+#nums_dat.drop(nums_dat.filter(regex="Unname"),axis=1, inplace=True)
+
+
+
 
 # Markdown code to hide "hamburger-menu"
 hide_streamlit_style = """
@@ -49,7 +59,7 @@ def display_map(location, parameter):
     #### Create folium map markers: ####
     au = folium.Marker(
                 location=[56.166666 , 10.1999992],
-                popup=f"Aarhus University  -{parameter}",
+                popup=f"Aarhus University",
                 icon=folium.Icon(color="blue", icon="home"),
                 )
 
@@ -62,7 +72,7 @@ def display_map(location, parameter):
     ku = folium.Marker(
             location=[55.674497302, 12.570164386],
             prefix='fa',
-            popup=f'Københavns Universitet  -{parameter}',
+            popup=f'Copenhagen Universitet  -{parameter}',
             icon=folium.Icon(icon='home', color='red'),
             
             )
@@ -80,7 +90,7 @@ def display_map(location, parameter):
         ruc.add_to(map)
         au.add_to(map)
 
-    if location == 'Københavns University':
+    if location == 'Copenhagen University':
 
         ku.add_to(map)
         
@@ -103,9 +113,7 @@ def dashboard():
         st.title("Danmarks Frie Forskningsfond")
         st.subheader("Visualization of funding data & funding flows")
 
-        for i in range(3):
-            st.write("\n")
-        
+       
         dashcol1, dashcol2 = st.columns([1,4])
         with dashcol1:
 
@@ -122,22 +130,31 @@ def dashboard():
         
         ## Displaying map and data on map
         with mapcol:
+
             
             ## Add configuration to map ##
             if chart_select == "Map":
 
                 with maincol:
                     
-                    locations = st.selectbox("Choose location to mark", ("All","Københavns University", "Roskilde University", "Aarhus University"))
+                    locations = st.selectbox("Choose location to mark", ("All","Copenhagen University", "Roskilde University", "Aarhus University"))
 
                     par_select = st.selectbox("Select a parameter for funding", ("Danish Crowns (DKK)", "Percentage (%)"))
+
+
+
+
+                    var_usd = st.metric("",f"DKK ")
+
+                   
+                    
 
                     
             
                 
                 display_map(locations, par_select)
     
-                st.slider("Year", min_value=min(years), max_value=max(years))    
+                #st.select_slider("Year", years)    
 
             
         
@@ -148,12 +165,12 @@ def dashboard():
 #### Creating the About section ####
 def about():
     st.title("About the Visualizer")
-    st.write("How do i use the visualizer and what can it tell me?")
+    ("How do i use the visualizer and what can it tell me?")
 
     st.markdown("***")
 
     st.title("About the Data")
-    st.write("How do i use the visualizer and what can it tell me?")
+    ("How do i use the visualizer and what can it tell me?")
 
     ## Add creator as expander with info with git links ##
     with st.sidebar:
@@ -175,14 +192,14 @@ def about():
             '''
             
 
-            st.write("Andreas LN")
-            st.write(aln_git)
+            ("Andreas LN")
+            (aln_git)
             st.markdown("***")
-            st.write("Christoffer M.K.")
-            st.write(cmk_git)
+            ("Christoffer M.K.")
+            (cmk_git)
             st.markdown("***")
-            st.write("Gustav C.")
-            st.write(gc_git)
+            ("Gustav C.")
+            (gc_git)
             st.markdown("***")
             
       
@@ -198,9 +215,10 @@ if choose == "Dashboard":
 
 if choose == "About":
     about()
+    st.table(nums_dat)
 
 
-    
+#### ADD SUMMARY!!! ####
     
 
 
