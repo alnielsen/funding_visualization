@@ -5,3 +5,5 @@ opencv-python-headless
 pandas
 streamlit-aggrid
 plotly
+folium
+streamlit_folium
