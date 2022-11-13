@@ -68,7 +68,7 @@ def display_map(location, parameter):
             )
     
     map = folium.Map(location=(56.263920, 10.501785),
-                    zoom_start=7,
+                    zoom_start=5,
                     scrollWheelZoom=True,
                     tiles='cartodbpositron'
                     
@@ -93,7 +93,7 @@ def display_map(location, parameter):
         au.add_to(map)
 
 
-    st_map = st_folium(map, width=500, height=500)
+    st_map = st_folium(map, width=900, height=500)
 
 
 
