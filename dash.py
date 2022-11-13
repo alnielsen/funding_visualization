@@ -93,7 +93,7 @@ def display_map(location, parameter):
         au.add_to(map)
 
 
-    st_map = st_folium(map, width=900, height=600)
+    st_map = st_folium(map, width=500, height=500)
 
 
 
@@ -112,7 +112,7 @@ def dashboard():
 
 
         ## Create columns for page split ##
-        maincol, mapcol = st.columns([2,4])
+        maincol, mapcol = st.columns([1,4])
         
 
         ## Choosing a visualization ##
