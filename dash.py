@@ -123,7 +123,7 @@ def histo_chart():
                 arr = [x for x in range(500)]
                 fig1, ax1 = plt.subplots()
                 ax1.hist(arr, bins=20)
-                st.pyplot(fig1)
+                st.plotly_chart(fig1)
 
 
 #### Bankey chart function ####
@@ -175,9 +175,9 @@ def dashboard():
 
 
         ## Create columns for chart split ##
-        mapcol, datacol = st.columns([1,1])
+        mapcol, datacol = st.columns([2,2])
 
-        histocol, flowcol = st.columns([1,1])
+        histocol, flowcol = st.columns([2,2])
 
         ## MAP CHART ##
         with mapcol:
