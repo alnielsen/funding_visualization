@@ -67,7 +67,7 @@ def display_map(location, parameter):
             
             )
     
-    map = folium.Map(location=(56.253920, 13.501785),
+    map = folium.Map(location=(56.253920, 15.501785),
                     zoom_start=6,
                     scrollWheelZoom=True,
                     tiles='cartodbpositron'
@@ -93,7 +93,7 @@ def display_map(location, parameter):
         au.add_to(map)
 
 
-    st_map = st_folium(map, width=900, height=500)
+    st_map = st_folium(map, width=900, height=450)
 
 
 
@@ -112,7 +112,7 @@ def dashboard():
 
 
         ## Create columns for page split ##
-        maincol, mapcol = st.columns([1,4])
+        maincol, mapcol = st.columns([2,5])
         
 
         ## Choosing a visualization ##
