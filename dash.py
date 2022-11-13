@@ -17,11 +17,12 @@ import csv
 # Set page configuration
 st.set_page_config(page_title="Funding Visualization Project", page_icon=":moneybag:", layout="wide", initial_sidebar_state="auto")
 
-st.markdown("***")
+
 
 years = [x for x in range(1900,2023)]
 
 df = pd.read_csv('gustav/dff.csv')
+
 
 institution = []
 
@@ -61,11 +62,11 @@ with st.sidebar:
                          icons=['speedometer', 'question-square'],
                          menu_icon="segmented-nav", default_index=0,
                          styles={
-                                "container": {"padding": "5!important", "background-color": "#29355c"},
-                                "icon": {"color": "orange", "font-size": "30px"}, 
-                                "nav-link": {"font-size": "12px", "text-align": "left", "margin":"0px", "--hover-color": "#eee"},
+                                "container": {"padding": "5!important", "background-color": "#181a30"},
+                                "icon": {"color": "orange", "font-size": "20px"}, 
+                                "nav-link": {"font-size": "20px", "text-align": "left", "margin":"0px", "--hover-color": "#eee"},
                                 "nav-link-selected": {"background-color": "#02ab21"},
-                                }, orientation='vertical')
+                                }, orientation='horizontal')
 
 
 
@@ -139,54 +140,54 @@ def dashboard():
     
         st.markdown("***")
 
-
-        ## Create columns for page split ##
-        maincol, mapcol = st.columns([3,4])
         
 
         ## Choosing a visualization ##
         
-        ## Displaying map and data on map
-        with mapcol:
+        ## Add configuration to map ##
+        if chart_select == "Overview":
+             ## Create columns for page split ##
+            maincol, datacol = st.columns([2,5])
 
-            
-            ## Add configuration to map ##
-            if chart_select == "Overview":
-
-                with maincol:
+            with maincol:
 
 
 
-                    locations = st.selectbox("Choose an institution", (institution))
+                locations = st.selectbox("Choose an institution", (institution))
 
-                    theme = st.selectbox("Choose a theme", (omraade))
+                theme = st.selectbox("Choose a theme", (omraade))
 
-                    par_select = st.selectbox("Select a parameter for funding", ("Danish Crowns (DKK)", "Percentage (%)"))
-
-
-                with mapcol:
-
-                    st.table(df.loc[(df['Institution'] == locations)])
+                #par_select = st.selectbox("Select a parameter for funding", ("Danish Crowns (DKK)", "Percentage (%)"))
 
 
-                    
-            
+            with datacol:
 
-            if chart_select == "Map":
-
-
-                with maincol:
-
-                    locations = st.selectbox("Choose an institution", (institution))
-
-                    par_select = st.selectbox("Select a parameter for funding", ("Danish Crowns (DKK)", "Percentage (%)"))
+                st.dataframe(df.loc[(df['Institution'] == locations)])
+                source = 'Soruce: [Danmarks Frie Forskningsfond](https://dff.dk/forskningsprojekter)'
+                st.markdown(source, unsafe_allow_html=True)
 
 
+                
+        
+
+        if chart_select == "Map":
+            ## Create columns for page split ##
+            maincol, mapcol = st.columns([2,3])
+        
+
+
+            with maincol:
+
+                locations = st.selectbox("Choose an institution", (institution))
+
+                par_select = st.selectbox("Select a parameter for funding", ("Danish Crowns (DKK)", "Percentage (%)"))
+
+            with mapcol:
                 display_map(locations, par_select)
-    
-                #st.select_slider("Year", years)    
 
-            
+            #st.select_slider("Year", years)    
+
+        
         
                 
         
@@ -194,13 +195,34 @@ def dashboard():
 
 #### Creating the About section ####
 def about():
+
+
+    
+    source = 'All data is soruced from: [Danmarks Frie Forskningsfond](https://dff.dk/forskningsprojekter)'
+    
     st.title("About the Visualizer")
     ("How do i use the visualizer and what can it tell me?")
 
     st.markdown("***")
 
     st.title("About the Data")
-    ("How do i use the visualizer and what can it tell me?")
+    
+    st.markdown(source, unsafe_allow_html=True)
+    ("Data holds information about funds, institutions, themes and more.")
+    for i in range(3):
+        st.write('\n')
+    ("You can download the data in .csv format below")
+
+    with open ("gustav/dff.csv", "rb") as file:
+        btn = st.download_button(
+            label="Download Data",
+            data=file,
+            file_name="dff_data.csv",
+            mime="text/csv"
+          )
+    
+
+
 
     ## Add creator as expander with info with git links ##
     with st.sidebar:
@@ -245,7 +267,7 @@ if choose == "Dashboard":
 
 if choose == "About":
     about()
-    st.table(df)
+    
 
 
 #### ADD SUMMARY!!! ####
