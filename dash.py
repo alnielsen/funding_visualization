@@ -14,9 +14,19 @@ import plotly.graph_objects as go
 
 
 # Set page configuration
-st.set_page_config(page_title="Funding Visualization Project", page_icon=":moneybag:", layout="wide", initial_sidebar_state="auto")
+st.set_page_config(page_title="Funding Visualization Project", page_icon=":moneybag:", layout="wide", initial_sidebar_state="collapsed")
 
+streamlit_style = """
+			<style>
+			@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap');
 
+			html, body, [class*="css"]  {
+			font-family: 'Roboto', sans-serif;
+
+			}
+			</style>
+			"""
+st.markdown(streamlit_style, unsafe_allow_html=True)
 
 years = [x for x in range(1900,2023)]
 
@@ -55,10 +65,10 @@ with st.sidebar:
                          icons=['speedometer', 'question-square'],
                          menu_icon="segmented-nav", default_index=0,
                          styles={
-                                "container": {"padding": "5!important", "background-color": "#181a30"},
+                                "container": {"padding": "5!important", "background-color": "#435870"},
                                 "icon": {"color": "orange", "font-size": "20px"}, 
-                                "nav-link": {"font-size": "20px", "text-align": "left", "margin":"0px", "--hover-color": "#eee"},
-                                "nav-link-selected": {"background-color": "#02ab21"},
+                                "nav-link": {"font-size": "20px", "text-align": "left", "margin":"0px", "--hover-color": "#b7bcc4"},
+                                "nav-link-selected": {"background-color": "#313945"},
                                 }, orientation='horizontal')
 
 
@@ -147,54 +157,78 @@ def bankey_chart():
 
 #### Creating the dashboard section ####
 def dashboard():
-        ## Section description ##
-        st.title("Danmarks Frie Forskningsfond")
-        st.subheader("Visualization of funding data & funding flows")
+        title_col1, title_col2 = st.columns([2,3])
+        with title_col1:
+            with st.container():
 
-       ## Create upper filter columns
-        dashcol1, dashcol2, dashcol3, dashcol4 = st.columns([1,1,1,1])
+                st.markdown("""
+                <style>
+                .big-font {
+                    font-size:20px !important;
+                }
+                </style>
+                """, unsafe_allow_html=True)
 
-        with dashcol1:
+            
 
-            locations = st.selectbox("Choose an institution", (institution))
+                ## Section description ##
+                st.title("Danmarks Frie Forskningsfond")
+                st.markdown('<p class="big-font">Visualization of funding data & funding flows</p>', unsafe_allow_html=True)
 
-        with dashcol2:
+        with title_col1:
 
-            theme = st.selectbox("Choose a theme", (omraade))
-        with dashcol3:
+            with st.container():
+                for i in range(2):
+                    "\n"
+                    
+                with st.expander("Open / Collapse filters", expanded=True):
+                    st.subheader("Filters")
 
-            chart_select3 = st.selectbox("filter3", ("Overview", "Map", "Heatmap", "Sankey Chart", "Histogram"))
-        with dashcol4:
+                    locations = st.selectbox("Choose an institution", (institution))
 
-            chart_select4 = st.selectbox("filter4", ("Overview", "Map", "Heatmap", "Sankey Chart", "Histogram"))
-    
-        st.markdown("***")
+                    theme = st.selectbox("Choose a theme", (omraade))
 
+                    year = st.number_input("Year", min_value=1900, max_value=2022)
 
-        ## Create columns for chart split ##
-        mapcol, datacol = st.columns([2,2])
+        "---"
 
-        histocol, flowcol = st.columns([2,2])
+                
+            
+        
+        ## Create upper filter columns
+        dashcol2, dashcol3 = st.columns([2,2], gap="large")
+
+        
 
         ## MAP CHART ##
-        with mapcol:
-            display_map(locations)
+        with dashcol2:
+            with st.container():
+                with st.expander("Open/Collapse Map", expanded=False):
+
+                    display_map(locations)
+
+            ## HISTORGRAM ##
+                with st.container():
+                    with st.expander("Open/Collapse Histogram", expanded=False):
+                        histo_chart()
 
 
         ## DATA CHART ##
-        with datacol:
-            fig2 = st.dataframe(df.loc[(df['Institution'] == locations)])
-            source = 'Soruce: [Danmarks Frie Forskningsfond](https://dff.dk/forskningsprojekter)'
-            st.markdown(source, unsafe_allow_html=True)
-            #par_select = st.selectbox("Select a parameter for funding", ("Danish Crowns (DKK)", "Percentage (%)"))
+        with dashcol3:
+            with st.container():
+                with st.expander(label="Open/Collapse Dataframe", expanded=False):
+                    fig2 = st.dataframe(df.loc[(df['Institution'] == locations)])
+                    source = 'Soruce: [Danmarks Frie Forskningsfond](https://dff.dk/forskningsprojekter)'
+                    st.markdown(source, unsafe_allow_html=True)
+                    #par_select = st.selectbox("Select a parameter for funding", ("Danish Crowns (DKK)", "Percentage (%)"))
+                ## SANKEY CHART ##
+        
+                with st.container():
+                    with st.expander("Open/Collapse Sankey Chart", expanded=False):
+                        bankey_chart()
+        
 
-        ## HISTORGRAM ##
-        with histocol:
-            histo_chart()
-
-        ## SANKEY CHART ##
-        with flowcol:
-            bankey_chart()
+        
 
             
 
