@@ -7,3 +7,4 @@ plotly
 folium
 streamlit_folium
 matplotlib
+wordcloud

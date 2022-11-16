@@ -11,12 +11,14 @@ import random as rd
 import csv
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
+from generate_wordcloud import generate_data, create_wordcloud
 
 
 # Set page configuration
 st.set_page_config(page_title="Funding Visualization Project", page_icon=":moneybag:", layout="wide", initial_sidebar_state="collapsed")
 
 streamlit_style = """
+
 			<style>
 			@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap');
 
@@ -26,25 +28,44 @@ streamlit_style = """
 			}
 			</style>
 			"""
+
 st.markdown(streamlit_style, unsafe_allow_html=True)
 
-years = [x for x in range(1900,2023)]
 
 df = pd.read_csv('gustav/dff.csv')
 
 
-institution = []
+institution = ['All']
 
 for i in df['Institution']:
     if i not in institution:
         institution.append(i)
 
 
-omraade = []
+omraade = ['All']
 
 for i in df['Område']:
      if i not in omraade:
         omraade.append(i)
+
+
+amount = []
+
+for i in df["Bevilliget beløb"]:
+    if i not in amount:
+        amount.append(i)
+#amount.insert(0,'All')
+
+
+years = []
+
+for i in range(1900, 2023):
+    if i not in years:
+        years.append(i)
+years.sort(reverse=True)
+years.insert(0, 'All')
+
+
 
 
 
@@ -124,6 +145,8 @@ def display_map(location):#, parameter):
 
     st_map = st_folium(map, width=900, height=450)
 
+
+
 #### Histogram function ####
 def histo_chart():
 
@@ -131,6 +154,7 @@ def histo_chart():
                 fig1, ax1 = plt.subplots()
                 ax1.hist(arr, bins=20)
                 st.plotly_chart(fig1)
+
 
 
 #### Bankey chart function ####
@@ -157,6 +181,9 @@ def bankey_chart():
 
 #### Creating the dashboard section ####
 def dashboard():
+
+
+        
         title_col1, title_col2 = st.columns([2,3])
         with title_col1:
             with st.container():
@@ -184,11 +211,11 @@ def dashboard():
                 with st.expander("Open / Collapse filters", expanded=True):
                     st.subheader("Filters")
 
-                    locations = st.selectbox("Choose an institution", (institution))
+                    locations = st.selectbox("Choose an institution", institution)
 
-                    theme = st.selectbox("Choose a theme", (omraade))
+                    theme = st.selectbox("Choose a theme", omraade)
 
-                    year = st.number_input("Year", min_value=1900, max_value=2022)
+                    year = st.selectbox("Year", years)
 
         "---"
 
@@ -213,14 +240,119 @@ def dashboard():
                         histo_chart()
 
 
+
         ## DATA CHART ##
         with dashcol3:
             with st.container():
-                with st.expander(label="Open/Collapse Dataframe", expanded=False):
-                    fig2 = st.dataframe(df.loc[(df['Institution'] == locations)])
+                
+                with st.expander(label="Open/Collapse Wordcloud", expanded=False):
+                    dataframe = df
+                    
+                    if locations == 'All' and theme == 'All' and year == 'All':
+                        
+                        funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
+                        funding, freqs = generate_data(dataframe, funding_thresh)
+                        w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
+                        st.image(w_cloud.to_array())
+                        with title_col2:
+                            for i in range(12):
+                                "\n"
+                            st.dataframe(df)
+        
+                        
+
+                    elif locations == 'All' and theme == theme and year == 'All':
+
+                        dataframe = df.loc[(df['Område'] == theme)]
+                        funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
+                        funding, freqs = generate_data(dataframe, funding_thresh)
+                        w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
+                        st.image(w_cloud.to_array())
+                        with title_col2:
+                            for i in range(12):
+                                "\n"
+                            st.dataframe(dataframe)
+
+                    elif locations == locations and theme == 'All' and year == 'All':
+                        
+                        dataframe = df.loc[(df['Institution'] == locations)]
+                        funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
+                        funding, freqs = generate_data(dataframe, funding_thresh)
+                        w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
+                        st.image(w_cloud.to_array())
+                        with title_col2:
+                            for i in range(12):
+                                "\n"
+                            st.dataframe(dataframe)
+
+                    
+                    elif year == year and locations == 'All' and theme == 'All':
+                        dataframe = df.loc[(df['År'] == year)]
+                        funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
+                        funding, freqs = generate_data(dataframe, funding_thresh)
+                        w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
+                        st.image(w_cloud.to_array())
+                        
+                        with title_col2:
+                            for i in range(12):
+                                "\n"
+                            st.dataframe(dataframe)
+                    
+
+                    elif locations == 'All' and theme == theme and year == year:
+                        dataframe = df.loc[(df['Område'] == theme) & (df['År'] == year)]
+                        funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
+                        funding, freqs = generate_data(dataframe, funding_thresh)
+                        w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
+                        st.image(w_cloud.to_array())
+                        with title_col2:
+                            for i in range(12):
+                                "\n"
+                            st.dataframe(dataframe)
+
+
+                    elif locations == locations and theme == 'All' and year == year:
+                        dataframe = df.loc[(df['Institution'] == locations) & (df['År'] == year)]
+                        funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
+                        funding, freqs = generate_data(dataframe, funding_thresh)
+                        w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
+                        st.image(w_cloud.to_array())
+                        with title_col2:
+                            for i in range(12):
+                                "\n"
+                            st.dataframe(dataframe)
+                    
+                    elif locations == locations and theme == theme and year == 'All':
+                        dataframe = df.loc[(df['Institution'] == locations) & (df['Område'] == theme)]
+                        funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
+                        funding, freqs = generate_data(dataframe, funding_thresh)
+                        w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
+                        st.image(w_cloud.to_array())
+                        with title_col2:
+                            for i in range(12):
+                                "\n"
+                            st.dataframe(dataframe)
+                         
+                    
+                    else:
+                        locations = locations
+                        theme = theme
+                        year = year
+                        dataframe = df.loc[(df['Institution'] == locations) & (df['Område'] == theme)]
+                        funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
+                        funding, freqs = generate_data(dataframe, funding_thresh)
+                        w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
+                        st.image(w_cloud.to_array())
+                        with title_col2:
+                            for i in range(12):
+                                "\n"
+                            st.dataframe(dataframe)
+                    
+                    
+                    
                     source = 'Soruce: [Danmarks Frie Forskningsfond](https://dff.dk/forskningsprojekter)'
                     st.markdown(source, unsafe_allow_html=True)
-                    #par_select = st.selectbox("Select a parameter for funding", ("Danish Crowns (DKK)", "Percentage (%)"))
+                #par_select = st.selectbox("Select a parameter for funding", ("Danish Crowns (DKK)", "Percentage (%)"))
                 ## SANKEY CHART ##
         
                 with st.container():
@@ -229,19 +361,6 @@ def dashboard():
         
 
         
-
-            
-
-
-                
-     
-
-        
-        
-                
-        
-
-
 #### Creating the About section ####
 def about():
 
@@ -269,9 +388,8 @@ def about():
             file_name="dff_data.csv",
             mime="text/csv"
           )
-    
-
-
+    "---"
+    st.dataframe(df)
 
     ## Add creator as expander with info with git links ##
     with st.sidebar:
@@ -306,9 +424,6 @@ def about():
       
            
                 
-               
-
-
 #### Checking for user choice and displaying context of menu ####
 if choose == "Dashboard":
     dashboard()
@@ -316,6 +431,7 @@ if choose == "Dashboard":
 
 if choose == "About":
     about()
+
     
 
 
