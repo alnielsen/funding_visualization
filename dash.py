@@ -59,7 +59,7 @@ for i in df["Bevilliget beløb"]:
 
 years = []
 
-for i in range(1900, 2023):
+for i in range(2013, 2023):
     if i not in years:
         years.append(i)
 years.sort(reverse=True)
