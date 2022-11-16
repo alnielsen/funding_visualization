@@ -250,10 +250,10 @@ def dashboard():
                     
                     if locations == 'All' and theme == 'All' and year == 'All':
                         
-                        funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
-                        funding, freqs = generate_data(dataframe, funding_thresh)
-                        w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
-                        st.image(w_cloud.to_array())
+                        # funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
+                        # funding, freqs = generate_data(dataframe, funding_thresh)
+                        # w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
+                        # st.image(w_cloud.to_array())
                         with title_col2:
                             for i in range(12):
                                 "\n"
@@ -264,10 +264,10 @@ def dashboard():
                     elif locations == 'All' and theme == theme and year == 'All':
 
                         dataframe = df.loc[(df['Område'] == theme)]
-                        funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
-                        funding, freqs = generate_data(dataframe, funding_thresh)
-                        w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
-                        st.image(w_cloud.to_array())
+                        # funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
+                        # funding, freqs = generate_data(dataframe, funding_thresh)
+                        # w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
+                        # st.image(w_cloud.to_array())
                         with title_col2:
                             for i in range(12):
                                 "\n"
@@ -276,10 +276,10 @@ def dashboard():
                     elif locations == locations and theme == 'All' and year == 'All':
                         
                         dataframe = df.loc[(df['Institution'] == locations)]
-                        funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
-                        funding, freqs = generate_data(dataframe, funding_thresh)
-                        w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
-                        st.image(w_cloud.to_array())
+                        # funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
+                        # funding, freqs = generate_data(dataframe, funding_thresh)
+                        # w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
+                        # st.image(w_cloud.to_array())
                         with title_col2:
                             for i in range(12):
                                 "\n"
@@ -288,10 +288,10 @@ def dashboard():
                     
                     elif year == year and locations == 'All' and theme == 'All':
                         dataframe = df.loc[(df['År'] == year)]
-                        funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
-                        funding, freqs = generate_data(dataframe, funding_thresh)
-                        w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
-                        st.image(w_cloud.to_array())
+                        # funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
+                        # funding, freqs = generate_data(dataframe, funding_thresh)
+                        # w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
+                        # st.image(w_cloud.to_array())
                         
                         with title_col2:
                             for i in range(12):
@@ -301,10 +301,10 @@ def dashboard():
 
                     elif locations == 'All' and theme == theme and year == year:
                         dataframe = df.loc[(df['Område'] == theme) & (df['År'] == year)]
-                        funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
-                        funding, freqs = generate_data(dataframe, funding_thresh)
-                        w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
-                        st.image(w_cloud.to_array())
+                        # funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
+                        # funding, freqs = generate_data(dataframe, funding_thresh)
+                        # w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
+                        # st.image(w_cloud.to_array())
                         with title_col2:
                             for i in range(12):
                                 "\n"
@@ -313,10 +313,10 @@ def dashboard():
 
                     elif locations == locations and theme == 'All' and year == year:
                         dataframe = df.loc[(df['Institution'] == locations) & (df['År'] == year)]
-                        funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
-                        funding, freqs = generate_data(dataframe, funding_thresh)
-                        w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
-                        st.image(w_cloud.to_array())
+                        # funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
+                        # funding, freqs = generate_data(dataframe, funding_thresh)
+                        # w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
+                        # st.image(w_cloud.to_array())
                         with title_col2:
                             for i in range(12):
                                 "\n"
@@ -324,10 +324,10 @@ def dashboard():
                     
                     elif locations == locations and theme == theme and year == 'All':
                         dataframe = df.loc[(df['Institution'] == locations) & (df['Område'] == theme)]
-                        funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
-                        funding, freqs = generate_data(dataframe, funding_thresh)
-                        w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
-                        st.image(w_cloud.to_array())
+                        # funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
+                        # funding, freqs = generate_data(dataframe, funding_thresh)
+                        # w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
+                        # st.image(w_cloud.to_array())
                         with title_col2:
                             for i in range(12):
                                 "\n"
@@ -339,10 +339,10 @@ def dashboard():
                         theme = theme
                         year = year
                         dataframe = df.loc[(df['Institution'] == locations) & (df['Område'] == theme)]
-                        funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
-                        funding, freqs = generate_data(dataframe, funding_thresh)
-                        w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
-                        st.image(w_cloud.to_array())
+                        # funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
+                        # funding, freqs = generate_data(dataframe, funding_thresh)
+                        # w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
+                        # st.image(w_cloud.to_array())
                         with title_col2:
                             for i in range(12):
                                 "\n"
