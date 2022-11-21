@@ -179,6 +179,7 @@ def bankey_chart():
 
 
 
+
 #### Creating the dashboard section ####
 def dashboard():
 
@@ -338,7 +339,7 @@ def dashboard():
                         locations = locations
                         theme = theme
                         year = year
-                        dataframe = df.loc[(df['Institution'] == locations) & (df['Område'] == theme)]
+                        dataframe = df.loc[(df['Institution'] == locations) & (df['Område'] == theme) & (df['År'] == year)]
                         # funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
                         # funding, freqs = generate_data(dataframe, funding_thresh)
                         # w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
