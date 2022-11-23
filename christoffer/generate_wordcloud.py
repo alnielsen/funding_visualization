@@ -1,8 +1,23 @@
 import pandas as pd
-from utils import create_wordcloud
+from wordcloud import WordCloud, STOPWORDS
+import matplotlib.pyplot as plt
 from math import inf
 
-def filter_dict(dictionary, lower_thresh = 0, upper_thresh = inf):
+####################
+# Helper functions #
+####################
+def _make_same_keys(filtered_dict, non_filtered_dict):
+    """
+    Creates a dict, which contains the same keys as another dictionary, while still keeping the original values
+    """
+    return_dict = {}
+    for key in filtered_dict:
+        val = non_filtered_dict[key]
+        return_dict[key] = val
+    return return_dict
+
+
+def _filter_dict(dictionary, lower_thresh = 0, upper_thresh = inf):
     filtered_dict = {}
     for key, val in dictionary.items(): 
         if  lower_thresh <= val <= upper_thresh:
@@ -10,175 +25,140 @@ def filter_dict(dictionary, lower_thresh = 0, upper_thresh = inf):
     return filtered_dict
 
 
-def create_color_dict(size_dict, non_filtered_dict):
+def _get_remaining_perc(val: float):
     """
-    Creates a color dict, which contains the same keys as the size dict
+    Returns the remaining percent  
     """
-    filtered_color_dict = {}
-    for key in size_dict:
-        val = non_filtered_dict[key]
-        filtered_color_dict[key] = val
-    return filtered_color_dict
-
-def dict_is_empty(dictionary):
-    return not bool(dictionary)    
+    return 100 - val
 
 
-def generate_data(year: int = None, # For filtering
-                       min_abs_amount = 0, # For filtering
-                       min_rel_amount = 0, # Filtering
-                       min_freq = 0, # Filtering
-                       min_rel_freq = 0, # Filtering
-                       show: bool = False,
-                       save_path: str = None):
+def _color_scaling(val, new_min = 15, new_max = 60, old_min = 0, old_max = 100):
+    """
+    Convert from a scaling of 0 to 100 to a new range for colors
+    """
+    val = _get_remaining_perc(val)
+    old_range = old_max - old_min
+    new_range = new_max - new_min
+    return (((val - old_min) * new_range) / old_range) + new_min
 
-    df = pd.read_csv("../synthetic_data.csv")
-    if year is not None:
-        df = df[df["år"] == year]
-    df["title_desc"] = df["titel"] + df["beskrivelse"]
 
-    n_words = 0
-    funding_sum = sum(df["beløb"])
+def scale_word_dict(word_dict):
+    """
+    Scales word freqs to color scalings
+    """
+    min_val = min(word_dict.values())
+    max_val = max(word_dict.values())
+    scaled_dict = {}
+    for key, val in word_dict.items():
+        z = ((val - min_val) / (max_val - min_val)) * 100 #Scaling to between 0 and 100
+        scaled_dict[key] = _color_scaling(z)
+    return scaled_dict
 
-    abs_freqs = {} # Absolute frequencies
-    rel_freqs = {} # Relative frequencies
-    abs_funding = {} # Absolute funding recieved
-    rel_funding = {}# Relative funding recieved
 
+def _my_tf_color_func(dictionary):
+    dictionary = scale_word_dict(dictionary)
+    def my_tf_color_func_inner(word, font_size, position, orientation, random_state=None, **kwargs):
+        return f"hsl(1, 100%, {dictionary[word]}%)"
+    return my_tf_color_func_inner
+
+####################
+# Public functions #
+####################
+# - Generate data
+# - plot wc
+# - create_wordcloud
+
+def generate_data(df: pd.DataFrame, funding_thresh_hold: int) -> tuple[dict, dict]:
+    df["title_desc"] = df["Titel"] #+ df["beskrivelse"]
+    freqs = {} # Absolute frequencies
+    funding = {} # Absolute funding recieved
+    
+    stopwords = list(set(STOPWORDS))
+    stopwords.append("-")
+    stopwords.append("–")
+    
     # Create dict of absolute freqs and funding
-    for text, amount in zip(df["title_desc"], df["beløb"]):
+    for text, amount in zip(df["title_desc"], df["Bevilliget beløb"]):
         # Split each token/word on whitespace
-        tokens = set([token.lower() for token in text.split()]) # Get unique tokens
-
-        n_words += len(tokens)
+        tokens = list(set([token.lower() for token in text.split()])) # Get unique tokens
+        # COunt unique tokens in each grant application
         for token in text.split():
             token = token.lower()
-            if not token in abs_freqs:
-                abs_freqs[token] = 1
-                abs_funding[token] = amount
+            if token in stopwords:
+                continue
+            if not token in freqs:
+                freqs[token] = 1
+                funding[token] = amount
             else:
-                abs_freqs[token] += 1
-                abs_funding[token] += amount
+                freqs[token] += 1
+                funding[token] += amount
 
-    # Create dict for relative freqs
-    for key, val in abs_freqs.items():
-        rel_freqs[key] = val/n_words
-
-    # I think there is a mistake here - FIXME
-    # Create dict for relative funding
-    for key, val in abs_funding.items():
-        rel_funding[key] = val/funding_sum
+    funding = _filter_dict(funding, funding_thresh_hold)
+    freqs = _make_same_keys(funding, freqs)
     
-    return (abs_funding, rel_funding, abs_freqs, rel_freqs)
+    avg_funding = {}
+    total_funding = sum(df["Bevilliget beløb"])
+    print(total_funding)
+    for key in funding:   
+        avg_funding[key] =  funding[key] // freqs[key]
+        
+    return (avg_funding, funding, freqs)
 
 
-#Demonstrating filtering and creation
-for year in range(2013, 2022 + 1):
-    abs_funding, rel_funding, abs_freqs, rel_freqs = generate_data(year)
+def plot_wc(wordcloud, title = "Word cloud", show= True, save_path = None):
+        # plot the WordCloud image                    
+    plt.imshow(wordcloud, interpolation="bilinear")
+    plt.axis("off")
+    plt.title(title)
+    if save_path:
+        plt.savefig(save_path)
     
-    # Size = abs funding, color = abs freqs
-    size_dict = filter_dict(abs_funding, 1000) # At least 1000 kr. in funding
-    if dict_is_empty(size_dict):
-        size_dict = abs_funding # no filter if empty
+    if show:
+        plt.show()
+
+def create_wordcloud(size_dict,
+                     color_dict = None,
+                     bigrams = False):
     
-    color_dict = create_color_dict(size_dict, abs_freqs)
-    f_path = f"output/abs funding/abs_funding_{year}.jpg"
-    w_cloud = create_wordcloud(size_dict = size_dict,
-                               color_dict = color_dict,
-                               title = f"Absolute funding and word usage {year}",
-                               show = False,
-                               save_path = f_path)
-
-    # size = rel funding, color = rel freq
-    size_dict = filter_dict(rel_funding, 0.05) # 5% of funding
+    wordcloud = WordCloud(background_color ='white',
+                          stopwords = set(STOPWORDS),
+                          collocations = bigrams, # Allow / disallow bigrams
+                          contour_color = "black",
+                          relative_scaling = 1,
+                          min_font_size = 10).generate_from_frequencies(size_dict)
     
-    if dict_is_empty(size_dict):
-        size_dict = rel_funding # no filter if empty
+    word_freqs = wordcloud.words_ if color_dict is None else color_dict
+    wordcloud.recolor(color_func= _my_tf_color_func(word_freqs))
     
-    color_dict = create_color_dict(size_dict, rel_freqs)
-    f_path = f"output/relative_funding/rel_funding_{year}.jpg"
-    w_cloud = create_wordcloud(size_dict = size_dict,
-                               color_dict = color_dict,
-                               title = f"Relative funding and word usage {year}",
-                               show = False,
-                               save_path = f_path)
-
-    # size = abs freq, color = abs funding
-    size_dict = filter_dict(abs_freqs, 2) # lowest frequency is 2
-    
-    if dict_is_empty(size_dict):
-        size_dict = abs_freqs # no filter if empty
-    
-    color_dict = create_color_dict(size_dict, abs_funding)
-    f_path = f"output/abs_freqs/abs_freq{year}.jpg"
-    w_cloud = create_wordcloud(size_dict = size_dict,
-                               color_dict = color_dict,
-                               title = f"Absolute word frequency and funding {year}",
-                               show = False,
-                               save_path = f_path)
-                               
-    # size = rel freq, color = rel funding
-    size_dict = filter_dict(rel_freqs, 2) # lowest frequency is 2
-    
-    if dict_is_empty(size_dict):
-        size_dict = rel_freqs # no filter if empty
-    
-    color_dict = create_color_dict(size_dict, rel_funding)
-    f_path = f"output/rel_freqs/rel_freq{year}.jpg"
-    w_cloud = create_wordcloud(size_dict = size_dict,
-                               color_dict = color_dict,
-                               title = f"Relative word frequency and funding {year}",
-                               show = False,
-                               save_path = f_path)
-
-'''
-# Test
-abs_funding, rel_funding, abs_freqs, rel_freqs = generate_data()
+    return wordcloud
 
 
-size_dict = create_color_dict(filter_dict(abs_funding, 0, 15000), abs_freqs)# betweem 0 and 15.000 kr. in funding
-if not dict_is_empty(size_dict):
-    f_path = f"output/size_test/abs_funding_betwen_0_15000.jpg"
-    w_cloud = create_wordcloud(size_dict = size_dict,
-                                title = f"Absolute funding and word usage between 0 and 15000",
-                                show = True,
-                                height = 200,
-                                save_path = f_path)
 
-size_dict = create_color_dict(filter_dict(abs_funding, 15000, 25000), abs_freqs)# between 15 and 25.000 kr. in funding
-if not dict_is_empty(size_dict):
-    f_path = f"output/size_test/abs_funding_between_15000_25000.jpg"
-    w_cloud = create_wordcloud(size_dict = size_dict,
-                                title = f"Absolute funding and word usage between 15000 and 25000",
-                                show = True,
-                                height = 300,
-                                save_path = f_path)
+"""
+Example -- How to use
+>>> dataframe = pd.read_csv("../gustav/dff.csv")
+>>> funding_thresh = 50000
+>>> funding, freqs = generate_data(df = dataframe,
+                                   funding_thresh_hold = funding_thresh)
+>>> w_cloud = create_wordcloud(size_dict = funding,
+                               color_dict = freqs)
+"""
+dataframe = pd.read_csv("../gustav/dff.csv")
+dataframe = dataframe[dataframe["År"] == 2016]
+avg_funding, funding, freqs = generate_data(df = dataframe,
+                                            funding_thresh_hold = 0)
 
-size_dict = create_color_dict(filter_dict(abs_funding, 25000, 50000), abs_freqs)# between 25 and 50.000 kr. in funding
-if not dict_is_empty(size_dict):
-    f_path = f"output/size_test/abs_funding_between_25000_50000.jpg"
-    w_cloud = create_wordcloud(size_dict = size_dict,
-                                title = f"Absolute funding and word usage between 25000 and 50000",
-                                show = True,
-                                height = 400,
-                                save_path = f_path)
+w_cloud_fund = create_wordcloud(size_dict = funding,
+                           color_dict = freqs)
 
-                    
-size_dict = create_color_dict(filter_dict(abs_funding, 50000, 75000), abs_freqs)# between 50 and 75.000 kr. in funding
-if not dict_is_empty(size_dict):
-    f_path = f"output/size_test/abs_funding_betweem_50000_75000.jpg"
-    w_cloud = create_wordcloud(size_dict = size_dict,
-                                title =f"Absolute funding and word usage between 50000 and 75000",
-                                show = True,
-                                height = 500,
-                                save_path = f_path)
+w_cloud_avg = create_wordcloud(
+                           size_dict = avg_funding,
+                           color_dict = funding)
 
-size_dict = create_color_dict(filter_dict(abs_funding, 75000), abs_freqs)# above 75.000 kr. in funding
-if not dict_is_empty(size_dict):
-    f_path = f"output/size_test/abs_funding_above_75000.jpg"
-    w_cloud = create_wordcloud(size_dict = size_dict,
-                                title = f"Absolute funding and word usage above 75000",
-                                show = True,
-                                height = 600,
-                                save_path = f_path)
-'''
+w_cloud_freq = create_wordcloud(
+                           size_dict = freqs,
+                           color_dict = freqs)
+
+plot_wc(w_cloud_fund, title = "Size = Funding, color = freqs")
+plot_wc(w_cloud_avg, title = "Size = Avg funding, color = freqs")
+plot_wc(w_cloud_freq, title = "Size = freqs, color = freqs")
