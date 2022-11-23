@@ -67,8 +67,6 @@ years.insert(0, 'All')
 
 
 
-
-
 # Markdown code to hide "hamburger-menu"
 hide_streamlit_style = """
 <style>
@@ -94,62 +92,6 @@ with st.sidebar:
 
 
 
-#### Function for displaying map ####
-def display_map(location):#, parameter):
-    #### Create folium map markers: ####
-    au = folium.Marker(
-                location=[56.166666 , 10.1999992],
-                popup=f"Aarhus University",
-                icon=folium.Icon(color="blue", icon="home"),
-                )
-
-    ruc = folium.Marker(
-                location=[55.652330724, 12.137999448],
-                popup=f"Roskilde University",
-                icon=folium.Icon(color="black", icon="home"),
-                )
-
-    ku = folium.Marker(
-            location=[55.674497302, 12.570164386],
-            prefix='fa',
-            popup=f'Copenhagen Universitet',
-            icon=folium.Icon(icon='home', color='red'),
-            
-            )
-    
-    map = folium.Map(location=(56.253920, 15.501785),
-                    zoom_start=6,
-                    scrollWheelZoom=True,
-                    tiles='cartodbpositron'
-                    
-                    
-                    
-                    )
-    if location == 'All':
-        ku.add_to(map)
-        ruc.add_to(map)
-        au.add_to(map)
-
-    if location == 'Københavns Universitet':
-
-        ku.add_to(map)
-        
-    if location == "Roskilde Universitet":
-
-        ruc.add_to(map)
-
-    if location == "Aarhus Universitet":
-
-        au.add_to(map)
-
-
-    st_map = st_folium(map, width=900, height=450)
-
-
-    
-
-
-
 
 
 #### Histogram function ####
@@ -165,26 +107,6 @@ def histo_chart():
     st.plotly_chart(fig, use_container_width=True)
 
 
-
-#### Bankey chart function ####
-def bankey_chart():
-    fig3 = go.Figure(data=[go.Sankey(
-                    node = dict(
-                    pad = 15,
-                    thickness = 20,
-                    line = dict(color = "white", width = 0),
-                    label = ["A1", "A2", "B1", "B2", "C1", "C2"],
-                    color = "blue"
-                    ),
-                    link = dict(
-                    source = [0, 1, 0, 2, 3, 3], # indices correspond to labels, eg A1, A2, A1, B1, ...
-                    target = [2, 3, 3, 4, 4, 5],
-                    value = [8, 4, 2, 8, 4, 2]
-                ))])
-
-    fig3.update_layout(title_text="Basic Sankey Diagram", font_size=20)
-
-    st.plotly_chart(fig3)
 
 
 
@@ -227,169 +149,11 @@ def dashboard():
 
         "---"
 
-                
-            
+
         
-        ## Create upper filter columns
-        dashcol2, dashcol3 = st.columns([2,2], gap="large")
-
-
-        ## DATA CHARTS ##
-        with st.container():
-
-            dataframe = df
-            
-            if locations == 'All' and theme == 'All' and year == 'All':
-                
-                # Display / Update dataframe
-                with title_col2:
-                    st.dataframe(df)
-                
-                with dashcol3:
-                    # Display / Update wordcloud
-                    with st.expander("Open wordcloud"):
-                        funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
-                        funding, freqs = generate_data(dataframe, funding_thresh)
-                        w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
-                        st.image(w_cloud.to_array())
-
-
-                
-
-            elif locations == 'All' and theme == theme and year == 'All':
-
-                dataframe = df.loc[(df['Område'] == theme)]
-               # Display / update dataframe
-                with title_col2:
-                    st.dataframe(dataframe)
-
-                with dashcol3:
-                    # Display / Update wordcloud
-                    with st.expander("Open wordcloud"):
-                        funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
-                        funding, freqs = generate_data(dataframe, funding_thresh)
-                        w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
-                        st.image(w_cloud.to_array())
-
-            elif locations == locations and theme == 'All' and year == 'All':
-                
-                dataframe = df.loc[(df['Institution'] == locations)]
-
-                # Display / update dataframe
-                with title_col2:
-                    
-                    st.dataframe(dataframe)
-
-                with dashcol3:
-                    # Display / Update wordcloud
-                    with st.expander("Open wordcloud"):
-                        funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
-                        funding, freqs = generate_data(dataframe, funding_thresh)
-                        w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
-                        st.image(w_cloud.to_array())
-
-                
-            elif year == year and locations == 'All' and theme == 'All':
-                dataframe = df.loc[(df['År'] == year)]
-                
-                # Display / update dataframe
-                with title_col2:
-                    
-                    st.dataframe(dataframe)
-
-                with dashcol3:
-                    # Display / Update wordcloud
-                    with st.expander("Open wordcloud"):
-                        funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
-                        funding, freqs = generate_data(dataframe, funding_thresh)
-                        w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
-                        st.image(w_cloud.to_array())
-                
-
-            elif locations == 'All' and theme == theme and year == year:
-                dataframe = df.loc[(df['Område'] == theme) & (df['År'] == year)]
-                # Display / update dataframe
-                with title_col2:
-                    
-                    st.dataframe(dataframe)
-
-                with dashcol3:
-                    # Display / Update wordcloud
-                    with st.expander("Open wordcloud"):
-                        funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
-                        funding, freqs = generate_data(dataframe, funding_thresh)
-                        w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
-                        st.image(w_cloud.to_array())
-
-    
-            elif locations == locations and theme == 'All' and year == year:
-                dataframe = df.loc[(df['Institution'] == locations) & (df['År'] == year)]
-                # Display / update dataframe
-                with title_col2:
-                    
-                    st.dataframe(dataframe)
-
-                with dashcol3:
-                    # Display / Update wordcloud
-                    with st.expander("Open wordcloud"):
-                        funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
-                        funding, freqs = generate_data(dataframe, funding_thresh)
-                        w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
-                        st.image(w_cloud.to_array())
-            
-            elif     locations == locations and theme == theme and year == 'All':
-                dataframe = df.loc[(df['Institution'] == locations) & (df['Område'] == theme)]
-                # Display / update dataframe
-                with title_col2:
-                    
-                    st.dataframe(dataframe)
-
-                with dashcol3:
-                    # Display / Update wordcloud
-                    with st.expander("Open wordcloud"):
-                        funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
-                        funding, freqs = generate_data(dataframe, funding_thresh)
-                        w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
-                        st.image(w_cloud.to_array())
-                    
-                
-            else:
-                locations = locations
-                theme = theme
-                year = year
-                dataframe = df.loc[(df['Institution'] == locations) & (df['Område'] == theme) & (df['År'] == year)]
-                # Display / update dataframe
-                with title_col2:
-                    
-                    st.dataframe(dataframe)
-                
-
-                with dashcol3:
-                    # Display / Update wordcloud
-                    with st.expander("Open wordcloud"):
-                        funding_thresh = st.slider("Funding amount", min_value=min(dataframe['Bevilliget beløb']), max_value=max(dataframe['Bevilliget beløb']))
-                        funding, freqs = generate_data(dataframe, funding_thresh)
-                        w_cloud = create_wordcloud(size_dict=funding, color_dict=freqs)
-                        st.image(w_cloud.to_array())
-                
-                    
-                
-                source = 'Soruce: [Danmarks Frie Forskningsfond](https://dff.dk/forskningsprojekter)'
-                st.markdown(source, unsafe_allow_html=True)
-                #par_select = st.selectbox("Select a parameter for funding", ("Danish Crowns (DKK)", "Percentage (%)"))
-                ## SANKEY CHART ##
-        
-        
-                with st.container():
-                    with st.expander("Open/Collapse Sankey Chart", expanded=False):
-                        bankey_chart()
-        
-
         
 #### Creating the About section ####
 def about():
-
-
     
     source = 'All data is soruced from: [Danmarks Frie Forskningsfond](https://dff.dk/forskningsprojekter)'
     
