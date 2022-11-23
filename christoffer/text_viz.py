@@ -2,6 +2,8 @@ import pandas as pd
 from wordcloud import WordCloud, STOPWORDS
 import matplotlib.pyplot as plt
 from math import inf
+import plotly.express as px
+
 
 ####################
 # Helper functions #
@@ -64,9 +66,25 @@ def _my_tf_color_func(dictionary):
 ####################
 # Public functions #
 ####################
-# - Generate data
-# - plot wc
-# - create_wordcloud
+# Data functions:
+#   - Generate data
+#   - dict to df
+
+# Wordcloud functions:
+#   - plot wc
+#   - create_wordcloud
+
+# Bar plot functions
+#   - create_bar_plot
+
+
+# ----- Data functions ------
+def dict_to_df(data_dict):
+    """
+    Converts a word - value (such af word - frequency) dict to a dataframe
+    """
+    return pd.DataFrame({"word": data_dict.keys(), "value": data_dict.values()})
+
 
 def generate_data(df: pd.DataFrame, funding_thresh_hold: int) -> tuple[dict, dict]:
     df["title_desc"] = df["Titel"] #+ df["beskrivelse"]
@@ -97,16 +115,17 @@ def generate_data(df: pd.DataFrame, funding_thresh_hold: int) -> tuple[dict, dic
     freqs = _make_same_keys(funding, freqs)
     
     avg_funding = {}
-    total_funding = sum(df["Bevilliget beløb"])
-    print(total_funding)
     for key in funding:   
         avg_funding[key] =  funding[key] // freqs[key]
         
     return (avg_funding, funding, freqs)
 
 
+# ------ Word cloud functions ------ 
 def plot_wc(wordcloud, title = "Word cloud", show= True, save_path = None):
-        # plot the WordCloud image                    
+    """
+    Plots a word cloud
+    """                  
     plt.imshow(wordcloud, interpolation="bilinear")
     plt.axis("off")
     plt.title(title)
@@ -116,9 +135,13 @@ def plot_wc(wordcloud, title = "Word cloud", show= True, save_path = None):
     if show:
         plt.show()
 
+
 def create_wordcloud(size_dict,
                      color_dict = None,
                      bigrams = False):
+    """
+    Returns a word cloud
+    """
     
     wordcloud = WordCloud(background_color ='white',
                           stopwords = set(STOPWORDS),
@@ -132,33 +155,26 @@ def create_wordcloud(size_dict,
     
     return wordcloud
 
+# ------ Bar plots ------
+def create_bar_plot(data_dict, value_label = "value label", title = "No Title", top_n = 25):
+    """
+    Takes as word: value dict such as
+    word: frequency
+    Returns as ploty plot
+    """
+    df = dict_to_df(data_dict).head(top_n)
+    df = df.sort_values(by="value")
+    df = df.head(top_n)
+    return px.bar(df,
+                  x="value",
+                  y = "word",
+                  labels = {"value": value_label},
+                  color = "value",
+                  color_continuous_scale = px.colors.sequential.Redor, 
+                  title = title)
+
+if __name__ == "__main__":
+    pass
 
 
-"""
-Example -- How to use
->>> dataframe = pd.read_csv("../gustav/dff.csv")
->>> funding_thresh = 50000
->>> funding, freqs = generate_data(df = dataframe,
-                                   funding_thresh_hold = funding_thresh)
->>> w_cloud = create_wordcloud(size_dict = funding,
-                               color_dict = freqs)
-"""
-dataframe = pd.read_csv("../gustav/dff.csv")
-dataframe = dataframe[dataframe["År"] == 2016]
-avg_funding, funding, freqs = generate_data(df = dataframe,
-                                            funding_thresh_hold = 0)
 
-w_cloud_fund = create_wordcloud(size_dict = funding,
-                           color_dict = freqs)
-
-w_cloud_avg = create_wordcloud(
-                           size_dict = avg_funding,
-                           color_dict = funding)
-
-w_cloud_freq = create_wordcloud(
-                           size_dict = freqs,
-                           color_dict = freqs)
-
-plot_wc(w_cloud_fund, title = "Size = Funding, color = freqs")
-plot_wc(w_cloud_avg, title = "Size = Avg funding, color = freqs")
-plot_wc(w_cloud_freq, title = "Size = freqs, color = freqs")
