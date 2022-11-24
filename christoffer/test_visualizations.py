@@ -1,4 +1,5 @@
-from text_viz import create_wordcloud, plot_wc, generate_data, dict_to_df, create_bar_plot
+from text_viz import create_wordcloud, plot_wc, generate_data, create_bar_plot
+import plotly.express as px
 import pandas as pd
 
 
@@ -17,27 +18,27 @@ dataframe = pd.read_csv("../gustav/dff.csv")
 dataframe = dataframe[dataframe["År"] == 2013]
 avg_funding, funding, freqs = generate_data(df = dataframe,
                                             funding_thresh_hold = 0)
-"""
+
+
+
 # Bar plots
-TOP_N = 50
-fig_avg = create_bar_plot(avg_funding, 
-                          value_label = "Funding divided by frequency",
+TOP_N = 30
+fig_avg = create_bar_plot(data_dict = avg_funding, 
+                          color_dict = freqs,
+                          color_label = "Grants Containing Word",
+                          value_label = "Average Funding pr. Grant",
                           title = f"Top {TOP_N} words with highest average funding",
                           top_n = TOP_N)
-fig_avg.show()
+fig_avg.write_html("average_funding.html")
 
-fig_funding = create_bar_plot(funding,
+fig_funding = create_bar_plot(data_dict = funding,
+                              color_dict = freqs,
+                              color_label = "# of Grants Containing Word",
                               value_label = "Funding across all grants",
                               title = f"Top {TOP_N} words with highest funding ",
                               top_n = TOP_N)
-fig_funding.show()
+fig_funding.write_html("absolute funding.html")
 
-fig_freqs = create_bar_plot(freqs,
-                            value_label = "Grant frequency",
-                            title = f"Top {TOP_N} most used words in different grants",
-                            top_n = TOP_N)
-fig_freqs.show()
-"""
 
 """
 # Word clouds

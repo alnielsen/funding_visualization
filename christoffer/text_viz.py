@@ -1,7 +1,7 @@
 import pandas as pd
 from wordcloud import WordCloud, STOPWORDS
 import matplotlib.pyplot as plt
-from math import inf
+from math import inf, floor
 import plotly.express as px
 
 
@@ -156,22 +156,45 @@ def create_wordcloud(size_dict,
     return wordcloud
 
 # ------ Bar plots ------
-def create_bar_plot(data_dict, value_label = "value label", title = "No Title", top_n = 25):
+def create_bar_plot(data_dict,
+                    color_dict,
+                    color_label = "color label",
+                    value_label = "value label",
+                    title = "No Title",
+                    top_n = 25):
     """
     Takes as word: value dict such as
     word: frequency
     Returns as ploty plot
     """
-    df = dict_to_df(data_dict).head(top_n)
-    df = df.sort_values(by="value")
+    df_dict = {"Word": [], "value": [], "color": []}
+    for key, val, in data_dict.items():
+        df_dict["Word"].append(key)
+        df_dict["value"].append(val)
+        df_dict["color"].append(color_dict[key])
+        
+    df = pd.DataFrame(df_dict)
+    df = df.sort_values(by="value", ascending = False)
     df = df.head(top_n)
-    return px.bar(df,
+    df = df.sort_values(by = "value", ascending=True)
+    # I have no Idea why I have to sort it in ascending order to get the words with highest value on top
+    fig = px.bar(df,
                   x="value",
-                  y = "word",
-                  labels = {"value": value_label},
-                  color = "value",
+                  y = "Word",
+                  labels = {"value": value_label,
+                            "color": color_label},
+                  color = "color",
                   color_continuous_scale = px.colors.sequential.Redor, 
                   title = title)
+    
+    if max(df["color"]) <= 5:
+        tick = 1
+    else:
+        tick = int((max(df["color"])/5))
+    fig.update_layout(coloraxis={"colorbar":{"dtick":tick}})
+    return fig
+        
+    
 
 if __name__ == "__main__":
     pass
