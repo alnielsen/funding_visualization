@@ -17,6 +17,7 @@ from geopy.geocoders import Nominatim
 from geopy.extra.rate_limiter import RateLimiter
 import folium
 from streamlit_folium import st_folium
+import streamlit.components.v1 as components
 
 
 # Set page configuration
@@ -39,6 +40,8 @@ st.markdown(streamlit_style, unsafe_allow_html=True)
 
 df = pd.read_csv('gustav/dff.csv')
 
+HtmlFile1 = open("christoffer/absolute funding.html", 'r', encoding='utf-8')
+HtmlFile2 = open("christoffer/average_funding.html", 'r', encoding='utf-8')
 
 institution = ['All']
 
@@ -186,10 +189,10 @@ def histo_chart():
 
 #### Creating the dashboard section ####
 def dashboard():
-
-        title_col1, title_col2 = st.columns([2,3])
+    
         
-        with title_col1:
+        maincol1, maincol2 = st.columns([20,1])
+        with maincol1:
             
             with st.container():
 
@@ -207,6 +210,8 @@ def dashboard():
                 st.title("Danmarks Frie Forskningsfond")
                 st.markdown('<p class="big-font">Visualization of funding data & funding flows</p>', unsafe_allow_html=True)
 
+            '---'
+        title_col1, title_col2 = st.columns([2,3])
         with title_col1:
 
             with st.container():
@@ -223,13 +228,42 @@ def dashboard():
                     year = st.selectbox("Year", years)
 
         "---"
-        dashcol1, dashcol2 = st.columns([2,2])
-        with dashcol2:
-            dataset = filters(locations, theme, year)
-            st.dataframe(dataset)
-        with title_col2:
+        
+        
 
-            map = display_map(locations, theme)
+        multi_select = st.multiselect('Choose Average or Absolute', ['Absolute', 'Average'], default='Absolute')
+
+        dashcol1, dashcol2 = st.columns([2,2])
+
+        if 'Absolute' in multi_select:
+                with dashcol1:
+                    components.html(HtmlFile1.read(), width=700, height=500)
+        if 'Average' in multi_select:
+            with dashcol2:
+                components.html(HtmlFile2.read(), width=700, height=500)
+
+
+        with title_col2:
+            with st.container():
+                for i in range(2):
+                    "\n"
+                with st.expander("Expand for Map and Data table", expanded=True):
+
+                    dataset = filters(locations, theme, year)
+                    st.dataframe(dataset)
+                    map = display_map(locations, theme)
+            
+        
+            
+            
+
+        
+            
+
+            
+
+
+                    
             
 
             
