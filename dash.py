@@ -65,7 +65,51 @@ for i in range(2013, 2023):
 years.sort(reverse=True)
 years.insert(0, 'All')
 
+def filters(institution, tema, år):
+    locations = institution
+    theme = tema
+    year = år
 
+    ## No filtering
+    if locations == 'All' and theme == 'All' and year == 'All':
+        data = df
+        return data
+
+    ## Filter for year
+    elif locations == 'All' and theme == 'All' and year == year:
+        data = df.loc[(df["År"] == year)]
+        return data
+
+    ## Filter for theme
+    elif locations == 'All' and theme == theme and year == 'All':
+        data = (df.loc[(df["Område"] == theme)])
+        return data
+
+    ## Filter for location
+    elif locations == locations and theme == 'All' and year == 'All':
+        data = df.loc[(df["Institution"] == locations)]
+        return data
+
+    ## Filter for theme and year
+    elif locations == 'All' and theme == theme and year == year:
+        data = df.loc[(df["Område"] == theme) & (df["År"] == year)]
+        return data
+    
+    ## Filter for location and theme
+    elif locations == locations and theme == theme and year == 'All':
+        data = df.loc[(df["Institution"] == locations) & (df["Område"] == theme)]
+        return data
+
+    ## Filter for location and year
+    elif locations == locations and theme == 'All' and year == year:
+        data = df.loc[(df["Institution"] == locations) & (df["År"] == year)]
+        return data
+
+    ## Filter for all
+    elif locations == locations and theme == theme and year == year:
+        data = df.loc[(df["Institution"] == locations) & (df["Område"] == theme) & df["År"] == year]
+        return data
+    
 
 # Markdown code to hide "hamburger-menu"
 hide_streamlit_style = """
@@ -93,7 +137,6 @@ with st.sidebar:
 
 
 
-
 #### Histogram function ####
 def histo_chart():
     
@@ -110,12 +153,13 @@ def histo_chart():
 
 
 
-
 #### Creating the dashboard section ####
 def dashboard():
 
         title_col1, title_col2 = st.columns([2,3])
+        
         with title_col1:
+            
             with st.container():
 
                 st.markdown("""
@@ -137,7 +181,7 @@ def dashboard():
             with st.container():
                 for i in range(2):
                     "\n"
-                    
+                   
                 with st.expander("Open / Collapse filters", expanded=True):
                     st.subheader("Filters")
 
@@ -148,6 +192,16 @@ def dashboard():
                     year = st.selectbox("Year", years)
 
         "---"
+        dashcol1, dashcol2 = st.columns([2,2])
+        with dashcol2:
+            dataset = filters(locations, theme, year)
+            st.dataframe(dataset)
+            
+            
+
+            
+
+            
 
 
         
