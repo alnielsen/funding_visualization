@@ -8,3 +8,7 @@ folium
 streamlit_folium
 matplotlib
 wordcloud
+geopy
+geopandas
+shapely
+
