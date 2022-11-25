@@ -20,7 +20,6 @@ avg_funding, funding, freqs = generate_data(df = dataframe,
                                             funding_thresh_hold = 0)
 
 
-
 # Bar plots
 TOP_N = 30
 fig_avg = create_bar_plot(data_dict = avg_funding, 
@@ -40,6 +39,22 @@ fig_funding = create_bar_plot(data_dict = funding,
 fig_funding.write_html("absolute funding.html")
 
 
+df = pd.read_csv("../gustav/dff.csv")
+years = list(set(dataframe["År"]))
+years.sort()
+df_dict = {"word": [], "funding": [], "avg_funding": [], "year": []}
+for year in years:
+    df = df[df["År"] == year]
+    avg_funding, funding, freqs = generate_data(df = dataframe,
+                                                funding_thresh_hold = 0)
+    for key in funding:
+        df_dict["word"].append(key)
+        df_dict["funding"].append(funding[key])
+        df_dict["avg_funding"].append(avg_funding[key])
+        df_dict["year"].append(year)
+        
+df = pd.DataFrame(df_dict)
+print(df)
 """
 # Word clouds
 w_cloud_fund = create_wordcloud(size_dict = funding,

@@ -1,7 +1,7 @@
 import pandas as pd
 from wordcloud import WordCloud, STOPWORDS
 import matplotlib.pyplot as plt
-from math import inf, floor
+from math import inf, floor, isnan
 import plotly.express as px
 
 
@@ -63,6 +63,43 @@ def _my_tf_color_func(dictionary):
         return f"hsl(1, 100%, {dictionary[word]}%)"
     return my_tf_color_func_inner
 
+
+def _clean_desc_col(desc_col: list):
+    """
+    Removes nans and converts col to str
+    """
+    desc_col_clean = []
+    for desc in desc_col:
+        if ( isinstance(desc, float) or isinstance(desc, int) ) and isnan(desc):
+            desc_col_clean.append("")
+        else:
+            desc_col_clean.append(str(desc))  
+    return desc_col_clean
+
+def get_stop_words() -> str:
+    """
+    Returns a list of stopwords
+    """
+    # Danish stopwords
+    txt = open("stopord.txt", "r", encoding='utf-8')
+    file_content = txt.read()
+    danish_stopwords = file_content.split("\n")
+    txt.close()
+    
+    # English stopwords
+    stopwords = list(STOPWORDS)
+    
+    # custom stopwords
+    cust_stop_w = ["-", "–", "samt", "både", "række", "hvilket", "findes", "give", "øget", "ofte", "giver", "del", "projektet", "udviklingen", "baseret", "studier"]
+    
+    # Combine english and danish
+    stopwords.extend(danish_stopwords)
+    stopwords.extend(cust_stop_w)
+    
+    return stopwords
+    
+
+
 ####################
 # Public functions #
 ####################
@@ -86,30 +123,40 @@ def dict_to_df(data_dict):
     return pd.DataFrame({"word": data_dict.keys(), "value": data_dict.values()})
 
 
+
 def generate_data(df: pd.DataFrame, funding_thresh_hold: int) -> tuple[dict, dict]:
-    df["title_desc"] = df["Titel"] #+ df["beskrivelse"]
+    """
+    Generatives three word: value dictionaries:
+    - word: funding
+    - word: average funding
+    - word: frequency
+    """
+    
+    df["title_desc"] = df["Titel"] + _clean_desc_col(df["Beskrivelse"])
+    
     freqs = {} # Absolute frequencies
     funding = {} # Absolute funding recieved
-    
-    stopwords = list(set(STOPWORDS))
-    stopwords.append("-")
-    stopwords.append("–")
+    stopwords = get_stop_words()
     
     # Create dict of absolute freqs and funding
     for text, amount in zip(df["title_desc"], df["Bevilliget beløb"]):
         # Split each token/word on whitespace
         tokens = list(set([token.lower() for token in text.split()])) # Get unique tokens
         # COunt unique tokens in each grant application
-        for token in text.split():
+        prev_tokens = []
+        for token in tokens:
             token = token.lower()
-            if token in stopwords:
+            if token in stopwords or token in prev_tokens:
                 continue
-            if not token in freqs:
-                freqs[token] = 1
-                funding[token] = amount
+                
             else:
-                freqs[token] += 1
-                funding[token] += amount
+                prev_tokens.append(token)
+                if not token in freqs:
+                    freqs[token] = 1
+                    funding[token] = amount
+                else:
+                    freqs[token] += 1
+                    funding[token] += amount
 
     funding = _filter_dict(funding, funding_thresh_hold)
     freqs = _make_same_keys(funding, freqs)
@@ -194,6 +241,11 @@ def create_bar_plot(data_dict,
     fig.update_layout(coloraxis={"colorbar":{"dtick":tick}})
     return fig
         
+def create_line_plot(df):
+    """
+    Returns a plotly lineplot with years on x-axis and value and y axis
+    """
+    print("MOCK Implementation")
     
 
 if __name__ == "__main__":
