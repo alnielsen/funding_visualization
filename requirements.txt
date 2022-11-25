@@ -10,4 +10,5 @@ matplotlib
 wordcloud
 geopy
 geopandas
+shapely
 
