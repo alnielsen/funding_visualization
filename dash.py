@@ -237,10 +237,10 @@ def dashboard():
 
         if 'Absolute' in multi_select:
                 with dashcol1:
-                    components.html(HtmlFile1.read(), width=700, height=500)
+                    components.html(HtmlFile1.read(), width=650, height=500)
         if 'Average' in multi_select:
             with dashcol2:
-                components.html(HtmlFile2.read(), width=700, height=500)
+                components.html(HtmlFile2.read(), width=650, height=500)
 
 
         with title_col2:
