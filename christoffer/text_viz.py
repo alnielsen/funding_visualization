@@ -3,7 +3,7 @@ from wordcloud import WordCloud, STOPWORDS
 import matplotlib.pyplot as plt
 from math import inf, floor, isnan
 import plotly.express as px
-
+import plotly.graph_objects as go
 
 ####################
 # Helper functions #
