@@ -1,4 +1,4 @@
-from text_viz import create_wordcloud, plot_wc, generate_data, create_bar_plot
+from text_viz import create_wordcloud, plot_wc, generate_data, create_bar_plot, create_bubble_plot, gen_spec_w_bub_data, gen_top_bub_data
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
@@ -66,82 +66,34 @@ fig = px.scatter(df, x="year", y="funding",
 """
 
 df = pd.read_csv("../gustav/dff.csv")
-years = list(set(df["År"]))
-years.sort()
-df_dict = {"word": [], "freqs": [], "funding": [], "avg_funding": [], "year": []}
-for year in years:
-    temp_df = df[df["År"] == year]
-    avg_funding, funding, freqs = generate_data(df = temp_df,
-                                                funding_thresh_hold = 0)
-    for key in funding: 
-        df_dict["word"].append(key)
-        df_dict["freqs"].append(freqs[key])
-        df_dict["funding"].append(funding[key])
-        df_dict["avg_funding"].append(avg_funding[key])
-        df_dict["year"].append(year)
+TOP_N = 25
+top_funded_df = gen_top_bub_data(df, TOP_N, sort_col = "funding") # The the top 25 words with highes absolute funding
+fig = create_bubble_plot(df = top_funded_df,
+                          y_col = "freqs",
+                          x_col = "avg_funding",
+                          size_col = "funding",
+                          color_col= "funding",
+                          y_strech = 50,
+                          x_strech = 1000000,
+                          title=f"Funding for {TOP_N} most funded words each year",
+                          y_lab = "Number of Grants Containing Word",
+                          x_lab= "Average funding pr. Grant",
+                          size_lab = "Combined Funding for all Grants Containing Word",
+                          color_lab = "Combined Funding for all Grants Containing Word")
+fig.write_html("bubble_top_funded_words.html", auto_play = False)
 
-df = pd.DataFrame(df_dict)
-top_n = 25
-sorted_df = pd.DataFrame(columns = ["word", "freqs", "funding", "avg_funding", "year"])
-for year in years:
-    temp_df = df[df["year"] == year]
-    temp_df = temp_df.sort_values(by="funding", ascending = False)
-    temp_df = temp_df.head(top_n)
-    sorted_df = pd.concat([sorted_df, temp_df], ignore_index = True)
-
-sorted_df = sorted_df.sort_values(by="year")
-
-sizes = list(sorted_df["funding"])
-fig = px.scatter(sorted_df,
-                x="freqs",
-                y="avg_funding",
-                animation_frame="year",
-                animation_group = "word",
-                size = list(sorted_df["funding"]),
-                color="word",
-                hover_name="word",
-                size_max = 100,
-                text = "word",
-                title = f"Evolution of {top_n} most funded words",
-                range_x=[min(df["freqs"]), max(df["freqs"]) + 25],
-                range_y=[min(df["avg_funding"]), max(df["avg_funding"])]
-                )
-#fig["layout"].pop("updatemenus") # Remove buttons (it does not work when animating)
-fig.layout.updatemenus[0].buttons[0].args[1]["transition"]["duration"] = 15000
-fig.update_traces(textposition='middle center')
-fig.write_html("bubble_test.html", auto_play = False)
-
-fig = px.scatter(sorted_df,
-                y="funding",
-                x="avg_funding",
-                animation_frame="year",
-                animation_group = "word",
-                size = list(sorted_df["freqs"]),
-                color="word",
-                hover_name="word",
-                size_max = 100,
-                text = "word",
-                title = f"Evolution of {top_n} most funded words",
-                range_x=[min(df["avg_funding"]), max(df["avg_funding"])],
-                range_y= [min(df["funding"]), max(df["funding"]) + 25]
-                )
-#fig["layout"].pop("updatemenus") # Remove buttons (it does not work when animating)
-fig.layout.updatemenus[0].buttons[0].args[1]["transition"]["duration"] = 1500
-fig.write_html("bubble_test_2.html", auto_play = False)
-"""
-# Word clouds
-w_cloud_fund = create_wordcloud(size_dict = funding,
-                           color_dict = freqs)
-
-w_cloud_avg = create_wordcloud(
-                           size_dict = avg_funding,
-                           color_dict = funding)
-
-w_cloud_freq = create_wordcloud(
-                           size_dict = freqs,
-                           color_dict = freqs)
-
-plot_wc(w_cloud_fund, title = "Size = Funding, color = freqs")
-plot_wc(w_cloud_avg, title = "Size = Avg funding, color = freqs")
-plot_wc(w_cloud_freq, title = "Size = freqs, color = freqs")
-"""
+words = ["projekt", "undersøge", "behandling", "udvikling", "data", "bedre", "første", "tool-box", "twenty", "north"]
+words_df = gen_spec_w_bub_data(df, words)
+fig = create_bubble_plot(df = words_df,
+                          y_col = "freqs",
+                          x_col = "avg_funding",
+                          size_col = "funding",
+                          color_col= "funding",
+                          y_strech = 50,
+                          x_strech = 1000000,
+                          title=f"Funding for Chosen words Each Year",
+                          y_lab = "Number of Grants Containing Word",
+                          x_lab= "Average funding pr. Grant",
+                          size_lab = "Combined Funding for all Grants Containing Word",
+                          color_lab = "Combined Funding for all Grants Containing Word")
+fig.write_html("bubble_test_specific_words.html", auto_play = False)
