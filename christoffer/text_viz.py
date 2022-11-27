@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from math import inf, floor, isnan
 import plotly.express as px
 import plotly.graph_objects as go
+from typing import Literal
 
 ####################
 # Helper functions #
@@ -210,9 +211,32 @@ def create_bar_plot(data_dict,
                     title = "No Title",
                     top_n = 25):
     """
-    Takes as word: value dict such as
-    word: frequency
-    Returns as ploty plot
+    Description
+    ------------
+    Takes as word: value dict and returns as ploty plot
+    
+    Parameters
+    -----------
+    - data_dict (dict): A dict where the keys are word and the words associated value. 
+      Can be created with the function generate_data(df, funding_thresh).The value determines the size of a word' bar
+      Examples of dicts:
+        - word: freqency
+        - word: funding
+        - word: average funding
+    - color_dict (dict): A word value dict (like previously), however the value determines the bar color for a word.
+    - color_label (str): The label for the colorbar
+    - value_label (str): The label for the x_axis
+    - title (str): The title of the plot.
+    - top_n (int): Only take the top n keys with the highest value.
+    
+    Return
+    -------
+    plotly.express.bar 
+    
+    Preconditions
+    -------------
+    - data_dict and color_dict contains the same keys.
+    
     """
     df_dict = {"Word": [], "value": [], "color": []}
     for key, val, in data_dict.items():
@@ -240,18 +264,14 @@ def create_bar_plot(data_dict,
         tick = int((max(df["color"])/5))
     fig.update_layout(coloraxis={"colorbar":{"dtick":tick}})
     return fig
-        
-def create_line_plot(df):
-    """
-    Returns a plotly lineplot with years on x-axis and value and y axis
-    """
-    print("MOCK Implementation")
 
 
-
-def gen_top_bub_data(df: pd.DataFrame, top_n: int, sort_col: str):
+def gen_bubble_data(df: pd.DataFrame,
+                     sort_col: Literal["freqs", "funding", "avg_funding"] | None = None,
+                     top_n: int | None = None,
+                     words: list[str] | None = None ):
     """
-    generates a dataset with top n words each year
+    generates a dataset filterede accorting to words, and/or value of a column
     """
     years = list(set(df["År"]))
     years.sort()
@@ -261,48 +281,27 @@ def gen_top_bub_data(df: pd.DataFrame, top_n: int, sort_col: str):
         avg_funding, funding, freqs = generate_data(df = temp_df,
                                                     funding_thresh_hold = 0)
         for key in funding: 
-            df_dict["word"].append(key)
-            df_dict["freqs"].append(freqs[key])
-            df_dict["funding"].append(funding[key])
-            df_dict["avg_funding"].append(avg_funding[key])
-            df_dict["year"].append(year)
-
-    df = pd.DataFrame(df_dict)
-
-    sorted_df = pd.DataFrame(columns = ["word", "freqs", "funding", "avg_funding", "year"])
-    for year in years:
-        temp_df = df[df["year"] == year]
-        temp_df = temp_df.sort_values(by=sort_col, ascending = False)
-        temp_df = temp_df.head(top_n)
-        sorted_df = pd.concat([sorted_df, temp_df], ignore_index = True)
-
-    return sorted_df.sort_values(by="year")
-
-
-def gen_spec_w_bub_data(df: pd.DataFrame, words: list[str]):
-    """
-    generates a dataset with specified words each year
-    """
-    years = list(set(df["År"]))
-    years.sort()
-    df_dict = {"word": [], "freqs": [], "funding": [], "avg_funding": [], "year": []}
-    for year in years:
-        temp_df = df[df["År"] == year]
-        avg_funding, funding, freqs = generate_data(df = temp_df,
-                                                    funding_thresh_hold = 0)
-        for key in funding:
-            if key in words:
+            if words is not None and key in words:         
                 df_dict["word"].append(key)
                 df_dict["freqs"].append(freqs[key])
                 df_dict["funding"].append(funding[key])
                 df_dict["avg_funding"].append(avg_funding[key])
                 df_dict["year"].append(year)
 
-
     df = pd.DataFrame(df_dict)
 
+    sorted_df = pd.DataFrame(columns = ["word", "freqs", "funding", "avg_funding", "year"])
+    for year in years:
+        temp_df = df[df["year"] == year]
+        
+        if sort_col is not None:
+            temp_df = temp_df.sort_values(by=sort_col, ascending = False)
+        if top_n is not None:
+            temp_df = temp_df.head(top_n)
+            
+        sorted_df = pd.concat([sorted_df, temp_df], ignore_index = True)
 
-    return df.sort_values(by="year")
+    return sorted_df.sort_values(by="year")
 
 def create_bubble_plot(df, 
                        x_col,
