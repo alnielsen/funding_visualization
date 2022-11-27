@@ -1,24 +1,32 @@
-# Import modules. Check requirements.txt for dependencies
+# Import Libraries. Check requirements.txt for dependencies
+
+## STREAMLIT LIBRARIES ##
 import streamlit as st
 from streamlit_option_menu import option_menu
-import numpy as np
-import pandas as pd
+import streamlit.components.v1 as components
 from st_aggrid import AgGrid
-import plotly.express as px
-from streamlit_folium import st_folium
-import random as rd
-import matplotlib.pyplot as plt
-import plotly.graph_objects as go
-from generate_wordcloud import generate_data, create_wordcloud
-from shapely.geometry import Point, Polygon
+
+## DATAFRAMES LIBRRIES ##
+import pandas as pd
 import geopandas as gpd
+
+## MAP LIBRARIES ##
 import geopy
 from geopy.geocoders import Nominatim
 from geopy.extra.rate_limiter import RateLimiter
 import folium
 from streamlit_folium import st_folium
-import streamlit.components.v1 as components
 
+## PLOT AND GEOMETRY LIBRARIES
+import plotly.express as px
+import plotly.graph_objects as go
+from shapely.geometry import Point, Polygon
+import matplotlib.pyplot as plt
+import numpy as np
+import random as rd
+
+## CUSTOM LIBRARIES ##
+from generate_wordcloud import generate_data, create_wordcloud
 
 # Set page configuration
 st.set_page_config(page_title="Funding Visualization Project", page_icon=":moneybag:", layout="wide", initial_sidebar_state="collapsed")
@@ -73,6 +81,8 @@ for i in range(2013, 2023):
 years.sort(reverse=True)
 years.insert(0, 'All')
 
+
+
 def filters(institution, tema, år):
     locations = institution
     theme = tema
@@ -121,8 +131,6 @@ def filters(institution, tema, år):
 
 def display_map(institution, tema):
 
-    
-
     geolocator = Nominatim(user_agent="GTA Lookup")
     geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
     
@@ -142,8 +150,6 @@ def display_map(institution, tema):
 
 
 
-    
-
 
 # Markdown code to hide "hamburger-menu"
 hide_streamlit_style = """
@@ -153,8 +159,8 @@ footer {visibility: hidden;}
 </style>
 
 """
-st.markdown(hide_streamlit_style, unsafe_allow_html=True,)
 
+st.markdown(hide_streamlit_style, unsafe_allow_html=True,)
 
 #### Configuring Sidebar/Navigation bar ####
 with st.sidebar:
@@ -169,8 +175,6 @@ with st.sidebar:
                                 }, orientation='horizontal')
 
 
-
-
 #### Histogram function ####
 def histo_chart():
     
@@ -182,8 +186,6 @@ def histo_chart():
                    )
     fig.update_layout(bargap=0.1)
     st.plotly_chart(fig, use_container_width=True)
-
-
 
 
 
@@ -204,13 +206,12 @@ def dashboard():
                 </style>
                 """, unsafe_allow_html=True)
 
-            
-
                 ## Section description ##
                 st.title("Danmarks Frie Forskningsfond")
                 st.markdown('<p class="big-font">Visualization of funding data & funding flows</p>', unsafe_allow_html=True)
 
             '---'
+
         title_col1, title_col2 = st.columns([2,3])
         with title_col1:
 
@@ -229,8 +230,6 @@ def dashboard():
 
         "---"
         
-        
-
         multi_select = st.multiselect('Choose Average or Absolute', ['Absolute', 'Average'], default='Absolute')
 
         dashcol1, dashcol2 = st.columns([2,2])
@@ -255,23 +254,6 @@ def dashboard():
             
         
             
-            
-
-        
-            
-
-            
-
-
-                    
-            
-
-            
-
-            
-
-
-        
         
 #### Creating the About section ####
 def about():
@@ -312,6 +294,7 @@ def about():
 
             '''
             gc_git = '''
+
             [![Repo](https://badgen.net/badge/icon/GitHub?icon=github&label)](https://github.com/gustavchristensen1995) 
 
             '''
@@ -320,7 +303,6 @@ def about():
 
             '''
             
-
             ("Andreas LN")
             (aln_git)
             st.markdown("***")
@@ -332,9 +314,8 @@ def about():
             st.markdown("***")
             
       
-           
-                
-#### Checking for user choice and displaying context of menu ####
+               
+#### Checking for user navigation choice and displaying context of menu ####
 if choose == "Dashboard":
     dashboard()
     
@@ -344,9 +325,6 @@ if choose == "About":
 
     
 
-
-#### ADD SUMMARY!!! ####
-    
 
 
     
