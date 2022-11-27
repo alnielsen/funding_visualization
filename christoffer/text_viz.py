@@ -3,7 +3,7 @@ from wordcloud import WordCloud, STOPWORDS
 import matplotlib.pyplot as plt
 from math import inf, floor, isnan
 import plotly.express as px
-
+import plotly.graph_objects as go
 
 ####################
 # Helper functions #
@@ -246,7 +246,118 @@ def create_line_plot(df):
     Returns a plotly lineplot with years on x-axis and value and y axis
     """
     print("MOCK Implementation")
+
+
+
+def gen_top_bub_data(df: pd.DataFrame, top_n: int, sort_col: str):
+    """
+    generates a dataset with top n words each year
+    """
+    years = list(set(df["År"]))
+    years.sort()
+    df_dict = {"word": [], "freqs": [], "funding": [], "avg_funding": [], "year": []}
+    for year in years:
+        temp_df = df[df["År"] == year]
+        avg_funding, funding, freqs = generate_data(df = temp_df,
+                                                    funding_thresh_hold = 0)
+        for key in funding: 
+            df_dict["word"].append(key)
+            df_dict["freqs"].append(freqs[key])
+            df_dict["funding"].append(funding[key])
+            df_dict["avg_funding"].append(avg_funding[key])
+            df_dict["year"].append(year)
+
+    df = pd.DataFrame(df_dict)
+
+    sorted_df = pd.DataFrame(columns = ["word", "freqs", "funding", "avg_funding", "year"])
+    for year in years:
+        temp_df = df[df["year"] == year]
+        temp_df = temp_df.sort_values(by=sort_col, ascending = False)
+        temp_df = temp_df.head(top_n)
+        sorted_df = pd.concat([sorted_df, temp_df], ignore_index = True)
+
+    return sorted_df.sort_values(by="year")
+
+
+def gen_spec_w_bub_data(df: pd.DataFrame, words: list[str]):
+    """
+    generates a dataset with specified words each year
+    """
+    years = list(set(df["År"]))
+    years.sort()
+    df_dict = {"word": [], "freqs": [], "funding": [], "avg_funding": [], "year": []}
+    for year in years:
+        temp_df = df[df["År"] == year]
+        avg_funding, funding, freqs = generate_data(df = temp_df,
+                                                    funding_thresh_hold = 0)
+        for key in funding:
+            if key in words:
+                df_dict["word"].append(key)
+                df_dict["freqs"].append(freqs[key])
+                df_dict["funding"].append(funding[key])
+                df_dict["avg_funding"].append(avg_funding[key])
+                df_dict["year"].append(year)
+
+
+    df = pd.DataFrame(df_dict)
+
+
+    return df.sort_values(by="year")
+
+def create_bubble_plot(df, 
+                       x_col,
+                       y_col,
+                       size_col,
+                       color_col,
+                       x_strech,
+                       y_strech,
+                       title = "Title",
+                       x_lab = None,
+                       y_lab = None,
+                       size_lab = None,
+                       color_lab = None):
     
+    if x_lab == None:
+        x_lab = x_col
+    if y_lab == None:
+        y_lab = y_col
+    if size_lab == None:
+        size_lab = size_col
+    if color_lab == None:
+        color_lab = color_col
+    fig = px.scatter(df,
+                     x=x_col,
+                     y=y_col,
+                     color= list(df[color_col]),
+                     color_continuous_scale=px.colors.sequential.Redor,
+                     animation_frame="year",
+                     animation_group = "word",
+                     size = list(df[size_col]),
+                     hover_name="word",
+                     size_max = 55,
+                     text = "word",
+                     title = title,
+                     range_x=[min(df[x_col] - x_strech), max(df[x_col]) + x_strech],
+                     range_y=[min(df[y_col]) - y_strech, max(df[y_col]) + y_strech],
+                     labels={
+                     x_col: x_lab,
+                     y_col: y_lab,
+                     size_col: size_lab,
+                     "year": "Year"
+                 }
+                    )
+    fig["layout"].pop("updatemenus") # Remove buttons (it does not work when animating)
+    fig.update_layout(coloraxis_colorbar_title_text = color_lab)
+    
+    hovertemplate="<br>".join([
+        f"{x_lab}: " + "%{x:,.0f}",
+        f"{y_lab}: " + "%{y}",
+        f"{size_lab}: " + "%{marker.size:,.0f}"])
+
+    fig.update_traces(hovertemplate=hovertemplate)
+    for frame in fig.frames:
+        frame.data[0].hovertemplate = hovertemplate
+    return fig
 
 if __name__ == "__main__":
     pass
