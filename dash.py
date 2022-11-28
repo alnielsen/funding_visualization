@@ -26,7 +26,13 @@ import numpy as np
 import random as rd
 
 ## CUSTOM LIBRARIES ##
-from generate_wordcloud import generate_data, create_wordcloud
+from christoffer.text_viz import generate_data, gen_bubble_data, create_bar_plot, create_bubble_plot, create_wordcloud
+
+df = pd.read_csv('gustav/dff.csv')
+
+
+
+
 
 # Set page configuration
 st.set_page_config(page_title="Funding Visualization Project", page_icon=":moneybag:", layout="wide", initial_sidebar_state="collapsed")
@@ -46,10 +52,39 @@ streamlit_style = """
 st.markdown(streamlit_style, unsafe_allow_html=True)
 
 
-df = pd.read_csv('gustav/dff.csv')
+@st.cache
+def gen_bar_plots():
 
-HtmlFile1 = open("christoffer/absolute funding.html", 'r', encoding='utf-8')
-HtmlFile2 = open("christoffer/average_funding.html", 'r', encoding='utf-8')
+    avg_funding, funding, freqs = generate_data(df = df,
+                                            funding_thresh_hold = 0)
+#############
+# Bar plots #
+#############
+    TOP_N = 30
+
+
+
+    fig_funding = create_bar_plot(data_dict = funding,
+                                color_dict = freqs,
+                                color_label = "# of Grants Containing Word",
+                                value_label = "Funding across all grants",
+                                title = f"Top {TOP_N} words with highest funding ",
+                                top_n = TOP_N)
+    return fig_funding
+
+
+
+@st.cache
+def gen_wordcloud():
+    avg_funding, funding, freqs = generate_data(df = df,
+                                            funding_thresh_hold = 0)
+    
+    wc = create_wordcloud(size_dict=funding, color_dict=freqs)
+
+    return wc
+    
+
+
 
 institution = ['All']
 
@@ -146,7 +181,7 @@ def display_map(institution, tema):
     folium.Marker(
     [lat, lon], popup=f'{institution}', tooltip=tooltip
     ).add_to(map)
-    st_map = st_folium(map, width=800, height=450)
+    st_map = st_folium(map, width=920, height=350)
 
 
 
@@ -176,6 +211,7 @@ with st.sidebar:
 
 
 #### Histogram function ####
+@st.cache
 def histo_chart():
     
     fig = px.histogram(df, x="Bevilliget beløb",
@@ -190,11 +226,11 @@ def histo_chart():
 
 
 #### Creating the dashboard section ####
+
+st.cache()
 def dashboard():
-    
-        
-        maincol1, maincol2 = st.columns([20,1])
-        with maincol1:
+        maincol1, maincol2, maincol3 = st.columns([1,5,1])
+        with maincol2:
             
             with st.container():
 
@@ -212,50 +248,60 @@ def dashboard():
 
             '---'
 
-        title_col1, title_col2 = st.columns([2,3])
-        with title_col1:
+        filter_col1, filter_col2, filter_col3 = st.columns([2,5,2])
+        with filter_col2:
 
             with st.container():
-                for i in range(2):
-                    "\n"
                    
-                with st.expander("Open / Collapse filters", expanded=True):
-                    st.subheader("Filters")
+                
+                st.subheader("Filters")
 
-                    locations = st.selectbox("Choose an institution", institution)
+                locations = st.selectbox("Choose an institution", institution)
 
-                    theme = st.selectbox("Choose a theme", omraade)
+                theme = st.selectbox("Choose a theme", omraade)
 
-                    year = st.selectbox("Year", years)
+                year = st.selectbox("Year", years)
+        
+        with filter_col2:
+            with st.container():
+                map = display_map(locations, theme)
+
 
         "---"
         
-        multi_select = st.multiselect('Choose Average or Absolute', ['Absolute', 'Average'], default='Absolute')
+        
 
-        dashcol1, dashcol2 = st.columns([2,2])
+        dashcol1, dashcol2 = st.columns([1,1])
 
-        if 'Absolute' in multi_select:
-                with dashcol1:
-                    components.html(HtmlFile1.read(), width=650, height=500)
-        if 'Average' in multi_select:
-            with dashcol2:
-                components.html(HtmlFile2.read(), width=650, height=500)
+        
+        with dashcol1:
+            with st.expander("Absolute Funding", expanded=True):
+                fig1 = gen_bar_plots()
+                st.plotly_chart(fig1, use_container_width=True)
+
+        with dashcol2:
+            with st.expander("Wordcloud for funding", expanded=True):
+                fig2 = gen_wordcloud()
+                st.image(fig2.to_array())
+
+                    
 
 
-        with title_col2:
-            with st.container():
-                for i in range(2):
-                    "\n"
-                with st.expander("Expand for Map and Data table", expanded=True):
+        
+        with st.container():
+            for i in range(2):
+                "\n"
+            with st.expander("Expand for Data table", expanded=False):
 
-                    dataset = filters(locations, theme, year)
-                    st.dataframe(dataset)
-                    map = display_map(locations, theme)
+                dataset = filters(locations, theme, year)
+                st.dataframe(dataset)
+                
             
         
             
         
 #### Creating the About section ####
+
 def about():
     
     source = 'All data is soruced from: [Danmarks Frie Forskningsfond](https://dff.dk/forskningsprojekter)'
