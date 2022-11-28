@@ -164,6 +164,7 @@ def filters(institution, tema, år):
         return data
 
 
+
 def display_map(institution, tema):
 
     geolocator = Nominatim(user_agent="GTA Lookup")
@@ -271,7 +272,7 @@ def dashboard():
         
         
 
-        dashcol1, dashcol2 = st.columns([1,1])
+        dashcol1, dashcol2 = st.columns([2,1])
 
         
         with dashcol1:
@@ -281,6 +282,8 @@ def dashboard():
 
         with dashcol2:
             with st.expander("Wordcloud for funding", expanded=True):
+                
+
                 fig2 = gen_wordcloud()
                 st.image(fig2.to_array())
 
