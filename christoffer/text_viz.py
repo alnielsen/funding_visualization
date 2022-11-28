@@ -254,12 +254,11 @@ def create_wordcloud(size_dict: dict,
 
     """
     
-    wordcloud = WordCloud(background_color ='white',
+    wordcloud = WordCloud(background_color = None,
                           stopwords = set(STOPWORDS),
                           collocations = bigrams, # Allow / disallow bigrams
                           contour_color = "black",
                           relative_scaling = 1,
-                          background_color=None,
                           min_font_size = 10).generate_from_frequencies(size_dict)
     
     word_freqs = wordcloud.words_ if color_dict is None else color_dict
