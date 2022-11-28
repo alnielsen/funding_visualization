@@ -254,7 +254,7 @@ def create_wordcloud(size_dict: dict,
 
     """
     
-    wordcloud = WordCloud(background_color ='white',
+    wordcloud = WordCloud(background_color = None,
                           stopwords = set(STOPWORDS),
                           collocations = bigrams, # Allow / disallow bigrams
                           contour_color = "black",
