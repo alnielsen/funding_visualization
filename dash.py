@@ -49,28 +49,28 @@ st.markdown(streamlit_style, unsafe_allow_html=True)
 
 df = pd.read_csv('gustav/dff.csv')
 
-avg_funding, funding, freqs = generate_data(df = df,
-                                            funding_thresh_hold = 0)
+# avg_funding, funding, freqs = generate_data(df = df,
+#                                             funding_thresh_hold = 0)
 
-#############
-# Bar plots #
-#############
-TOP_N = 30
-fig_avg = create_bar_plot(data_dict = avg_funding, 
-                          color_dict = freqs,
-                          color_label = "Grants Containing Word",
-                          value_label = "Average Funding pr. Grant",
-                          title = f"Top {TOP_N} words with highest average funding",
-                          top_n = TOP_N)
+# #############
+# # Bar plots #
+# #############
+# TOP_N = 30
+# fig_avg = create_bar_plot(data_dict = avg_funding, 
+#                           color_dict = freqs,
+#                           color_label = "Grants Containing Word",
+#                           value_label = "Average Funding pr. Grant",
+#                           title = f"Top {TOP_N} words with highest average funding",
+#                           top_n = TOP_N)
 
 
 
-fig_funding = create_bar_plot(data_dict = funding,
-                              color_dict = freqs,
-                              color_label = "# of Grants Containing Word",
-                              value_label = "Funding across all grants",
-                              title = f"Top {TOP_N} words with highest funding ",
-                              top_n = TOP_N)
+# fig_funding = create_bar_plot(data_dict = funding,
+#                               color_dict = freqs,
+#                               color_label = "# of Grants Containing Word",
+#                               value_label = "Funding across all grants",
+#                               title = f"Top {TOP_N} words with highest funding ",
+#                               top_n = TOP_N)
 
 institution = ['All']
 
@@ -261,12 +261,14 @@ def dashboard():
         if 'Absolute' in multi_select:
             with dashcol1:
                 with st.expander("Absolute Funding", expanded=True):
-                    st.plotly_chart(fig_funding, use_container_width=True)
+                    pass
+                    #st.plotly_chart(fig_funding, use_container_width=True)
                     
         if 'Average' in multi_select:
             with dashcol2:
                 with st.expander("Average Funding", expanded=True):
-                    st.plotly_chart(fig_avg, use_container_width=True)
+                    pass
+                    #st.plotly_chart(fig_avg, use_container_width=True)
 
 
         
