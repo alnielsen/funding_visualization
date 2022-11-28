@@ -14,7 +14,7 @@ Example wordclouds -- How to use
 >>> w_cloud = create_wordcloud(size_dict = funding,
                                color_dict = freqs)
 """
-
+"""
 dataframe = pd.read_csv("../gustav/dff.csv")
 avg_funding, funding, freqs = generate_data(df = dataframe,
                                             funding_thresh_hold = 0)
@@ -53,7 +53,7 @@ plot_wc(wordcloud = wc,
 # Bubble charts #
 #################
 df = pd.read_csv("../gustav/dff.csv")
-TOP_N = 25
+TOP_N = 200
 top_funded_df = gen_bubble_data(df,
                                 top_n= TOP_N,
                                 sort_col = "funding") # The the top 25 words with highes absolute funding
@@ -87,3 +87,5 @@ fig = create_bubble_plot(df = words_df,
                           size_lab = "Combined Funding for all Grants Containing Word",
                           color_lab = "Combined Funding for all Grants Containing Word")
 fig.write_html("output/bubble_test_specific_words.html", auto_play = False)
+"""
+
