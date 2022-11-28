@@ -28,6 +28,11 @@ import random as rd
 ## CUSTOM LIBRARIES ##
 from christoffer.text_viz import generate_data, gen_bubble_data, create_bar_plot, create_bubble_plot, create_wordcloud
 
+df = pd.read_csv('gustav/dff.csv')
+
+
+
+
 
 # Set page configuration
 st.set_page_config(page_title="Funding Visualization Project", page_icon=":moneybag:", layout="wide", initial_sidebar_state="collapsed")
@@ -47,30 +52,39 @@ streamlit_style = """
 st.markdown(streamlit_style, unsafe_allow_html=True)
 
 
-df = pd.read_csv('gustav/dff.csv')
+@st.cache
+def gen_bar_plots():
 
-# avg_funding, funding, freqs = generate_data(df = df,
-#                                             funding_thresh_hold = 0)
-
-# #############
-# # Bar plots #
-# #############
-# TOP_N = 30
-# fig_avg = create_bar_plot(data_dict = avg_funding, 
-#                           color_dict = freqs,
-#                           color_label = "Grants Containing Word",
-#                           value_label = "Average Funding pr. Grant",
-#                           title = f"Top {TOP_N} words with highest average funding",
-#                           top_n = TOP_N)
+    avg_funding, funding, freqs = generate_data(df = df,
+                                            funding_thresh_hold = 0)
+#############
+# Bar plots #
+#############
+    TOP_N = 30
 
 
 
-# fig_funding = create_bar_plot(data_dict = funding,
-#                               color_dict = freqs,
-#                               color_label = "# of Grants Containing Word",
-#                               value_label = "Funding across all grants",
-#                               title = f"Top {TOP_N} words with highest funding ",
-#                               top_n = TOP_N)
+    fig_funding = create_bar_plot(data_dict = funding,
+                                color_dict = freqs,
+                                color_label = "# of Grants Containing Word",
+                                value_label = "Funding across all grants",
+                                title = f"Top {TOP_N} words with highest funding ",
+                                top_n = TOP_N)
+    return fig_funding
+
+
+
+@st.cache
+def gen_wordcloud():
+    avg_funding, funding, freqs = generate_data(df = df,
+                                            funding_thresh_hold = 0)
+    
+    wc = create_wordcloud(size_dict=funding, color_dict=freqs)
+
+    return wc
+    
+
+
 
 institution = ['All']
 
@@ -197,6 +211,7 @@ with st.sidebar:
 
 
 #### Histogram function ####
+@st.cache
 def histo_chart():
     
     fig = px.histogram(df, x="Bevilliget beløb",
@@ -211,9 +226,9 @@ def histo_chart():
 
 
 #### Creating the dashboard section ####
+
+st.cache()
 def dashboard():
-    
-        
         maincol1, maincol2, maincol3 = st.columns([1,5,1])
         with maincol2:
             
@@ -254,28 +269,29 @@ def dashboard():
 
         "---"
         
-        multi_select = st.multiselect('Choose Average or Absolute', ['Absolute', 'Average'], default='Absolute')
+        
 
         dashcol1, dashcol2 = st.columns([1,1])
 
-        if 'Absolute' in multi_select:
-            with dashcol1:
-                with st.expander("Absolute Funding", expanded=True):
-                    pass
-                    #st.plotly_chart(fig_funding, use_container_width=True)
+        
+        with dashcol1:
+            with st.expander("Absolute Funding", expanded=True):
+                fig1 = gen_bar_plots()
+                st.plotly_chart(fig1, use_container_width=True)
+
+        with dashcol2:
+            with st.expander("Wordcloud for funding", expanded=True):
+                fig2 = gen_wordcloud()
+                st.image(fig2.to_array())
+
                     
-        if 'Average' in multi_select:
-            with dashcol2:
-                with st.expander("Average Funding", expanded=True):
-                    pass
-                    #st.plotly_chart(fig_avg, use_container_width=True)
 
 
         
         with st.container():
             for i in range(2):
                 "\n"
-            with st.expander("Expand for Map and Data table", expanded=True):
+            with st.expander("Expand for Data table", expanded=False):
 
                 dataset = filters(locations, theme, year)
                 st.dataframe(dataset)
@@ -285,6 +301,7 @@ def dashboard():
             
         
 #### Creating the About section ####
+
 def about():
     
     source = 'All data is soruced from: [Danmarks Frie Forskningsfond](https://dff.dk/forskningsprojekter)'
