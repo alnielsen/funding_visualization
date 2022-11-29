@@ -73,6 +73,68 @@ def gen_bar_plots():
     return fig_funding
 
 
+@st.experimental_memo
+def generateSankey(df, year, category_columns):
+    df.tail()
+
+    colorpalette = px.colors.qualitative.Plotly
+
+    # data for sankey
+    df = df.loc[df['År'] == year]
+    df_sankey = df.loc[:,category_columns + ['Bevilliget beløb']]
+
+    # create list of labels, i.e. unique values from each column except the values
+    # create color list
+    labels = []
+    colornumlist = []
+
+    for col in category_columns:
+        labels = labels + list(set(df_sankey[col].values)) # adds unique labels in each category to list
+        colornumlist.append(len(list(set(df_sankey[col].values)))) # appends number of unique labels for each category
+
+    # define colors based on number of categories
+    colorList = []
+    for idx, colorNum in enumerate(colornumlist):
+        colorList = colorList + [colorpalette[idx]]*colorNum
+
+    # initiate input for for loop
+    df_link_input = pd.DataFrame({'source' : [], 'target': [], 'count': []})
+
+    # create data for go.Sankey function
+    for i in range(len(category_columns)-1):
+        if len(category_columns) == 1:
+            print("Number of input categories must be at least 2")
+        else:
+            temporary_df = df_sankey.groupby([category_columns[i], category_columns[i+1]]).agg({'Bevilliget beløb':'sum'}).reset_index() # loop over columns and group by column to the right, i.e. 'År' and 'Virkemidler', and then 'Virkemidler' and 'Område'
+            temporary_df.columns = ['source','target','count']
+            df_link_input = df_link_input.append(temporary_df)
+
+    # add index for source-target pair
+    df_link_input['sourceID'] = df_link_input['source'].apply(lambda x: labels.index(x))
+    df_link_input['targetID'] = df_link_input['target'].apply(lambda x: labels.index(x))
+
+    # creating the sankey diagram
+    fig = go.Figure(data=[go.Sankey(
+        valueformat = ",",
+        valuesuffix = " kr.",
+        # define nodes
+        node = dict(
+            pad = 15,
+            thickness = 20,
+            line = dict(color = "black", width = 0.5),
+            label = labels,
+            color = colorList
+            ),
+        link = dict(
+            source = df_link_input['sourceID'], # indices correspond to labels, e.g. '2022', 'Forskningsprojekt 1', 'Forskningsprojekt 2', ...
+            target = df_link_input['targetID'],
+            value = df_link_input['count']
+        ))])
+
+    fig.update_layout(title_text="Funding of Research Grants in " + str(year) + "<br>Source: <a href='https://dff.dk/'>Danmarks Frie Forskningsfond</a>",
+                        font_size=10)
+    return fig
+
 
 @st.experimental_memo
 def gen_wordcloud():
@@ -298,6 +360,13 @@ def dashboard():
 
                 dataset = filters(locations, theme, year)
                 st.dataframe(dataset)
+
+            with st.expander("Display Sankey chart", expanded=False):
+                # NODES UDE TIL HØJRE SKAL SORTERES I FALDENDE ORDEN
+                # plotting sankey diagram
+                year_slider = st.slider("Year", min_value=2013, max_value=2022, value=2022)
+                sankey = generateSankey(df, year=year_slider, category_columns = ['År','Virkemidler', 'Område'])
+                st.plotly_chart(sankey, use_container_width=True)
                 
             
         
