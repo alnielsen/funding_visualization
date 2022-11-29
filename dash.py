@@ -52,7 +52,7 @@ streamlit_style = """
 st.markdown(streamlit_style, unsafe_allow_html=True)
 
 
-@st.cache
+@st.experimental_memo
 def gen_bar_plots():
 
     avg_funding, funding, freqs = generate_data(df = df,
@@ -74,7 +74,7 @@ def gen_bar_plots():
 
 
 
-@st.cache
+@st.experimental_memo
 def gen_wordcloud():
     avg_funding, funding, freqs = generate_data(df = df,
                                             funding_thresh_hold = 0)
@@ -117,7 +117,7 @@ years.sort(reverse=True)
 years.insert(0, 'All')
 
 
-
+@st.experimental_memo
 def filters(institution, tema, år):
     locations = institution
     theme = tema
@@ -212,7 +212,7 @@ with st.sidebar:
 
 
 #### Histogram function ####
-@st.cache
+
 def histo_chart():
     
     fig = px.histogram(df, x="Bevilliget beløb",
