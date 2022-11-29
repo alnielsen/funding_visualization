@@ -244,11 +244,12 @@ def display_map(institution, tema):
     map_data = pd.DataFrame({'lat': [lat], 'lon': [lon]})
     tooltip = 'Show info.'
     
-    map = folium.Map(location=map_data, zoom_start=12)
+    map = folium.Map(location=map_data, zoom_start=10, scrollWheelZoom=False, width='100%', height="100%")
     folium.Marker(
     [lat, lon], popup=f'{institution}', tooltip=tooltip
     ).add_to(map)
-    st_map = st_folium(map, width=920, height=350)
+    return map
+    
 
 
 
@@ -330,6 +331,7 @@ def dashboard():
         with filter_col2:
             with st.container():
                 map = display_map(locations, theme)
+                st_map = st_folium(map, width=1000, height=350)
 
 
         "---"
@@ -401,7 +403,7 @@ def about():
             mime="text/csv"
           )
     "---"
-    st.dataframe(df)
+    #st.dataframe(df)
 
     ## Add creator as expander with info with git links ##
     with st.sidebar:
