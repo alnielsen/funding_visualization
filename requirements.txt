@@ -11,4 +11,5 @@ wordcloud
 geopy
 geopandas
 shapely
+networkx
 
