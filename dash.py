@@ -364,7 +364,7 @@ def dashboard():
             with st.expander("Display Sankey chart", expanded=False):
                 # NODES UDE TIL HØJRE SKAL SORTERES I FALDENDE ORDEN
                 # plotting sankey diagram
-                year_slider = st.slider("Year", min_value=2013, max_value=2022, value=2022)
+                year_slider = st.slider("Year", min_value=2013, max_value=2022, value=2013)
                 sankey = generateSankey(df, year=year_slider, category_columns = ['År','Virkemidler', 'Område'])
                 st.plotly_chart(sankey, use_container_width=True)
                 
