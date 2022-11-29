@@ -5,3 +5,4 @@ matplotlib
 wordcloud
 streamlit
 plotly
+networkx[all]
