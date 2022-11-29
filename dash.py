@@ -28,9 +28,9 @@ import random as rd
 ## CUSTOM LIBRARIES ##
 from christoffer.text_viz import generate_data, gen_bubble_data, create_bar_plot, create_bubble_plot, create_wordcloud
 
+
+## Load dataset
 df = pd.read_csv('gustav/dff.csv')
-
-
 
 
 
@@ -51,7 +51,7 @@ streamlit_style = """
 
 st.markdown(streamlit_style, unsafe_allow_html=True)
 
-
+## Generate bar plots ##
 @st.experimental_memo
 def gen_bar_plots():
 
@@ -73,6 +73,7 @@ def gen_bar_plots():
     return fig_funding
 
 
+## Generate sankey chart ##
 @st.experimental_memo
 def generateSankey(df, year, category_columns):
     df.tail()
@@ -136,6 +137,7 @@ def generateSankey(df, year, category_columns):
     return fig
 
 
+## Generate wordcloud ##
 @st.experimental_memo
 def gen_wordcloud():
     avg_funding, funding, freqs = generate_data(df = df,
@@ -179,6 +181,8 @@ years.sort(reverse=True)
 years.insert(0, 'All')
 
 
+
+## Filter function / Display filters ##
 @st.experimental_memo
 def filters(institution, tema, år):
     locations = institution
@@ -226,7 +230,7 @@ def filters(institution, tema, år):
         return data
 
 
-
+## Generate and display map ##
 def display_map(institution, tema):
 
     geolocator = Nominatim(user_agent="GTA Lookup")
@@ -274,7 +278,6 @@ with st.sidebar:
 
 
 #### Histogram function ####
-
 def histo_chart():
     
     fig = px.histogram(df, x="Bevilliget beløb",
@@ -289,7 +292,6 @@ def histo_chart():
 
 
 #### Creating the dashboard section ####
-
 st.cache()
 def dashboard():
         maincol1, maincol2, maincol3 = st.columns([1,5,1])
