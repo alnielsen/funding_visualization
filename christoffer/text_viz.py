@@ -5,6 +5,7 @@ from math import inf, floor, isnan
 import plotly.express as px
 import plotly.graph_objects as go
 from typing import Literal
+import networkx as nx
 
 ####################
 # Helper functions #
@@ -174,14 +175,12 @@ def generate_data(df: pd.DataFrame,
         # Split each token/word on whitespace
         tokens = list(set([token.lower() for token in text.split()])) # Get unique tokens
         # COunt unique tokens in each grant application
-        prev_tokens = []
         for token in tokens:
             token = token.lower()
-            if token in stopwords or token in prev_tokens:
+            if token in stopwords:
                 continue
                 
             else:
-                prev_tokens.append(token)
                 if not token in freqs:
                     freqs[token] = 1
                     funding[token] = amount
@@ -489,6 +488,85 @@ def create_bubble_plot(df: pd.DataFrame,
     for frame in fig.frames:
         frame.data[0].hovertemplate = hovertemplate
     return fig
+
+
+def generate_graph_data(df: pd.DataFrame) -> nx.Graph:
+    """
+    Description
+    -----------
+
+    Parameters
+    ----------
+    - df (pandas.DataFrame): A dataframe containing the following columns: 
+        - "År" (int), "Titel" (str), "Beskrivelse" (str), "Bevilliget beløb" (int | float)
+    - funding_thresh_hold (int): Only get words which have a higher funding than this
+        - Default: 0
+
+    Return
+    ------
+    tuple(dict, dict, dict)
+    """
+    avg_funding, funding, freqs = generate_data(df)
+    G = nx.Graph()
+    df = df.head(100)
+    df["title_desc"] = df["Titel"] + _clean_desc_col(df["Beskrivelse"])
+    
+    stopwords = get_stop_words()
+
+    #df_dict = {"word": None, "freqs": [], "funding": [], "avg_funding": [], "year": []}
+    
+    # Create Graph
+    token_lists = []
+    for text, amount in zip(df["title_desc"], df["Bevilliget beløb"]):
+        # Split each token/word on whitespace
+        tokens = list(set([token.lower() for token in text.split()])) # Get unique tokens
+        token_list = []
+        for token in tokens:
+            if token in stopwords:
+                continue 
+            else:
+                token_list.append(token)
+        token_lists.append(token_list)
+    token_lists = [token_list for token_list in token_lists if token_list != []]
+    for token_list in token_lists:
+        for token in token_list:
+            G.add_node(token,
+                       avg_funding = avg_funding[token],
+                       funding = funding[token],
+                       freq = freqs[token])
+
+    for token_list in token_lists:
+        if len(token_list) > 1:
+            for i in range(len(token_list)-1):
+                G.add_edges_from([(str(token_list[i]), str(token_list[i+1]))])
+    """
+    source_tokens = []
+    targ_tokens = []
+    for token in tokens:
+        if token in stopwords:
+            continue 
+        else:
+            source_tokens.append(token)
+            targ_tokens.append(token)
+
+    for s_tok in source_tokens:
+        G.add_node(s_tok)#,
+                #avg_funding = avg_funding[s_tok],
+                #freqs = freqs[s_tok],
+                #funding = funding[s_tok]) 
+        for targ_tok in targ_tokens:
+            if not s_tok == targ_tok:
+                G.add_node(targ_tok)#,
+                        #avg_funding = avg_funding[targ_tok],
+                        #freqs = freqs[targ_tok],
+                        #funding = funding[targ_tok])
+                G.add_edge(s_tok, targ_tok)
+        """
+    positions = nx.random_layout(G)
+    for node, position in positions.items():
+        G.nodes[node]["pos"] = position
+    
+    return G
 
 if __name__ == "__main__":
     pass
