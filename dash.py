@@ -343,8 +343,14 @@ def dashboard():
                 # plotting sankey diagram
                 
                 year_slider = st.slider("Year", min_value=2013, max_value=2022, value=2013)
+
+                if locations == 'All':
+                    sankey = generateSankey(df, year=year_slider, category_columns = ['År','Virkemidler', 'Område'])
                 
-                sankey = generateSankey(df.loc[(df["Institution"] == locations)], year=year_slider, category_columns = ['År','Virkemidler', 'Område'])
+                else:
+
+
+                    sankey = generateSankey(df.loc[(df["Institution"] == locations)], year=year_slider, category_columns = ['År','Virkemidler', 'Område'])
                 
                 
                 st.plotly_chart(sankey, use_container_width=True)
