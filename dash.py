@@ -28,28 +28,91 @@ import random as rd
 ## CUSTOM LIBRARIES ##
 from christoffer.text_viz import generate_data, gen_bubble_data, create_bar_plot, create_bubble_plot, create_wordcloud
 
+# Set page configuration
+st.set_page_config(page_title="Funding Visualization Project", page_icon=":moneybag:", layout="wide", initial_sidebar_state="collapsed")
+
 
 ## Load dataset
 df = pd.read_csv('gustav/dff.csv')
 
+institution = ['All']
+
+for i in df['Institution']:
+    if i not in institution:
+        institution.append(i)
 
 
-# Set page configuration
-st.set_page_config(page_title="Funding Visualization Project", page_icon=":moneybag:", layout="wide", initial_sidebar_state="collapsed")
+omraade = ['All']
 
-streamlit_style = """
+for i in df['Område']:
+     if i not in omraade:
+        omraade.append(i)
 
-			<style>
-			@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap');
 
-			html, body, [class*="css"]  {
-			font-family: 'Roboto', sans-serif;
+amount = []
 
-			}
-			</style>
-			"""
+for i in df["Bevilliget beløb"]:
+    if i not in amount:
+        amount.append(i)
+#amount.insert(0,'All')
 
-st.markdown(streamlit_style, unsafe_allow_html=True)
+
+years = []
+
+for i in range(2013, 2023):
+    if i not in years:
+        years.append(i)
+years.sort(reverse=True)
+years.insert(0, 'All')
+
+
+## Filter function / Display filters ##
+@st.experimental_memo
+def filters(institution, tema, år):
+    locations = institution
+    theme = tema
+    year = år
+
+    ## No filtering
+    if locations == 'All' and theme == 'All' and year == 'All':
+        data = df
+        return data
+
+    ## Filter for year
+    elif locations == 'All' and theme == 'All' and year == year:
+        data = df.loc[(df["År"] == year)]
+        return data
+
+    ## Filter for theme
+    elif locations == 'All' and theme == theme and year == 'All':
+        data = (df.loc[(df["Område"] == theme)])
+        return data
+
+    ## Filter for location
+    elif locations == locations and theme == 'All' and year == 'All':
+        data = df.loc[(df["Institution"] == locations)]
+        return data
+
+    ## Filter for theme and year
+    elif locations == 'All' and theme == theme and year == year:
+        data = df.loc[(df["Område"] == theme) & (df["År"] == year)]
+        return data
+    
+    ## Filter for location and theme
+    elif locations == locations and theme == theme and year == 'All':
+        data = df.loc[(df["Institution"] == locations) & (df["Område"] == theme)]
+        return data
+
+    ## Filter for location and year
+    elif locations == locations and theme == 'All' and year == year:
+        data = df.loc[(df["Institution"] == locations) & (df["År"] == year)]
+        return data
+
+    ## Filter for all
+    elif locations == locations and theme == theme and year == year:
+        data = df.loc[(df["Institution"] == locations) & (df["Område"] == theme) & df["År"] == year]
+        return data
+
 
 ## Generate bar plots ##
 @st.experimental_memo
@@ -148,88 +211,6 @@ def gen_wordcloud():
     return wc
     
 
-
-
-institution = ['All']
-
-for i in df['Institution']:
-    if i not in institution:
-        institution.append(i)
-
-
-omraade = ['All']
-
-for i in df['Område']:
-     if i not in omraade:
-        omraade.append(i)
-
-
-amount = []
-
-for i in df["Bevilliget beløb"]:
-    if i not in amount:
-        amount.append(i)
-#amount.insert(0,'All')
-
-
-years = []
-
-for i in range(2013, 2023):
-    if i not in years:
-        years.append(i)
-years.sort(reverse=True)
-years.insert(0, 'All')
-
-
-
-## Filter function / Display filters ##
-@st.experimental_memo
-def filters(institution, tema, år):
-    locations = institution
-    theme = tema
-    year = år
-
-    ## No filtering
-    if locations == 'All' and theme == 'All' and year == 'All':
-        data = df
-        return data
-
-    ## Filter for year
-    elif locations == 'All' and theme == 'All' and year == year:
-        data = df.loc[(df["År"] == year)]
-        return data
-
-    ## Filter for theme
-    elif locations == 'All' and theme == theme and year == 'All':
-        data = (df.loc[(df["Område"] == theme)])
-        return data
-
-    ## Filter for location
-    elif locations == locations and theme == 'All' and year == 'All':
-        data = df.loc[(df["Institution"] == locations)]
-        return data
-
-    ## Filter for theme and year
-    elif locations == 'All' and theme == theme and year == year:
-        data = df.loc[(df["Område"] == theme) & (df["År"] == year)]
-        return data
-    
-    ## Filter for location and theme
-    elif locations == locations and theme == theme and year == 'All':
-        data = df.loc[(df["Institution"] == locations) & (df["Område"] == theme)]
-        return data
-
-    ## Filter for location and year
-    elif locations == locations and theme == 'All' and year == year:
-        data = df.loc[(df["Institution"] == locations) & (df["År"] == year)]
-        return data
-
-    ## Filter for all
-    elif locations == locations and theme == theme and year == year:
-        data = df.loc[(df["Institution"] == locations) & (df["Område"] == theme) & df["År"] == year]
-        return data
-
-
 ## Generate and display map ##
 def display_map(institution, tema):
 
@@ -249,33 +230,6 @@ def display_map(institution, tema):
     [lat, lon], popup=f'{institution}', tooltip=tooltip
     ).add_to(map)
     return map
-    
-
-
-
-
-# Markdown code to hide "hamburger-menu"
-hide_streamlit_style = """
-<style>
-#MainMenu {visibility: hidden;}
-footer {visibility: hidden;}
-</style>
-
-"""
-
-st.markdown(hide_streamlit_style, unsafe_allow_html=True,)
-
-#### Configuring Sidebar/Navigation bar ####
-with st.sidebar:
-    choose = option_menu("Navigation bar", ["Dashboard", "About"],
-                         icons=['speedometer', 'question-square'],
-                         menu_icon="segmented-nav", default_index=0,
-                         styles={
-                                "container": {"padding": "5!important", "background-color": "#435870"},
-                                "icon": {"color": "orange", "font-size": "20px"}, 
-                                "nav-link": {"font-size": "20px", "text-align": "left", "margin":"0px", "--hover-color": "#b7bcc4"},
-                                "nav-link-selected": {"background-color": "#313945"},
-                                }, orientation='horizontal')
 
 
 #### Histogram function ####
@@ -291,91 +245,143 @@ def histo_chart():
     st.plotly_chart(fig, use_container_width=True)
 
 
+streamlit_style = """
+
+			<style>
+			@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap');
+
+			html, body, [class*="css"]  {
+			font-family: 'Roboto', sans-serif;
+
+			}
+			</style>
+			"""
+
+st.markdown(streamlit_style, unsafe_allow_html=True)
+
+
+# Markdown code to hide "hamburger-menu"
+hide_streamlit_style = """
+<style>
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+</style>
+
+"""
+
+st.markdown(hide_streamlit_style, unsafe_allow_html=True,)
+
+
+#### Configuring Sidebar/Navigation bar ####
+with st.sidebar:
+    choose = option_menu("Navigation bar", ["Dashboard", "About"],
+                         icons=['speedometer', 'question-square'],
+                         menu_icon="segmented-nav", default_index=0,
+                         styles={
+                                "container": {"padding": "5!important", "background-color": "#435870"},
+                                "icon": {"color": "orange", "font-size": "20px"}, 
+                                "nav-link": {"font-size": "20px", "text-align": "left", "margin":"0px", "--hover-color": "#b7bcc4"},
+                                "nav-link-selected": {"background-color": "#313945"},
+                                }, orientation='horizontal')
+
+
+
+
+
 
 #### Creating the dashboard section ####
 st.cache()
 def dashboard():
-        maincol1, maincol2, maincol3 = st.columns([1,5,1])
-        with maincol2:
-            
-            with st.container():
+    top_col1,top_col2,top_col3 = st.columns([2,2,2], gap="large")
+    
+    with top_col1:
+        with st.container():
 
-                st.markdown("""
-                <style>
-                .big-font {
-                    font-size:20px !important;
-                }
-                </style>
-                """, unsafe_allow_html=True)
+            st.markdown("""
+            <style>
+            .big-font {
+                font-size:18px !important;
+            }
+            </style>
+            """, unsafe_allow_html=True)
 
-                ## Section description ##
-                st.title("Danmarks Frie Forskningsfond")
-                st.markdown('<p class="big-font">Visualization of funding data & funding flows</p>', unsafe_allow_html=True)
+            ## Section description ##
+            st.header("Danmarks Frie Forskningsfond")
+            st.markdown('<p class="big-font">Visualization of funding data & funding flows</p>', unsafe_allow_html=True)
 
-            '---'
-
-        filter_col1, filter_col2, filter_col3 = st.columns([2,5,2])
-        with filter_col2:
-
-            with st.container():
-                   
-                
-                st.subheader("Filters")
+    with top_col2:
+        with st.container():
+            with st.expander("Open/Close Filters", expanded=True):
 
                 locations = st.selectbox("Choose an institution", institution)
 
                 theme = st.selectbox("Choose a theme", omraade)
 
                 year = st.selectbox("Year", years)
-        
-        with filter_col2:
-            with st.container():
-                map = display_map(locations, theme)
-                st_map = st_folium(map, width=1000, height=350)
 
+    with top_col3:
+        with st.container():
+            with st.expander('Need instructions?'):
+                st.write("How to use:")
 
-        "---"
-        
-        
+    ("---")
 
-        dashcol1, dashcol2 = st.columns([2,1])
+    for break_page in range(2):
+        st.write("\n")
+    
 
-        
-        with dashcol1:
-            with st.expander("Absolute Funding", expanded=True):
+    sankeycol1,sankeycol2,sankeycol3 = st.columns([1,7,1])
+
+    with sankeycol2:
+        with st.container():
+            with st.expander("Display Sankey chart", expanded=True):
+                    # NODES UDE TIL HØJRE SKAL SORTERES I FALDENDE ORDEN
+                    # plotting sankey diagram
+                    year_slider = st.slider("Year", min_value=2013, max_value=2022, value=2013)
+                    sankey = generateSankey(df, year=year_slider, category_columns = ['År','Virkemidler', 'Område'])
+                    st.plotly_chart(sankey, use_container_width=True)
+
+    for break_page in range(2):
+        st.write("\n")
+
+    barcol1, barcol2, barcol3 = st.columns([1,7,1])
+
+    with barcol2:
+        with st.container():
+            ## Display bar plots ##
+            with st.expander("Absolute Funding", expanded=False):
                 fig1 = gen_bar_plots()
                 st.plotly_chart(fig1, use_container_width=True)
 
-        with dashcol2:
-            with st.expander("Wordcloud for funding", expanded=True):
-                
-
-                fig2 = gen_wordcloud()
-                st.image(fig2.to_array())
-
-                    
+    
+    for break_page in range(2):
+        st.write("\n")
 
 
-        
+    cloudcol1, cloudcol2, cloudcol3 = st.columns([5,2,5])
+
+    with cloudcol2:
         with st.container():
-            for i in range(2):
-                "\n"
+            ## Display Wordcloud ##
+            with st.expander("Wordcloud for funding", expanded=False):
+                    fig2 = gen_wordcloud()
+                    st.image(fig2.to_array())
+
+    for break_page in range(2):
+        st.write("\n")
+
+
+    datacol1,datacol2,datacol3 = st.columns([1,7,1])
+
+    with datacol2:
+        with st.container():
             with st.expander("Expand for Data table", expanded=False):
 
                 dataset = filters(locations, theme, year)
                 st.dataframe(dataset)
+            
 
-            with st.expander("Display Sankey chart", expanded=False):
-                # NODES UDE TIL HØJRE SKAL SORTERES I FALDENDE ORDEN
-                # plotting sankey diagram
-                year_slider = st.slider("Year", min_value=2013, max_value=2022, value=2013)
-                sankey = generateSankey(df, year=year_slider, category_columns = ['År','Virkemidler', 'Område'])
-                st.plotly_chart(sankey, use_container_width=True)
-                
-            
-        
-            
-        
+    
 #### Creating the About section ####
 
 def about():
@@ -434,32 +440,16 @@ def about():
             ("Gustav C.")
             (gc_git)
             st.markdown("***")
-            
-      
-               
+
+
+
+
 #### Checking for user navigation choice and displaying context of menu ####
 if choose == "Dashboard":
     dashboard()
-    
 
 if choose == "About":
     about()
 
-    
-
-
 
     
-        
-
-    
-    
-
-
-
-
-
-
-
-
-
