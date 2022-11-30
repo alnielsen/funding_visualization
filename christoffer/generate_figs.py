@@ -146,9 +146,6 @@ The functions handles all filtering internally through the parameter settings.
 
 Examples of how to call the functions
 
-# The import might change depending on your working directory
->>> from christoffer.generate_figs import *
-
 # Data
 >>> df = pd.read_csv("../gustav/dff.csv")
 
