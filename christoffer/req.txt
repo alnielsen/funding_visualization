@@ -1,8 +1,6 @@
 pandas
 numpy
-random-word
 matplotlib
 wordcloud
-streamlit
 plotly
 networkx[all]
