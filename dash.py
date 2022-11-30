@@ -317,7 +317,7 @@ def dashboard():
 
                 theme = st.selectbox("Choose a theme", omraade)
 
-                year = st.selectbox("Year", years)
+                #year = st.selectbox("Year", years)
 
     with top_col3:
         with st.container():
@@ -334,12 +334,20 @@ def dashboard():
 
     with sankeycol2:
         with st.container():
+            
             with st.expander("Display Sankey chart", expanded=True):
-                    # NODES UDE TIL HØJRE SKAL SORTERES I FALDENDE ORDEN
-                    # plotting sankey diagram
-                    year_slider = st.slider("Year", min_value=2013, max_value=2022, value=2013)
-                    sankey = generateSankey(df, year=year_slider, category_columns = ['År','Virkemidler', 'Område'])
-                    st.plotly_chart(sankey, use_container_width=True)
+                for break_page in range(2):
+                    st.write("\n")
+                st.metric("Institution: ", value=locations)
+                # NODES UDE TIL HØJRE SKAL SORTERES I FALDENDE ORDEN
+                # plotting sankey diagram
+                
+                year_slider = st.slider("Year", min_value=2013, max_value=2022, value=2013)
+                
+                sankey = generateSankey(df.loc[(df["Institution"] == locations)], year=year_slider, category_columns = ['År','Virkemidler', 'Område'])
+                
+                
+                st.plotly_chart(sankey, use_container_width=True)
 
     for break_page in range(2):
         st.write("\n")
@@ -377,7 +385,7 @@ def dashboard():
         with st.container():
             with st.expander("Expand for Data table", expanded=False):
 
-                dataset = filters(locations, theme, year)
+                dataset = filters(locations, theme, 2022)
                 st.dataframe(dataset)
             
 
