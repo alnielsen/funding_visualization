@@ -172,7 +172,7 @@ def generateSankey(df, year, category_columns):
         else:
             temporary_df = df_sankey.groupby([category_columns[i], category_columns[i+1]]).agg({'Bevilliget beløb':'sum'}).reset_index() # loop over columns and group by column to the right, i.e. 'År' and 'Virkemidler', and then 'Virkemidler' and 'Område'
             temporary_df.columns = ['source','target','count']
-            df_link_input = df_link_input.append(temporary_df)
+            df_link_input = df_link_input.concat(temporary_df)
 
     # add index for source-target pair
     df_link_input['sourceID'] = df_link_input['source'].apply(lambda x: labels.index(x))
