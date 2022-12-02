@@ -446,7 +446,7 @@ def dashboard():
             else:
                 metricdata = df.loc[df["Institution"] == locations]
                 metricsum = metricdata["Bevilliget beløb"]
-                
+
                 st.write("Total funding 2013-2022")
                 st.subheader(f"{sum(metricsum):,} DKK")
                 for i in range(5):
@@ -457,7 +457,7 @@ def dashboard():
         stx.TabBarItemData(id="barchart", title="🟢Most used words by year", description=""),
         stx.TabBarItemData(id="bubblechart", title="🟡Most funded words by year (Bubblechart)", description=""),
         stx.TabBarItemData(id="wordcloud", title="🟣Most funded words (Wordcloud)", description="")
-        ], default="sankey")
+        ])
 
         if sub_chosen_id == 'barchart':
             with st.container():
