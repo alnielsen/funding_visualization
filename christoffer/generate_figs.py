@@ -1,18 +1,20 @@
-from text_viz import * 
+from christoffer.text_viz import * 
 import pandas as pd
+from streamlit import experimental_memo
 
 TOP_N = 50
 
 ###############
 # Word clouds #
 ###############
+@experimental_memo
 def generate_wordcloud_freqs(df):
     avg_funding, funding, freqs = generate_data(df = df,
                                                 funding_thresh_hold = 0)
     return create_wordcloud(size_dict = funding,
                             color_dict = freqs)
 
-
+@experimental_memo
 def generate_wordcloud_funding(df):
     avg_funding, funding, freqs = generate_data(df = df,
                                                 funding_thresh_hold = 0)
@@ -23,6 +25,7 @@ def generate_wordcloud_funding(df):
 #############
 # Bar plots #
 #############
+@experimental_memo
 def generate_bar_chart(df, animated = False):
     """
     Wrapper function for generating frequncy bar charts
@@ -46,6 +49,7 @@ def generate_bar_chart(df, animated = False):
 #########
 # Buble #
 #########
+@experimental_memo
 def generate_bubble_chart(df, animated = False):
     """
     Wrapper function for creating bubble charts
@@ -77,7 +81,7 @@ def generate_bubble_chart(df, animated = False):
                                 size_lab = "Word Frequency",
                                 color_lab = "Word Frequency")
 
-
+@experimental_memo
 def generate_bubble_words(df, words, animated = False):
     if animated:
         return create_bubble_plot(df = gen_chart_data(df, sort_col= "freqs", yearly = True, words = words),
@@ -108,6 +112,7 @@ def generate_bubble_words(df, words, animated = False):
 ##########
 # Graphs #
 ##########
+@experimental_memo
 def generate_graph_total(df, min_deg = 800):
     """
     Wrapper for generating a graph over total word connectivity
@@ -115,7 +120,7 @@ def generate_graph_total(df, min_deg = 800):
     G = generate_graph_data(df = df, min_deg = min_deg)
     return plot_graph(G, title = "Most Interconnected Words (All Time)")
 
-
+@experimental_memo
 def generate_graph_year(df, year, min_deg):
     """
     Wrapper for generating of graph over word connectivity in a given year
@@ -124,7 +129,7 @@ def generate_graph_year(df, year, min_deg):
     G = generate_graph_data(df = df, min_deg = min_deg)
     return plot_graph(G, title = f"Most Interconnected Words ({year})")
 
-
+@experimental_memo
 def generate_graph_words(df, words, min_deg = 0):
     """
     Wrapper for generating a graph over connectivity between chosen words
@@ -132,7 +137,7 @@ def generate_graph_words(df, words, min_deg = 0):
     G = generate_graph_data(df = df, words = words, min_deg = 0)
     return plot_graph(G, title = f"Connectivity Between {words}")
 
-
+@experimental_memo
 def generate_graph_single_word(df, word, min_deg):
     G = generate_graph_data(df = df, spec_word = word, min_deg = min_deg)
     return plot_graph(G, title = f"Connectivity For '{word}'")    

@@ -27,7 +27,7 @@ import numpy as np
 import random as rd
 
 ## CUSTOM LIBRARIES ##
-#from christoffer.text_viz import generate_data, gen_bubble_data, create_bar_plot, create_bubble_plot, create_wordcloud
+from christoffer.generate_figs import generate_wordcloud_freqs, generate_wordcloud_funding, generate_bar_chart, generate_bubble_chart, generate_bubble_words, generate_graph_total, generate_graph_year, generate_graph_words, generate_graph_single_word
 
 # Set page configuration
 st.set_page_config(page_title="Funding Visualization Project", page_icon=":moneybag:", layout="wide", initial_sidebar_state="expanded")
@@ -35,6 +35,8 @@ st.set_page_config(page_title="Funding Visualization Project", page_icon=":money
 
 ## Load dataset
 df = pd.read_csv('gustav/dff.csv', index_col=False)
+
+
 
 institution = ['All']
 
@@ -115,26 +117,9 @@ def filters(institution, tema, år):
         return data
 
 
-## Generate bar plots ##
-@st.experimental_memo
-def gen_bar_plots():
-
-    avg_funding, funding, freqs = generate_data(df = df,
-                                            funding_thresh_hold = 0)
-#############
-# Bar plots #
-#############
-    TOP_N = 30
 
 
 
-    fig_funding = create_bar_plot(data_dict = funding,
-                                color_dict = freqs,
-                                color_label = "# of Grants Containing Word",
-                                value_label = "Funding across all grants",
-                                title = f"Top {TOP_N} words with highest funding ",
-                                top_n = TOP_N)
-    return fig_funding
 
 
 ## Generate sankey chart ##
@@ -202,49 +187,6 @@ def generateSankey(df, year, category_columns):
 
 
 ## Generate wordcloud ##
-@st.experimental_memo
-def gen_wordcloud():
-    avg_funding, funding, freqs = generate_data(df = df,
-                                            funding_thresh_hold = 0)
-    
-    wc = create_wordcloud(size_dict=funding, color_dict=freqs)
-
-    return wc
-    
-
-## Generate and display map ##
-def display_map(institution, tema):
-
-    geolocator = Nominatim(user_agent="GTA Lookup")
-    geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
-    
-    location = geolocator.geocode(institution)
-
-    lat = location.latitude
-    lon = location.longitude
-
-    map_data = pd.DataFrame({'lat': [lat], 'lon': [lon]})
-    tooltip = 'Show info.'
-    
-    map = folium.Map(location=map_data, zoom_start=10, scrollWheelZoom=False, width='100%', height="100%")
-    folium.Marker(
-    [lat, lon], popup=f'{institution}', tooltip=tooltip
-    ).add_to(map)
-    return map
-
-
-#### Histogram function ####
-def histo_chart():
-    
-    fig = px.histogram(df, x="Bevilliget beløb",
-                   title='Histogram of grants',
-                   nbins=30,
-                   #histnorm='percent',
-                   color_discrete_sequence=['indianred'] # color of histogram bars
-                   )
-    fig.update_layout(bargap=0.1)
-    st.plotly_chart(fig, use_container_width=True)
-
 
 streamlit_style = """
 
@@ -309,10 +251,6 @@ with st.sidebar:
 #### Creating the dashboard section ####
 st.cache()
 def dashboard():
-    chosen_id = stx.tab_bar(data=[
-        stx.TabBarItemData(id="Investigate", title="🔍 Investigate", description=""),
-        stx.TabBarItemData(id="Sandbox", title="📊 Sandbox", description="")], default="Investigate")
-    
     with st.sidebar:
         with st.container():
             with st.expander("Filters", expanded=True):
@@ -323,6 +261,9 @@ def dashboard():
 
                 #year = st.selectbox("Year", years)
 
+                #charts = st.multiselect("Choose visualizers", ['Funding flow', 'Top funded words', 'Funding wordcloud'], default="Funding flow")
+                
+                dashtype = st.radio("Choose dashboard type", ['Investigator', 'Comparer'])
                 
         
         with st.container():
@@ -332,7 +273,7 @@ def dashboard():
         
     
     
-    if chosen_id == 'Sandbox':
+    if dashtype == 'Comparer':
         maincol1, maincol2, maincol3 = st.columns([3,1,1])        
         
 
@@ -349,6 +290,7 @@ def dashboard():
 
         sandcol1, sandcol2 = st.columns([2,2])
         with sandcol1:
+
             if 'Funding flow' in charts:
                 with st.expander(f"Funding flow for {locations}", expanded=True):
                     for pagebreak in range(2):
@@ -393,60 +335,83 @@ def dashboard():
 
         
 
-        with sandcol2:
-            with st.expander(f"Funding flow for {compare}", expanded=True):
-                for pagebreak in range(2):
-                    "\n"
+                with sandcol2:
+                    with st.expander(f"Funding flow for {compare}", expanded=True):
+                        for pagebreak in range(2):
+                            "\n"
 
-                CHOICES = {1: "Virkemidler", 2: "Område"}
+                        CHOICES = {1: "Virkemidler", 2: "Område"}
 
-                def format_func(option):
-                    return CHOICES[option]
+                        def format_func(option):
+                            return CHOICES[option]
 
-                
-                option3 = st.selectbox(f"Column 2. Data ", options=[CHOICES.get(1), CHOICES.get(2)], index=0)
-                option4 = st.selectbox(f"Column 3. Data ", options=[CHOICES.get(1), CHOICES.get(2)], index=1)
-                year_slider = st.slider(f"Year ", min_value=2013, max_value=2022, value=2013)
-                    
-                
-                
-                
-                with st.container():
-                    
-                    # NODES UDE TIL HØJRE SKAL SORTERES I FALDENDE ORDEN
-                    # plotting sankey diagram
-                    if compare == 'All':
                         
-                        if option3 == 'Virkemidler' and option4 == 'Område':
-                            sankey = generateSankey(df, year=year_slider, category_columns = ['År',option3, option4])
-                            st.plotly_chart(sankey, use_container_width=True)
-
-                        elif option3 == 'Område' and option4 == 'Virkemidler':
-                            sankey = generateSankey(df, year=year_slider, category_columns = ['År',option3, option4])
-                    
-                    
-                            st.plotly_chart(sankey, use_container_width=True)
+                        option3 = st.selectbox(f"Column 2. Data ", options=[CHOICES.get(1), CHOICES.get(2)], index=0)
+                        option4 = st.selectbox(f"Column 3. Data ", options=[CHOICES.get(1), CHOICES.get(2)], index=1)
+                        year_slider = st.slider(f"Year ", min_value=2013, max_value=2022, value=2013)
+                            
                         
-                    else:
+                        
+                        
+                        with st.container():
+                            
+                            # NODES UDE TIL HØJRE SKAL SORTERES I FALDENDE ORDEN
+                            # plotting sankey diagram
+                            if compare == 'All':
+                                
+                                if option3 == 'Virkemidler' and option4 == 'Område':
+                                    sankey = generateSankey(df, year=year_slider, category_columns = ['År',option3, option4])
+                                    st.plotly_chart(sankey, use_container_width=True)
 
-                        if option3 == 'Virkemidler' and option4 == 'Område':
-                            sankey = generateSankey(df.loc[(df["Institution"] == compare)], year=year_slider, category_columns = ['År',option1, option2])
-                            st.plotly_chart(sankey, use_container_width=True)
+                                elif option3 == 'Område' and option4 == 'Virkemidler':
+                                    sankey = generateSankey(df, year=year_slider, category_columns = ['År',option3, option4])
+                            
+                            
+                                    st.plotly_chart(sankey, use_container_width=True)
+                                
+                            else:
 
-                        elif option3 == 'Område' and option4 == 'Virkemidler':
-                            sankey = generateSankey(df.loc[(df["Institution"] == compare)], year=year_slider, category_columns = ['År',option1, option2])
-                            st.plotly_chart(sankey, use_container_width=True)
+                                if option3 == 'Virkemidler' and option4 == 'Område':
+                                    sankey = generateSankey(df.loc[(df["Institution"] == compare)], year=year_slider, category_columns = ['År',option1, option2])
+                                    st.plotly_chart(sankey, use_container_width=True)
 
-
-            if 'Top funded words' in charts:
-                with st.expander("Top funded words", expanded=True):
+                                elif option3 == 'Område' and option4 == 'Virkemidler':
+                                    sankey = generateSankey(df.loc[(df["Institution"] == compare)], year=year_slider, category_columns = ['År',option1, option2])
+                                    st.plotly_chart(sankey, use_container_width=True)
+            
+            if locations or compare == 'All':
+                with sandcol1:
+                    if 'Top funded words' in charts:
+                        with st.expander(f"Top funded words ({locations})", expanded=True):
+                            with st.container():
+                                ## Display bar chart ##
+                                total_bar_chart = generate_bar_chart(df, animated=True)
+                                st.plotly_chart(total_bar_chart, use_container_width=True)
+                    with sandcol2:
+                        with st.expander(f"Top funded words ({compare})", expanded=True):
+                            with st.container():
+                                ## Display bar chart ##
+                                total_bar_chart = generate_bar_chart(df, animated=True)
+                                st.plotly_chart(total_bar_chart, use_container_width=True)
+            
+            else:
+                with sandcol1:
+                    if 'Top funded words' in charts:
+                        with st.expander(f"Top funded words ({locations})", expanded=True):
+                            with st.container():
+                                ## Display bar chart ##
+                                total_bar_chart = generate_bar_chart(df.loc[(df["Institution"] == locations)], animated=True)
+                                st.plotly_chart(total_bar_chart, use_container_width=True)
                     
-                    with st.container():
-                        ## Display bar plots ##
-                        fig1 = gen_bar_plots()
-                        st.plotly_chart(fig1, use_container_width=True)
+                    with sandcol2:
+                        with st.expander(f"Top funded words ({compare})", expanded=True):
+                            with st.container():
+                                ## Display bar chart ##
+                                total_bar_chart = generate_bar_chart(df.loc[(df["Institution"] == compare)], animated=True)
+                                st.plotly_chart(total_bar_chart, use_container_width=True)
 
-                
+
+                    
                 
         with sandcol1:
             if 'Funding wordcloud' in charts:
@@ -462,110 +427,117 @@ def dashboard():
         for break_page in range(2):
             st.write("\n")
 
-    if chosen_id == "Investigate":
-        metriccol, metriccol2, viscol = st.columns([3,3,1])
-        with metriccol:
-
+    #### INVESTIGATOR SECTION ####
+    if dashtype == 'Investigator':
+        maincol1, maincol2, maincol3 = st.columns([3,1,1])  
+        with maincol1:
             st.write("Institution")
             st.subheader(f"{locations}")
+            for i in range(2):
+                "\n"
             
         
-        with metriccol2:
+        with maincol3:
             if locations == 'All':
                 all_sum = sum(df["Bevilliget beløb"])
                 st.write("Total funding 2013-2022")
                 st.subheader(f'{all_sum:,} DKK')
+
             else:
-                
                 metricdata = df.loc[df["Institution"] == locations]
                 metricsum = metricdata["Bevilliget beløb"]
                 
                 st.write("Total funding 2013-2022")
                 st.subheader(f"{sum(metricsum):,} DKK")
-                
-
-            
-        with viscol:
-            charts = st.multiselect("Choose visualizers", ['Funding flow', 'Top funded words', 'Funding wordcloud'], default="Funding flow")
-        if 'Funding flow' in charts:
-            with st.expander(label="Funding flow",expanded=False):
-                for pagebreak in range(2):
+                for i in range(5):
                     "\n"
-                CHOICES = {1: "Virkemidler", 2: "Område"}
+        
+        sub_chosen_id = stx.tab_bar(data=[
+        stx.TabBarItemData(id="sankey", title="🔴Funding flow", description=""),
+        stx.TabBarItemData(id="barchart", title="🟢Most used words by year", description=""),
+        stx.TabBarItemData(id="bubblechart", title="🟡Most funded words by year (Bubblechart)", description=""),
+        stx.TabBarItemData(id="wordcloud", title="🟣Most funded words (Wordcloud)", description="")
+        ], default="sankey")
 
+        if sub_chosen_id == 'barchart':
+            with st.container():
+                ## Display bar chart ##
+                total_bar_chart = generate_bar_chart(df.loc[(df["Institution"] == locations)], animated=True)
+                st.plotly_chart(total_bar_chart, use_container_width=True)
+        
+        elif sub_chosen_id == 'bubblechart':
+            with st.container():
 
-                def format_func(option):
-                    return CHOICES[option]
-
-                flowfilter1, flowfilter2 = st.columns([1,1])
-                year_slider = st.slider("Year", min_value=2013, max_value=2022, value=2013)
-                with flowfilter1:    
-                    option1 = st.selectbox("Column 2. Data", options=[CHOICES.get(1), CHOICES.get(2)], index=0)
-                with flowfilter2:  
-                    option2 = st.selectbox("Column 3. Data", options=[CHOICES.get(1), CHOICES.get(2)], index=1)
+                animated_bub = generate_bubble_chart(df, animated = True)
+                st.plotly_chart(animated_bub)
                 
-                
-                dashcol1,dashcol2,dashcol3 = st.columns([1,10,1])
-                with dashcol2:
-                    with st.container():
-                        
-                        # NODES UDE TIL HØJRE SKAL SORTERES I FALDENDE ORDEN
-                        # plotting sankey diagram
-                        if locations == 'All':
-                            
-                            if option1 == 'Virkemidler' and option2 == 'Område':
-                                sankey = generateSankey(df, year=year_slider, category_columns = ['År',option1, option2])
-                                st.plotly_chart(sankey, use_container_width=True)
+        
 
-                            elif option1 == 'Område' and option2 == 'Virkemidler':
-                                sankey = generateSankey(df, year=year_slider, category_columns = ['År',option1, option2])
-                        
-                        
-                                st.plotly_chart(sankey, use_container_width=True)
-                            
-                            
-                        else:
+        if 'sankey' in sub_chosen_id:
+            for pagebreak in range(2):
+                "\n"
+            CHOICES = {1: "Virkemidler", 2: "Område"}
 
-                            if option1 == 'Virkemidler' and option2 == 'Område':
-                                sankey = generateSankey(df.loc[(df["Institution"] == locations)], year=year_slider, category_columns = ['År',option1, option2])
-                                st.plotly_chart(sankey, use_container_width=True)
 
-                            elif option1 == 'Område' and option2 == 'Virkemidler':
-                                sankey = generateSankey(df.loc[(df["Institution"] == locations)], year=year_slider, category_columns = ['År',option1, option2])
-                                st.plotly_chart(sankey, use_container_width=True)
-                                
-                                
-                        
-                        
+            def format_func(option):
+                return CHOICES[option]
 
-            for break_page in range(2):
-                st.write("\n")
-
-        if 'Top funded words' in charts:
-            with st.expander("Top funded words", expanded=True):
-                barcol1, barcol2, barcol3 = st.columns([1,10,1])
-
-                with barcol2:
-                    with st.container():
-                        ## Display bar plots ##
-                    
-                        fig1 = gen_bar_plots()
-                        st.plotly_chart(fig1, use_container_width=True)
-
+            flowfilter1, flowfilter2 = st.columns([1,1])
+            year_slider = st.slider("Year", min_value=2013, max_value=2022, value=2013)
+            with flowfilter1:    
+                option1 = st.selectbox("Column 2. Data", options=[CHOICES.get(1), CHOICES.get(2)], index=0)
+            with flowfilter2:  
+                option2 = st.selectbox("Column 3. Data", options=[CHOICES.get(1), CHOICES.get(2)], index=1)
             
+            
+            dashcol1,dashcol2,dashcol3 = st.columns([1,10,1])
+            with dashcol2:
+                with st.container():
+                    
+                    # NODES UDE TIL HØJRE SKAL SORTERES I FALDENDE ORDEN
+                    # plotting sankey diagram
+                    if locations == 'All':
+                        
+                        if option1 == 'Virkemidler' and option2 == 'Område':
+                            sankey = generateSankey(df, year=year_slider, category_columns = ['År',option1, option2])
+                            st.plotly_chart(sankey, use_container_width=True)
+
+                        elif option1 == 'Område' and option2 == 'Virkemidler':
+                            sankey = generateSankey(df, year=year_slider, category_columns = ['År',option1, option2])
+                    
+                    
+                            st.plotly_chart(sankey, use_container_width=True)
+                        
+                        
+                    else:
+
+                        if option1 == 'Virkemidler' and option2 == 'Område':
+                            sankey = generateSankey(df.loc[(df["Institution"] == locations)], year=year_slider, category_columns = ['År',option1, option2])
+                            st.plotly_chart(sankey, use_container_width=True)
+
+                        elif option1 == 'Område' and option2 == 'Virkemidler':
+                            sankey = generateSankey(df.loc[(df["Institution"] == locations)], year=year_slider, category_columns = ['År',option1, option2])
+                            st.plotly_chart(sankey, use_container_width=True)
+                            
+                            
+                        
+                        
+
             for break_page in range(2):
                 st.write("\n")
 
-        if 'Funding wordcloud' in charts:
+
+        #WORD CLOUD #
+        elif sub_chosen_id == 'wordcloud':
             with st.expander("Funding wordcloud", expanded=True):
                 cloudcol1, cloudcol2, cloudcol3 = st.columns([5,2,5])
 
                 with cloudcol2:
                     with st.container():
                         ## Display Wordcloud ##
-                        
-                        fig2 = gen_wordcloud()
-                        st.image(fig2.to_array())
+                        wordcloud_freqs = generate_wordcloud_freqs(df)
+                        wordcloud = generate_wordcloud_funding(df.loc[(df["Institution"] == locations)])
+                        st.image(wordcloud.to_array())
 
             for break_page in range(2):
                 st.write("\n")
