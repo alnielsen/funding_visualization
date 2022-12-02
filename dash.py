@@ -34,7 +34,7 @@ st.set_page_config(page_title="Funding Visualization Project", page_icon=":money
 
 
 ## Load dataset
-df = pd.read_csv('gustav/dff.csv')
+df = pd.read_csv('gustav/dff.csv', index_col=False)
 
 institution = ['All']
 
@@ -463,10 +463,27 @@ def dashboard():
             st.write("\n")
 
     if chosen_id == "Investigate":
-        metriccol, spacecol, viscol = st.columns([3,1,1])
+        metriccol, metriccol2, viscol = st.columns([3,3,1])
         with metriccol:
 
-            st.metric("Institution: ", value=locations)
+            st.write("Institution")
+            st.subheader(f"{locations}")
+            
+        
+        with metriccol2:
+            if locations == 'All':
+                all_sum = sum(df["Bevilliget beløb"])
+                st.write("Total funding")
+                st.subheader(f'{all_sum:,} DKK')
+            else:
+                
+                metricdata = df.loc[df["Institution"] == locations]
+                metricsum = metricdata["Bevilliget beløb"]
+                
+                st.write("Total funding")
+                st.subheader(f"{sum(metricsum):,} DKK")
+                
+
             
         with viscol:
             charts = st.multiselect("Choose visualizers", ['Funding flow', 'Top funded words', 'Funding wordcloud'], default="Funding flow")
