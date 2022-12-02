@@ -473,14 +473,14 @@ def dashboard():
         with metriccol2:
             if locations == 'All':
                 all_sum = sum(df["Bevilliget beløb"])
-                st.write("Total funding")
+                st.write("Total funding 2013-2022")
                 st.subheader(f'{all_sum:,} DKK')
             else:
                 
                 metricdata = df.loc[df["Institution"] == locations]
                 metricsum = metricdata["Bevilliget beløb"]
                 
-                st.write("Total funding")
+                st.write("Total funding 2013-2022")
                 st.subheader(f"{sum(metricsum):,} DKK")
                 
 
@@ -488,7 +488,7 @@ def dashboard():
         with viscol:
             charts = st.multiselect("Choose visualizers", ['Funding flow', 'Top funded words', 'Funding wordcloud'], default="Funding flow")
         if 'Funding flow' in charts:
-            with st.expander(label="Funding flow",expanded=True):
+            with st.expander(label="Funding flow",expanded=False):
                 for pagebreak in range(2):
                     "\n"
                 CHOICES = {1: "Virkemidler", 2: "Område"}
