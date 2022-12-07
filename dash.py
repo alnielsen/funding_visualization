@@ -454,8 +454,8 @@ def dashboard():
         
         sub_chosen_id = stx.tab_bar(data=[
         stx.TabBarItemData(id="sankey", title="🔴Funding flow", description=""),
-        stx.TabBarItemData(id="barchart", title="🟢Most used words by year", description=""),
-        stx.TabBarItemData(id="bubblechart", title="🟡Most funded words by year (Bubblechart)", description=""),
+        stx.TabBarItemData(id="barchart", title="🟢Most used words", description=""),
+        stx.TabBarItemData(id="bubblechart", title="🟡Most funded words (Bubblechart)", description=""),
         stx.TabBarItemData(id="wordcloud", title="🟣Most funded words (Wordcloud)", description="")
         ])
 
