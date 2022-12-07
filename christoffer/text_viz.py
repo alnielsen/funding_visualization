@@ -285,7 +285,7 @@ def create_wordcloud(size_dict: dict,
                           collocations = bigrams, # Allow / disallow bigrams
                           contour_color = "black",
                           relative_scaling = 1,
-                          min_font_size = 10).generate_from_frequencies(size_dict)
+                          min_font_size = 20).generate_from_frequencies(size_dict)
     
     word_freqs = wordcloud.words_ if color_dict is None else color_dict
     wordcloud.recolor(color_func= _my_tf_color_func(word_freqs))
