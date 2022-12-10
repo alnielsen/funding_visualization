@@ -690,9 +690,9 @@ def plot_graph(G,
         x1, y1 = G.nodes[edge[1]]['pos']
         edge_x.append(tuple([x0, x1]))
         edge_y.append(tuple([y0, y1]))
-
+    
+    # Create edge lines
     edge_traces = []
-
     i = 0
     for ex, ey in zip(edge_x, edge_y):
         edge_color = edge_colors[i]
@@ -706,6 +706,23 @@ def plot_graph(G,
             hovertext = f"{edge_counts[i]}")
         edge_traces.append(edge_trace)
         i += 1
+
+    # Create edge labels
+    edge_labs_x = [(x[1] + x[0])//2 for x in edge_x]
+    edge_labs_y = [(y[0] + y[1])//2 for y in edge_y]
+    edge_labs_traces = go.Scatter(
+        x = edge_labs_x,
+        y = edge_labs_y,
+        mode = "text",
+        text = edge_counts,
+        textfont=dict(
+            size = 14,
+            color="rgb(0, 0 , 0)"
+        ),
+        visible = False
+    )
+
+    # Create nodes markers
     node_x = []
     node_y = []
     for node in G.nodes():
@@ -750,7 +767,8 @@ def plot_graph(G,
 
     data = [edge_trace for edge_trace in edge_traces]
     data.append(node_trace)
-    fig = go.Figure(data=data,
+    data.append(edge_labs_traces)
+    fig = go.FigureWidget(data=data,
                 layout=go.Layout(
                     title= title,
                     titlefont_size=16,
@@ -761,12 +779,26 @@ def plot_graph(G,
                     yaxis=dict(title = "Combined Funding"))
                     )
     
+    lines = fig.data[0]
+    nodes = fig.data[1]
+    edge_labs = fig.data[2]
+
+    edge_counts = [dict(type = "scatter")]
+    fig.update_layout(
+        updatemenus=[
+            dict(
+                type="buttons",
+                buttons=[
+                    dict(label = "Enable Edge Counts ",
+                    method = "restyle",
+                    args = [{"visible": [True, True, True]}]),
+                    
+                    dict(label = "Disable Edge Counts",
+                    method = "restyle",
+                    args = [{"visible": [True, False, True]}])                    
+                ])])
     return fig
 
-
-
-if __name__ == "__main__":
-    pass
 
 
 
