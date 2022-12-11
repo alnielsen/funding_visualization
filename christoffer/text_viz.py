@@ -583,7 +583,7 @@ def create_bubble_plot(df: pd.DataFrame,
     return fig
 
 
-def generate_graph_data(df: pd.DataFrame, words = None, spec_word = None,  min_deg = 750) -> nx.Graph:
+def generate_full_graph_data(df: pd.DataFrame, words = None, spec_word = None,  min_deg = 750) -> nx.Graph:
     """
     Description
     -----------
@@ -602,10 +602,12 @@ def generate_graph_data(df: pd.DataFrame, words = None, spec_word = None,  min_d
     for text in df["Titel"]:
         # Split each token/word on whitespace
         tokens = list(set([token.lower() for token in text.split()])) # Get unique tokens
+        if words is None:
+            words = tokens
         
-        if words is not None:
-            if not any(token in words for token in tokens): # If the token is not in the list of words
-                continue
+
+        if not any(token in words for token in tokens): # If the token is not in the list of words
+            continue
         
         if spec_word is not None:
             if spec_word not in tokens:
@@ -617,36 +619,32 @@ def generate_graph_data(df: pd.DataFrame, words = None, spec_word = None,  min_d
         for token in tokens:
             if token in stopwords:
                 continue 
-            elif spec_word is None and words is None:
+            else:
                 source_list.append(token)
-                targ_list.append(token)  
-            elif spec_word is not None:
-                source_list.append(token)
-                targ_list.append(token)
-            elif words is not None and token in words:
-                source_list.append(token)
-                targ_list.append(token)                               
+                targ_list.append(token)                            
 
         for s_tok in source_list:
             G.add_node(s_tok,
-                        avg_funding = avg_funding[s_tok],
-                        funding = funding[s_tok],
-                        freqs = freqs[s_tok],
-                        total_deg = 0)   
+                       avg_funding = avg_funding[s_tok],
+                       funding = funding[s_tok],
+                       freqs = freqs[s_tok],
+                       total_deg = 0)   
 
         for s_tok in source_list:
             temp_targ_list = targ_list
             temp_targ_list.remove(s_tok)
             for targ_tok in temp_targ_list:
                 G.add_edge(s_tok, targ_tok)
-
+    
+    for node, deg in G.degree():
+        G.nodes[node]["total_deg"] = deg
     for node in G.nodes():
         G.nodes[node]["pos"] = (G.nodes[node]["avg_funding"], G.nodes[node]["funding"])
     
-    node_degs = []
+    degs = []
     for node, deg in G.degree():
         G.nodes[node]["total_deg"] = deg
-        node_degs.append(deg)
+    
     
     if words is None and spec_word is None:
         remove = [node for node, degree in G.degree() if degree < min_deg]
