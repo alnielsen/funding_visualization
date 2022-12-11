@@ -460,7 +460,7 @@ def dashboard():
         ])
         investicol1,investicol2,investicol3 = st.columns([0.5,20,0.5])
 
-
+        df = df[]
         if sub_chosen_id == 'barchart':
             with investicol2:
 
