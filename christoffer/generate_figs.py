@@ -1,4 +1,4 @@
-from christoffer.text_viz import * 
+from christoffer.text_viz import *
 import pandas as pd
 from streamlit import experimental_memo
 
@@ -141,7 +141,6 @@ def generate_graph_words(df, words, min_deg = 0):
 def generate_graph_single_word(df, word, min_deg):
     G = generate_graph_data(df = df, spec_word = word, min_deg = min_deg)
     return plot_graph(G, title = f"Connectivity For '{word}'")    
-
 
 
 """
