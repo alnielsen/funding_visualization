@@ -118,10 +118,6 @@ def filters(institution, tema, år):
 
 
 
-
-
-
-
 ## Generate sankey chart ##
 @st.experimental_memo
 def generateSankey(df, year, category_columns):
@@ -454,6 +450,7 @@ def dashboard():
                 st.subheader(f"{sum(metricsum):,} DKK")
                 for i in range(5):
                     "\n"
+                
         
         sub_chosen_id = stx.tab_bar(data=[
         stx.TabBarItemData(id="sankey", title="🔴Funding flow", description=""),
@@ -462,6 +459,7 @@ def dashboard():
         stx.TabBarItemData(id="wordcloud", title="🟣Most funded words (Wordcloud)", description="")
         ])
         investicol1,investicol2,investicol3 = st.columns([0.5,20,0.5])
+
 
         if sub_chosen_id == 'barchart':
             with investicol2:
@@ -473,9 +471,8 @@ def dashboard():
         
         elif sub_chosen_id == 'bubblechart':
             with investicol2:
-
                 with st.container():
-                    animated_bub = generate_bubble_chart(df, animated = True)
+                    animated_bub = generate_bubble_chart(df.loc[(df["Institution"] == locations)], animated = True)
                     st.plotly_chart(animated_bub)
                 
         
@@ -483,6 +480,7 @@ def dashboard():
         if 'sankey' in sub_chosen_id:
             for pagebreak in range(2):
                 "\n"
+                
             CHOICES = {1: "Virkemidler", 2: "Område"}
 
 
