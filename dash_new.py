@@ -28,7 +28,7 @@ import random as rd
 
 ## CUSTOM LIBRARIES ##
 from christoffer.generate_figs import generate_wordcloud_freqs, generate_wordcloud_funding, generate_bar_chart, generate_bubble_chart, generate_bubble_words, generate_graph_total, generate_graph_year, generate_graph_words, generate_graph_single_word
-
+from gustav.gustav_figs import generateSankey
 
 # Set page configuration
 st.set_page_config(page_title="Funding Visualization Project", page_icon=":moneybag:", layout="wide", initial_sidebar_state="expanded")
@@ -86,6 +86,24 @@ for i in full_df["Bevilliget beløb"]:
         amount.append(i)
 #amount.insert(0,'All')
 
+def full_screen_fix():
+    style_fullscreen_button_css = """
+                button[title="View fullscreen"] {
+                    background-color: #004170cc;
+                    right: 0;
+                    color: white;
+                }
+
+                button[title="View fullscreen"]:hover {
+                    background-color:  #004170;
+                    color: white;
+                    }
+                """
+    st.markdown(
+        "<style>"
+        + style_fullscreen_button_css
+        + "</styles>",
+        unsafe_allow_html=True,)
 
 
 #### Configuring Sidebar/Navigation bar ####
@@ -104,6 +122,7 @@ with st.sidebar:
     </style>
     """, unsafe_allow_html=True)
    
+
     st.image("logo.png", use_column_width="auto")
     #st.markdown("<h1 style='text-align: center; color: white;'>DFF Funding Visualizer</h1>", unsafe_allow_html=True)
     choose = option_menu("", ["Dashboard", "About"],
@@ -116,89 +135,175 @@ with st.sidebar:
                                 "nav-link-selected": {"background-color": "#007aaf"},
                                 }, orientation='horizontal')
     with st.sidebar:
-        with st.container():
-            with st.expander("Filters", expanded=True):
+        
+        with st.expander("Filters", expanded=True):
 
-                locations = st.selectbox("Choose an institution", institution)
+            locations = st.selectbox("Choose an institution", institution)
 
-                #theme = st.selectbox("Choose a theme", omraade)
+            #theme = st.selectbox("Choose a theme", omraade)
 
-                #year = st.selectbox("Year", years)
+            #year = st.selectbox("Year", years)
 
-                #charts = st.multiselect("Choose visualizers", ['Funding flow', 'Top funded words', 'Funding wordcloud'], default="Funding flow")
-                
-                dashtype = st.radio("Choose dashboard type", ['Investigator', 'Comparer'])
+            #charts = st.multiselect("Choose visualizers", ['Funding flow', 'Top funded words', 'Funding wordcloud'], default="Funding flow")
+            
+            dashtype = st.radio("Choose dashboard type", ['Investigator', 'Comparer'])
 
-                if locations == "All":
-                    df = full_df
-                else:
-                    df = full_df.loc[(full_df["Institution"] == locations)]
-                
+            if locations == "All":
+                df = full_df
+            else:
+                df = full_df.loc[(full_df["Institution"] == locations)]
+            
 
-            with st.container():
-                with st.expander('Need instructions?'):
- 
-                    st.write("How to use:")
+        
+        with st.expander('Need instructions?'):
+
+            st.write("How to use:")
 #### Creating the dashboard section ####
 st.cache()
 def dashboard(df):
+        
     #### INVESTIGATOR SECTION ####
+
     if dashtype == 'Investigator':
-        maincol1, maincol2 = st.columns([2,4])  
+        maincol1, maincol2 = st.columns([2,2], gap="large")  
         with maincol1:
             st.write("Institution")
             st.subheader(f"{locations}")
-            "---"
-
+            
+        
+        with maincol2:
             year = st.select_slider("Year",
                                     options=[2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,"All Time"],
                                     value='All Time')
-            "---"                                    
-
-           
+                                          
+            
+        
             if year == "All Time":
                 df = df
             if not year == "All Time":
                 df = df.loc[(df["År"] == year)]
-
+        "---"
+        metriccol1, metriccol2, metriccol3, metriccol4, metriccol5, metriccol6 = st.columns([1,3,4,3,3,1], gap="medium")
+        
+        with metriccol2:
+            st.write("Year selected:")
+            st.subheader(year)
+        
+        with metriccol3:
             all_sum = sum(df["Bevilliget beløb"])
-            st.write(f"Total funding: {year}")
+            st.write(f"Total funding:")
             st.subheader(f'{all_sum:,} DKK')
-            "---"
-
-            num_projects = len(df)
-            st.write(f"Number of funded projects: {year}")
-            st.subheader(f'{num_projects}')
-            "---"
-
-            avg_fund = all_sum//num_projects
-            st.write(f"Average funding pr. project: {year}")
-            st.subheader(f'{avg_fund:,} DKK')
-            "---"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             
+        with metriccol4:
+            num_projects = len(df)
+            st.write(f"Number of funded projects:")
+            st.subheader(f'{num_projects}')
+            
+        with metriccol5:
+            avg_fund = all_sum//num_projects
+            st.write(f"Average funding pr. project:")
+            st.subheader(f'{avg_fund:,} DKK')
+        
+        "---"
+        
+        with st.expander("Flow of funding", expanded=True):
+            sankey = generateSankey(df, year=year, category_columns=['År','Virkemidler', 'Område'])
+            st.plotly_chart(sankey, use_container_width=True)
+            
+            
+
+        with st.expander("Most Frequently Used Words", expanded=False):
+            barchart = generate_bar_chart(df, animated = False)
+            st.plotly_chart(barchart, use_container_width=True)
+
+        with st.expander("Most Funded Words", expanded=False):
+            bubchart = generate_bubble_chart(df, animated = False)
+            st.plotly_chart(bubchart, use_container_width=True)
+
+        with st.expander("Word Connections", expanded=False):
+            
+            create_graph = st.button("Generate Network Graph")
+            if create_graph:
+                graph_chart = generate_graph_total(df, min_deg = 200)
+                st.plotly_chart(graph_chart, use_container_width=True)
+            
+        full_screen_fix()
+    
+    if dashtype == 'Comparer':
+        "hej"
+
+
+
+
+
+
+
+
+#### Creating the About section ####
+def about():
+    
+    source = 'All data is soruced from: [Danmarks Frie Forskningsfond](https://dff.dk/forskningsprojekter)'
+    
+    st.title("About the Visualizer")
+    ("How do i use the visualizer and what can it tell me?")
+
+    st.markdown("***")
+
+    st.title("About the Data")
+    
+    st.markdown(source, unsafe_allow_html=True)
+    ("Data holds information about funds, institutions, themes and more.")
+    for i in range(3):
+        st.write('\n')
+    ("You can download the data in .csv format below")
+
+    with open ("gustav/dff.csv", "rb") as file:
+        btn = st.download_button(
+            label="Download Data",
+            data=file,
+            file_name="dff_data.csv",
+            mime="text/csv"
+          )
+    "---"
+    #st.dataframe(df)
+
+    ## Add creator as expander with info with git links ##
+    with st.sidebar:
+        
+        with st.expander("Creators"):
+                  
+            # Add Link to your repo
+            aln_git = '''
+            [![Repo](https://badgen.net/badge/icon/GitHub?icon=github&label)](https://github.com/alnielsen) 
+
+            '''
+            gc_git = '''
+
+            [![Repo](https://badgen.net/badge/icon/GitHub?icon=github&label)](https://github.com/gustavchristensen1995) 
+
+            '''
+            cmk_git = '''
+            [![Repo](https://badgen.net/badge/icon/GitHub?icon=github&label)](https://github.com/Chris-Kramer) 
+
+            '''
+            
+            ("Andreas LN")
+            (aln_git)
+            st.markdown("***")
+            ("Christoffer M.K.")
+            (cmk_git)
+            st.markdown("***")
+            ("Gustav C.")
+            (gc_git)
+            st.markdown("***")
+
+
+
 if choose == "Dashboard":
     dashboard(df)
+
+if choose == "About":
+    about()
             
     
 

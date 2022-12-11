@@ -643,8 +643,10 @@ def generate_graph_data(df: pd.DataFrame, words = None, spec_word = None,  min_d
     for node in G.nodes():
         G.nodes[node]["pos"] = (G.nodes[node]["avg_funding"], G.nodes[node]["funding"])
     
+    node_degs = []
     for node, deg in G.degree():
         G.nodes[node]["total_deg"] = deg
+        node_degs.append(deg)
     
     if words is None and spec_word is None:
         remove = [node for node, degree in G.degree() if degree < min_deg]
