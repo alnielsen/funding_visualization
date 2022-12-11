@@ -288,6 +288,7 @@ def dashboard():
             st.metric(f"Institution(s)", value=f'{locations} and {compare}', )
         "---"
 
+
         sandcol1, sandcol2 = st.columns([2,2])
         with sandcol1:
 
@@ -379,7 +380,8 @@ def dashboard():
                                     sankey = generateSankey(df.loc[(df["Institution"] == compare)], year=year_slider, category_columns = ['År',option1, option2])
                                     st.plotly_chart(sankey, use_container_width=True)
             
-            if locations or compare == 'All':
+
+            if locations == 'All' or compare == 'All':
                 with sandcol1:
                     if 'Top funded words' in charts:
                         with st.expander(f"Top funded words ({locations})", expanded=True):
