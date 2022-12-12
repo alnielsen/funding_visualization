@@ -4,13 +4,19 @@ import matplotlib.pyplot as plt
 from math import inf, floor, isnan, ceil
 import plotly.express as px
 import plotly.graph_objects as go
-from typing import Literal
+from typing import Literal, Any
 import networkx as nx
-
 
 ####################
 # Helper functions #
 ####################
+def _sort_tuples(tuple_list: tuple[Any, int]):
+    """
+    Returns a sorted list of tuple, sorted by second item
+    
+    """
+    return sorted(tuple_list, key=lambda x: x[1], reverse=True) 
+
 def _make_same_keys(filtered_dict: dict,
                     non_filtered_dict: int) -> dict:
     """
@@ -583,18 +589,18 @@ def create_bubble_plot(df: pd.DataFrame,
     return fig
 
 
-def generate_full_graph_data(df: pd.DataFrame, words = None, spec_word = None,  min_deg = 750) -> nx.Graph:
+
+
+def generate_graph_data(df: pd.DataFrame, words = None, spec_word = None,  min_deg = 750) -> nx.Graph:
     """
     Description
     -----------
-
     Preconditions
     -------------
     S
     """
     avg_funding, funding, freqs = generate_data(df)
     G = nx.MultiGraph()
-    df["title_desc"] = df["Titel"]
     stopwords = get_stop_words()
 
     i = 0
@@ -602,12 +608,10 @@ def generate_full_graph_data(df: pd.DataFrame, words = None, spec_word = None,  
     for text in df["Titel"]:
         # Split each token/word on whitespace
         tokens = list(set([token.lower() for token in text.split()])) # Get unique tokens
-        if words is None:
-            words = tokens
         
-
-        if not any(token in words for token in tokens): # If the token is not in the list of words
-            continue
+        if words is not None:
+            if not any(token in words for token in tokens): # If the token is not in the list of words
+                continue
         
         if spec_word is not None:
             if spec_word not in tokens:
@@ -619,33 +623,56 @@ def generate_full_graph_data(df: pd.DataFrame, words = None, spec_word = None,  
         for token in tokens:
             if token in stopwords:
                 continue 
-            else:
+            elif spec_word is None and words is None:
                 source_list.append(token)
-                targ_list.append(token)                            
+                targ_list.append(token)  
+            elif spec_word is not None:
+                source_list.append(token)
+                targ_list.append(token)
+            elif words is not None and token in words:
+                source_list.append(token)
+                targ_list.append(token)                               
 
         for s_tok in source_list:
             G.add_node(s_tok,
-                       avg_funding = avg_funding[s_tok],
-                       funding = funding[s_tok],
-                       freqs = freqs[s_tok],
-                       total_deg = 0)   
+                        avg_funding = avg_funding[s_tok],
+                        funding = funding[s_tok],
+                        freqs = freqs[s_tok],
+                        total_deg = 0)   
 
         for s_tok in source_list:
             temp_targ_list = targ_list
             temp_targ_list.remove(s_tok)
             for targ_tok in temp_targ_list:
                 G.add_edge(s_tok, targ_tok)
-    
+
+    node_degs = [] # Node and degrees
     for node, deg in G.degree():
         G.nodes[node]["total_deg"] = deg
+        #G.nodes[node]["pos"] = (G.nodes[node]["avg_funding"], G.nodes[node]["funding"])
+        node_degs.append((node, deg))
+    node_degs = _sort_tuples(node_degs)[10:-1]
+    remove = []
+    for node_deg in node_degs:
+        node, deg = node_deg
+        if spec_word is not None:
+            if str(node) != spec_word:
+                remove.append(node)
+        elif words is not None:
+            if str(node) not in words:
+                remove.append(node)
+        else:
+            remove.append(node)
+    #remove = [node for node[0] in node_degs if str(node[0]) not in words and str(node[0]) != spec_word]
+    G.remove_nodes_from(remove)
+    
+    pos = nx.kamada_kawai_layout(G)
+    
     for node in G.nodes():
-        G.nodes[node]["pos"] = (G.nodes[node]["avg_funding"], G.nodes[node]["funding"])
-    
-    degs = []
-    for node, deg in G.degree():
-        G.nodes[node]["total_deg"] = deg
-    
-    
+        x = pos[node][0]
+        y = pos[node][1]
+        G.nodes[node]["pos"] = (x, y)
+    """
     if words is None and spec_word is None:
         remove = [node for node, degree in G.degree() if degree < min_deg]
     elif spec_word is not None:
@@ -653,14 +680,13 @@ def generate_full_graph_data(df: pd.DataFrame, words = None, spec_word = None,  
     else:
         remove = [node for node, degree in G.degree() if degree < min_deg and str(node) not in words]
     G.remove_nodes_from(remove)
-
+    """
     return G
-
 
 def plot_graph(G,
                title = "All Time",
-               max_node_size = 135,
-               min_node_size = 60):
+               max_node_size = 50,
+               min_node_size = 49):
     node_adjacencies = []
     hover_text = []
     node_index = 0
@@ -708,8 +734,8 @@ def plot_graph(G,
         i += 1
 
     # Create edge labels
-    edge_labs_x = [(x[1] + x[0])//2 for x in edge_x]
-    edge_labs_y = [(y[0] + y[1])//2 for y in edge_y]
+    edge_labs_x = [(x[1] + x[0])/2 for x in edge_x]
+    edge_labs_y = [(y[0] + y[1])/2 for y in edge_y]
     edge_labs_traces = go.Scatter(
         x = edge_labs_x,
         y = edge_labs_y,
@@ -726,8 +752,8 @@ def plot_graph(G,
     node_x = []
     node_y = []
     for node in G.nodes():
-        x = G.nodes[node]["avg_funding"]
-        y = G.nodes[node]['funding']
+        x = G.nodes[node]["pos"][0]
+        y = G.nodes[node]["pos"][1]
         node_x.append(x)
         node_y.append(y)
 
@@ -770,10 +796,12 @@ def plot_graph(G,
     data.append(edge_labs_traces)
     fig = go.FigureWidget(data=data,
                 layout=go.Layout(
+                    #height = 1000,
+                    #width = 800,
                     title= title,
                     titlefont_size=16,
                     showlegend=False,
-                    hovermode='closest',
+                    #hovermode='closest',
                     margin=dict(b=50,l=50,r=50,t=150),
                     xaxis=dict(title = "Average Funding pr. Grant"),
                     yaxis=dict(title = "Combined Funding"))
@@ -797,8 +825,32 @@ def plot_graph(G,
                     method = "restyle",
                     args = [{"visible": [True, False, True]}])                    
                 ])])
+    fig.layout.hovermode = 'closest'
+    #fig.layout.hoverdistance = -1 #ensures no "gaps" for selecting sparse dat
+    default_linewidth = 2
+    highlighted_linewidth_delta = 2
+
+    # our custom event handler
+    def update_trace(trace, points, selector):
+        # this list stores the points which were clicked on
+        # in all but one trace they are empty
+        if len(points.point_inds) == 0:
+            return
+            
+        for i,_ in enumerate(fig.data[0]):
+            fig.data[i]['line']['width'] = 178 * (i == points.trace_index) #default_linewidth + highlighted_linewidth_delta * (i == points.trace_index)
+            print(178 * (i == points.trace_index))
+
+    # we need to add the on_click event to each trace separately       
+    for i, _ in enumerate(fig.data[0]):
+        fig.data[i].on_click(update_trace)
+    #for i in range( len(fig.data) ):
+    #    fig.data[i].on_click(update_trace)
     return fig
 
 
 
 
+if __name__ == "__main__":
+    df = pd.read_csv("../gustav/dff.csv")
+    

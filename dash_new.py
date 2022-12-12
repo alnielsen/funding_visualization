@@ -224,7 +224,7 @@ def dashboard(df):
             
             create_graph = st.button("Generate Network Graph")
             if create_graph:
-                graph_chart = generate_graph_total(df, min_deg = 200)
+                graph_chart = generate_graph_total(df, min_deg = 50)
                 st.plotly_chart(graph_chart, use_container_width=True)
             
         full_screen_fix()

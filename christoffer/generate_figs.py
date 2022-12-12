@@ -1,4 +1,5 @@
 from christoffer.text_viz import *
+#from text_viz import *
 import pandas as pd
 from streamlit import experimental_memo
 
@@ -142,7 +143,11 @@ def generate_graph_single_word(df, word, min_deg):
     G = generate_graph_data(df = df, spec_word = word, min_deg = min_deg)
     return plot_graph(G, title = f"Connectivity For '{word}'")    
 
-
+if __name__ == "__main__":
+    df = pd.read_csv("../gustav/dff.csv")
+    
+    fig = generate_graph_total(df)
+    fig.write_html("test.html")
 """
 All functions returns a plotly figure.
 Moreover All functions expect to have the full data set we have scraped.
