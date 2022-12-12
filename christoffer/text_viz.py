@@ -300,10 +300,11 @@ def create_wordcloud(size_dict: dict,
 
 # ------ Bar plots ------
 def create_bar_plot(df,
-                    y_col,
+                    x_col,
                     color_col,
                     color_label = "color label",
                     x_label = "value label",
+                    top_n = 50,
                     title = "No Title") -> px.bar:
     """
     Description
@@ -334,15 +335,16 @@ def create_bar_plot(df,
     
     """
 
-    df = df.sort_values(by = y_col, ascending=False) 
+    df = df.sort_values(by = x_col, ascending=False) 
+    df = df.head(top_n)
     # I have no Idea why I have to sort it in ascending order to get the words with highest value on top
 
     fig = px.bar(df,
-                  y = y_col,
-                  x = "word",
+                  x = x_col,
+                  y = "word",
                   color = color_col,
-                  hover_data= [y_col, color_col, "funding"],
-                  labels = {y_col: x_label,
+                  hover_data= [x_col, color_col, "funding"],
+                  labels = {x_col: x_label,
                             color_col: color_label,
                             "funding": "Total Funding"},
                   color_continuous_scale = px.colors.sequential.Redor, 
@@ -506,7 +508,7 @@ def create_bubble_plot(df: pd.DataFrame,
                        y_lab: str | None = None,
                        size_lab: str | None = None,
                        color_lab: str | None = None) -> px.scatter:
-    """
+    '''
     Description
     ------------
     Creates a bubble chart displaying the words funding, frequency and average frequency over time.
@@ -545,7 +547,7 @@ def create_bubble_plot(df: pd.DataFrame,
     Return
     -------
     plotly.express.scatter
-    """
+    '''
     if x_lab == None:
         x_lab = x_col
     if y_lab == None:
@@ -591,14 +593,14 @@ def create_bubble_plot(df: pd.DataFrame,
 
 
 
-def generate_graph_data(df: pd.DataFrame, words = None, spec_word = None,  min_deg = 750) -> nx.Graph:
-    """
+def generate_graph_data(df: pd.DataFrame, words = None, spec_word = None,  top_n = 10,  min_edge_count = 3) -> nx.Graph:
+    '''
     Description
     -----------
     Preconditions
     -------------
     S
-    """
+    '''
     avg_funding, funding, freqs = generate_data(df)
     G = nx.MultiGraph()
     stopwords = get_stop_words()
@@ -649,9 +651,9 @@ def generate_graph_data(df: pd.DataFrame, words = None, spec_word = None,  min_d
     node_degs = [] # Node and degrees
     for node, deg in G.degree():
         G.nodes[node]["total_deg"] = deg
-        #G.nodes[node]["pos"] = (G.nodes[node]["avg_funding"], G.nodes[node]["funding"])
+
         node_degs.append((node, deg))
-    node_degs = _sort_tuples(node_degs)[10:-1]
+    node_degs = _sort_tuples(node_degs)[top_n - 1 : -1]
     remove = []
     for node_deg in node_degs:
         node, deg = node_deg
@@ -663,30 +665,27 @@ def generate_graph_data(df: pd.DataFrame, words = None, spec_word = None,  min_d
                 remove.append(node)
         else:
             remove.append(node)
-    #remove = [node for node[0] in node_degs if str(node[0]) not in words and str(node[0]) != spec_word]
     G.remove_nodes_from(remove)
-    
+
+
+    edge_list = [str(e) for e in G.edges()]
+    remove = []
+    for edge in G.edges():
+        if edge_list.count(str(edge)) < min_edge_count:
+            remove.append(edge)
+    G.remove_edges_from(remove)
+
     pos = nx.kamada_kawai_layout(G)
-    
     for node in G.nodes():
         x = pos[node][0]
         y = pos[node][1]
         G.nodes[node]["pos"] = (x, y)
-    """
-    if words is None and spec_word is None:
-        remove = [node for node, degree in G.degree() if degree < min_deg]
-    elif spec_word is not None:
-        remove = [node for node, degree in G.degree() if degree < min_deg and str(node) != spec_word]
-    else:
-        remove = [node for node, degree in G.degree() if degree < min_deg and str(node) not in words]
-    G.remove_nodes_from(remove)
-    """
     return G
 
 def plot_graph(G,
                title = "All Time",
-               max_node_size = 50,
-               min_node_size = 49):
+               max_node_size = 100,
+               min_node_size = 30):
     node_adjacencies = []
     hover_text = []
     node_index = 0
@@ -736,14 +735,21 @@ def plot_graph(G,
     # Create edge labels
     edge_labs_x = [(x[1] + x[0])/2 for x in edge_x]
     edge_labs_y = [(y[0] + y[1])/2 for y in edge_y]
+    edge_hover_text = [f"Node: {e} \n Count: {edge_list.count(str(e))}" for e in G.edges()]
     edge_labs_traces = go.Scatter(
         x = edge_labs_x,
         y = edge_labs_y,
-        mode = "text",
+        mode = "markers+text",
+        hoverinfo = "text",
+        hovertext = edge_hover_text,
         text = edge_counts,
         textfont=dict(
             size = 14,
             color="rgb(0, 0 , 0)"
+        ),
+        marker=dict(
+            size = 25,
+            color = "rgb(194, 210, 237)"
         ),
         visible = False
     )
@@ -790,27 +796,24 @@ def plot_graph(G,
                 f"  - <i>Marker Size:</i> Total Word Connections <br>" +
                 f"  - <i>Marker Color:</i> Word Connections In Current Graph <br>" +
                 f"  - <i>Line Size: </i> Connections Between Words")
-
+    
     data = [edge_trace for edge_trace in edge_traces]
     data.append(node_trace)
     data.append(edge_labs_traces)
     fig = go.FigureWidget(data=data,
                 layout=go.Layout(
-                    #height = 1000,
-                    #width = 800,
+                    height = 1000,
+                    width = 800,
                     title= title,
                     titlefont_size=16,
                     showlegend=False,
-                    #hovermode='closest',
+                    hovermode='closest',
                     margin=dict(b=50,l=50,r=50,t=150),
-                    xaxis=dict(title = "Average Funding pr. Grant"),
-                    yaxis=dict(title = "Combined Funding"))
+                    xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                    yaxis=dict(showgrid=False, zeroline=False, showticklabels=False))
                     )
+                    
     
-    lines = fig.data[0]
-    nodes = fig.data[1]
-    edge_labs = fig.data[2]
-
     edge_counts = [dict(type = "scatter")]
     fig.update_layout(
         updatemenus=[
@@ -825,29 +828,7 @@ def plot_graph(G,
                     method = "restyle",
                     args = [{"visible": [True, False, True]}])                    
                 ])])
-    fig.layout.hovermode = 'closest'
-    #fig.layout.hoverdistance = -1 #ensures no "gaps" for selecting sparse dat
-    default_linewidth = 2
-    highlighted_linewidth_delta = 2
-
-    # our custom event handler
-    def update_trace(trace, points, selector):
-        # this list stores the points which were clicked on
-        # in all but one trace they are empty
-        if len(points.point_inds) == 0:
-            return
-            
-        for i,_ in enumerate(fig.data[0]):
-            fig.data[i]['line']['width'] = 178 * (i == points.trace_index) #default_linewidth + highlighted_linewidth_delta * (i == points.trace_index)
-            print(178 * (i == points.trace_index))
-
-    # we need to add the on_click event to each trace separately       
-    for i, _ in enumerate(fig.data[0]):
-        fig.data[i].on_click(update_trace)
-    #for i in range( len(fig.data) ):
-    #    fig.data[i].on_click(update_trace)
     return fig
-
 
 
 

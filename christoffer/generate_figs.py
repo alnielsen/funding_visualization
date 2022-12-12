@@ -1,5 +1,5 @@
-from christoffer.text_viz import *
-#from text_viz import *
+#from christoffer.text_viz import *
+from text_viz import *
 import pandas as pd
 from streamlit import experimental_memo
 
@@ -27,22 +27,23 @@ def generate_wordcloud_funding(df):
 # Bar plots #
 #############
 @experimental_memo
-def generate_bar_chart(df, animated = False):
+def generate_bar_chart(df, top_n, animated = False):
     """
     Wrapper function for generating frequncy bar charts
     """
     if animated:
         return create_animated_bar(df,
-                                  y_col= "freqs",
+                                  x_col= "freqs",
                                   color_col = "avg_funding",
                                   color_label= "Average Funding pr. Grant",
                                   x_label = "Word Frequency",
-                                  title = "Top 50 Most Used Words By Year")
+                                  top_n = top_n,
+                                  title = "Top {top_n} Most Used Words By Year")
     else:
         return create_bar_plot(df = gen_chart_data(df, top_n = TOP_N, yearly = False, sort_col = "freqs"),
                               y_col = "freqs",
                               color_col = "avg_funding",
-                              title = f"Top {TOP_N} Most Used Words Across All Time (2013 - 2022)",
+                              title = f"Top {TOP_N} Most Used Words",
                               color_label = "Average Funding pr. Grant",
                               x_label = "Frequency")
 
@@ -51,32 +52,32 @@ def generate_bar_chart(df, animated = False):
 # Buble #
 #########
 @experimental_memo
-def generate_bubble_chart(df, animated = False):
+def generate_bubble_chart(df, top_n = 50, animated = False):
     """
     Wrapper function for creating bubble charts
     """
     if animated:
-        return create_bubble_plot(df = gen_chart_data(df, top_n= TOP_N, yearly = True, sort_col = "funding"),
+        return create_bubble_plot(df = gen_chart_data(df, top_n= top_n, yearly = True, sort_col = "funding"),
                           y_col = "funding",
                           x_col = "avg_funding",
                           size_col = "freqs",
                           color_col= "freqs",
                           y_strech = 10000000,
                           x_strech = 1000000,
-                          title=f"Top {TOP_N} Most Funded Words Each Year",
+                          title=f"Top {top_n} Most Funded Words Each Year",
                           y_lab = "Combined Funding",
                           x_lab= "Average Funding pr. Grant",
                           size_lab = "Word Frequency",
                           color_lab = "Word Frequency")
     else:
-        return create_bubble_plot(df = gen_chart_data(df, top_n= TOP_N, yearly = False, sort_col = "funding"),
+        return create_bubble_plot(df = gen_chart_data(df, top_n = top_n, yearly = False, sort_col = "funding"),
                                 y_col = "funding",
                                 x_col = "avg_funding",
                                 size_col = "freqs",
                                 color_col= "freqs",
                                 y_strech = 50000000,
                                 x_strech = 1000000,
-                                title=f"Top {TOP_N} Most Funded Words Across All Years",
+                                title=f"Top {top_n} Most Funded Words",
                                 y_lab = "Combined Funding",
                                 x_lab= "Average Funding pr. Grant",
                                 size_lab = "Word Frequency",
@@ -114,39 +115,41 @@ def generate_bubble_words(df, words, animated = False):
 # Graphs #
 ##########
 @experimental_memo
-def generate_graph_total(df, min_deg = 800):
+def generate_graph_total(df, top_n = 10):
     """
     Wrapper for generating a graph over total word connectivity
     """
-    G = generate_graph_data(df = df, min_deg = min_deg)
+    G = generate_graph_data(df = df, top_n = top_n)
     return plot_graph(G, title = "Most Interconnected Words (All Time)")
 
 @experimental_memo
-def generate_graph_year(df, year, min_deg):
+def generate_graph_year(df, year, top_n):
     """
     Wrapper for generating of graph over word connectivity in a given year
     """
     df = df[df["År"] == year]
-    G = generate_graph_data(df = df, min_deg = min_deg)
+    G = generate_graph_data(df = df, top_n = top_n)
     return plot_graph(G, title = f"Most Interconnected Words ({year})")
 
 @experimental_memo
-def generate_graph_words(df, words, min_deg = 0):
+def generate_graph_words(df, words, top_n = 0):
     """
     Wrapper for generating a graph over connectivity between chosen words
     """
-    G = generate_graph_data(df = df, words = words, min_deg = 0)
+    G = generate_graph_data(df = df, words = words, top_n = 0)
     return plot_graph(G, title = f"Connectivity Between {words}")
 
 @experimental_memo
-def generate_graph_single_word(df, word, min_deg):
-    G = generate_graph_data(df = df, spec_word = word, min_deg = min_deg)
+def generate_graph_single_word(df, word, top_n):
+    G = generate_graph_data(df = df, spec_word = word, top_n = top_n)
     return plot_graph(G, title = f"Connectivity For '{word}'")    
 
 if __name__ == "__main__":
     df = pd.read_csv("../gustav/dff.csv")
     
     fig = generate_graph_total(df)
+    #generate_graph_total(df)
+    fig.show()
     fig.write_html("test.html")
 """
 All functions returns a plotly figure.
@@ -185,17 +188,17 @@ Word cloud where size is determiend by funding
 >>> yearly_bar_chart = generate_bar_chart(df, animated = True)
 
 # Graph over total word connections
->>> graph_all_words = generate_graph_total(df, min_deg = 800)
+>>> graph_all_words = generate_graph_total(df, top_n = 800)
 
 # Graph over total word connections in a given year
->>> graph_2013 = generate_graph_year(df, year = 2013, min_deg= 80)
+>>> graph_2013 = generate_graph_year(df, year = 2013, top_n= 80)
 
 # Graph over Connections between chosen words
 >>> my_words = ["novel", "green", "system", "transition", "study", "patients", "covid"]
->>> graph_chosen_words = generate_graph_words(df, words = my_words, min_deg = 0)
+>>> graph_chosen_words = generate_graph_words(df, words = my_words, top_n = 0)
 
 # Graph over connections for a single word
 >>> my_word = "green"
->>> graph_green = generate_graph_single_word(df, word = "green", min_deg = 20) 
+>>> graph_green = generate_graph_single_word(df, word = "green", top_n = 20) 
 
 """
