@@ -1,5 +1,5 @@
-#from christoffer.text_viz import *
-from text_viz import *
+from christoffer.text_viz import *
+#from text_viz import *
 import pandas as pd
 from streamlit import experimental_memo
 
@@ -40,8 +40,8 @@ def generate_bar_chart(df, top_n, animated = False):
                                   top_n = top_n,
                                   title = "Top {top_n} Most Used Words By Year")
     else:
-        return create_bar_plot(df = gen_chart_data(df, top_n = TOP_N, yearly = False, sort_col = "freqs"),
-                              y_col = "freqs",
+        return create_bar_plot(df = gen_chart_data(df, top_n = top_n, yearly = False, sort_col = "freqs"),
+                              x_col = "freqs",
                               color_col = "avg_funding",
                               title = f"Top {TOP_N} Most Used Words",
                               color_label = "Average Funding pr. Grant",
@@ -120,36 +120,27 @@ def generate_graph_top_n(df, top_n = 10):
     Wrapper for generating a graph over total word connectivity
     """
     G = generate_graph_data_all(df = df, top_n = top_n)
-    return plot_graph(G, title = "Most Interconnected Words (All Time)")
+    return plot_graph(G, title = f"Top {top_n} Most Title Co-appearences")
 
 @experimental_memo
-def generate_graph_year(df, year, top_n):
-    """
-    Wrapper for generating of graph over word connectivity in a given year
-    """
-    df = df[df["År"] == year]
-    G = generate_graph_data(df = df, top_n = top_n)
-    return plot_graph(G, title = f"Most Interconnected Words ({year})")
-
-@experimental_memo
-def generate_graph_words(df, words, top_n = 0):
+def generate_graph_words(df, words):
     """
     Wrapper for generating a graph over connectivity between chosen words
     """
-    G = generate_graph_data(df = df, words = words, top_n = 0)
-    return plot_graph(G, title = f"Connectivity Between {words}")
+    G = generate_graph_data_words(df = df, words = words)
+    return plot_graph(G, title = f"Co-Appearences in Titles Between {words}")
 
 @experimental_memo
 def generate_graph_single_word(df, word, top_n):
-    G = generate_graph_data(df = df, spec_word = word, top_n = top_n)
+    G = generate_graph_data_word(df = df, word = word, top_n = top_n)
     return plot_graph(G, title = f"Connectivity For '{word}'")    
 
 if __name__ == "__main__":
     df = pd.read_csv("../gustav/dff.csv")
-    
-    fig = generate_graph_top_n(df)
+    words = ["test", "dafesf", "trial", "covid", "novel", "green", "patients", "t", "type"]
+    word = "novel"
+    fig = generate_graph_single_word(df, word, top_n=10)
     #generate_graph_total(df)
-    fig.show()
     fig.write_html("test.html")
 """
 All functions returns a plotly figure.
