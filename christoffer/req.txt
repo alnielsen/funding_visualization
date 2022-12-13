@@ -3,4 +3,7 @@ numpy
 matplotlib
 wordcloud
 plotly
-networkx[all]
+networkx
+scipy
+streamlit
+ipywidgets

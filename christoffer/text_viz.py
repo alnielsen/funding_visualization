@@ -590,10 +590,13 @@ def create_bubble_plot(df: pd.DataFrame,
         frame.data[0].hovertemplate = hovertemplate
     return fig
 
+def generate_graph_data_word(df: pd.DataFrame, word: str, top_n: int) -> nx.Graph:
+    pass
 
+def generate_graph_data_words(df: pd.DataFrame, words: list[str], top_n: int) -> nx.Graph:
+    pass
 
-
-def generate_graph_data(df: pd.DataFrame, words = None, spec_word = None,  top_n = 10,  min_edge_count = 3) -> nx.Graph:
+def generate_graph_data_all(df: pd.DataFrame, top_n: int = 10) -> nx.Graph:
     '''
     Description
     -----------
@@ -602,7 +605,7 @@ def generate_graph_data(df: pd.DataFrame, words = None, spec_word = None,  top_n
     S
     '''
     avg_funding, funding, freqs = generate_data(df)
-    G = nx.MultiGraph()
+    G = nx.Graph()
     stopwords = get_stop_words()
 
     i = 0
@@ -611,27 +614,12 @@ def generate_graph_data(df: pd.DataFrame, words = None, spec_word = None,  top_n
         # Split each token/word on whitespace
         tokens = list(set([token.lower() for token in text.split()])) # Get unique tokens
         
-        if words is not None:
-            if not any(token in words for token in tokens): # If the token is not in the list of words
-                continue
-        
-        if spec_word is not None:
-            if spec_word not in tokens:
-                continue
-
-        
         source_list = []
         targ_list = []
         for token in tokens:
             if token in stopwords:
-                continue 
-            elif spec_word is None and words is None:
-                source_list.append(token)
-                targ_list.append(token)  
-            elif spec_word is not None:
-                source_list.append(token)
-                targ_list.append(token)
-            elif words is not None and token in words:
+                continue
+            else:
                 source_list.append(token)
                 targ_list.append(token)                               
 
@@ -646,35 +634,26 @@ def generate_graph_data(df: pd.DataFrame, words = None, spec_word = None,  top_n
             temp_targ_list = targ_list
             temp_targ_list.remove(s_tok)
             for targ_tok in temp_targ_list:
-                G.add_edge(s_tok, targ_tok)
-
-    node_degs = [] # Node and degrees
-    for node, deg in G.degree():
-        G.nodes[node]["total_deg"] = deg
-
-        node_degs.append((node, deg))
-    node_degs = _sort_tuples(node_degs)[top_n - 1 : -1]
-    remove = []
-    for node_deg in node_degs:
-        node, deg = node_deg
-        if spec_word is not None:
-            if str(node) != spec_word:
-                remove.append(node)
-        elif words is not None:
-            if str(node) not in words:
-                remove.append(node)
-        else:
-            remove.append(node)
-    G.remove_nodes_from(remove)
+                if G.has_edge(s_tok, targ_tok):
+                    G[s_tok][targ_tok]["weight"] += 1
+                else:
+                    G.add_edge(s_tok, targ_tok, weight = 1)
 
 
-    edge_list = [str(e) for e in G.edges()]
-    remove = []
-    for edge in G.edges():
-        if edge_list.count(str(edge)) < min_edge_count:
-            remove.append(edge)
-    G.remove_edges_from(remove)
+    edge_weights = []
+    for e in G.edges():
+        s_node = e[0]
+        t_node = e[1]
+        edge_weight = G[s_node][t_node]["weight"]
+        edge_weights.append((e, edge_weight))
 
+    lowest_edge_weights = _sort_tuples(edge_weights)[(top_n + 2) - 1 : -1]
+    edges_remove = []
+    for edge, _ in lowest_edge_weights:
+        edges_remove.append(edge)
+
+    G.remove_edges_from(edges_remove)
+    G.remove_nodes_from(list(nx.isolates(G)))
     pos = nx.kamada_kawai_layout(G)
     for node in G.nodes():
         x = pos[node][0]
@@ -682,22 +661,22 @@ def generate_graph_data(df: pd.DataFrame, words = None, spec_word = None,  top_n
         G.nodes[node]["pos"] = (x, y)
     return G
 
+
 def plot_graph(G,
                title = "All Time",
                max_node_size = 100,
                min_node_size = 30):
-    node_adjacencies = []
+    
+    
+
     hover_text = []
     node_index = 0
-    for node, adjacencies in G.adjacency():
-        n_adjacencies = len(adjacencies)
-        node_adjacencies.append(n_adjacencies)
+    for node in G.nodes():
 
         avg_funding_txt = f"{G.nodes[node]['avg_funding']:,}"
         funding_txt = f"{G.nodes[node]['funding']:,}"
         hover_text.append(f"<b>Word</b>: {node} <br>" +
                         f"<b>Total Word Connections</b>: {G.nodes[node]['total_deg']}<br>"
-                        f"<b>Word Connections in current Graph</b>: {n_adjacencies}<br>" + 
                         f"<b>Frequency</b>: {G.nodes[node]['freqs']}<br>" +
                         f"<b>Average Funding</b>: {avg_funding_txt}<br>" +
                         f"<b>Total Funding</b>: {funding_txt}<br>")
@@ -705,11 +684,19 @@ def plot_graph(G,
 
     edge_x = []
     edge_y = []
-    edge_list = [str(e) for e in G.edges()]
-    edge_counts = [edge_list.count(str(e)) for e in G.edges()]
+    
+    # Create edge labels
+    edge_hover_text = []
+    weights = []
+    for e in G.edges():
+        source_node = e[0]
+        target_node = e[1]
+        weight = G[source_node][target_node]["weight"]
+        edge_hover_text.append(f"Node: {e} \n Count: {weight}")
+        weights.append(weight)
 
-    edge_colors = rescale_to_range(edge_counts, new_max = 0, new_min = 120)
-    edge_sizes = rescale_to_range(edge_counts, new_max = 8, new_min = 2)
+    edge_colors = rescale_to_range(weights, new_max = 0, new_min = 120)
+    edge_sizes = rescale_to_range(weights, new_max = 12, new_min = 2)
     for edge in G.edges():
         x0, y0 = G.nodes[edge[0]]['pos']
         x1, y1 = G.nodes[edge[1]]['pos']
@@ -725,24 +712,20 @@ def plot_graph(G,
         edge_trace = go.Scatter(
             x=ex, y=ey,
             line=dict(color = f"rgb(255, {edge_color}, {edge_color})",
-                    width = edge_size),
-            mode='lines',
-            hoverinfo = "text+x+y",
-            hovertext = f"{edge_counts[i]}")
+                    width = edge_size))
         edge_traces.append(edge_trace)
         i += 1
-
-    # Create edge labels
+    
+    # Create label traces
     edge_labs_x = [(x[1] + x[0])/2 for x in edge_x]
     edge_labs_y = [(y[0] + y[1])/2 for y in edge_y]
-    edge_hover_text = [f"Node: {e} \n Count: {edge_list.count(str(e))}" for e in G.edges()]
     edge_labs_traces = go.Scatter(
         x = edge_labs_x,
         y = edge_labs_y,
         mode = "markers+text",
         hoverinfo = "text",
         hovertext = edge_hover_text,
-        text = edge_counts,
+        text = weights,
         textfont=dict(
             size = 14,
             color="rgb(0, 0 , 0)"
@@ -775,22 +758,12 @@ def plot_graph(G,
             color="rgb(0, 0 , 0)"
         ),
         marker=dict(
-            showscale=True,
-            colorscale='YlOrRd',
-            reversescale=False,
-            color=[],
+            color="rgb(204, 20, 42)",
             size= [],
-            colorbar=dict(
-                thickness=15,
-                title='Word Connections in current Graph',
-                xanchor='left',
-                titleside='right'
-            ),
             line_width= 2))
 
     node_sizes = [val for _, val in nx.get_node_attributes(G, "total_deg").items()]
     scaled_node_sizes = rescale_to_range(node_sizes, new_max = max_node_size, new_min = min_node_size)
-    node_trace.marker.color = node_adjacencies 
     node_trace.marker.size = scaled_node_sizes
     title = str(f"<b>{title}</b> <br>" + 
                 f"  - <i>Marker Size:</i> Total Word Connections <br>" +
@@ -831,7 +804,4 @@ def plot_graph(G,
     return fig
 
 
-
-if __name__ == "__main__":
-    df = pd.read_csv("../gustav/dff.csv")
     

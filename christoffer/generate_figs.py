@@ -115,11 +115,11 @@ def generate_bubble_words(df, words, animated = False):
 # Graphs #
 ##########
 @experimental_memo
-def generate_graph_total(df, top_n = 10):
+def generate_graph_top_n(df, top_n = 10):
     """
     Wrapper for generating a graph over total word connectivity
     """
-    G = generate_graph_data(df = df, top_n = top_n)
+    G = generate_graph_data_all(df = df, top_n = top_n)
     return plot_graph(G, title = "Most Interconnected Words (All Time)")
 
 @experimental_memo
@@ -147,7 +147,7 @@ def generate_graph_single_word(df, word, top_n):
 if __name__ == "__main__":
     df = pd.read_csv("../gustav/dff.csv")
     
-    fig = generate_graph_total(df)
+    fig = generate_graph_top_n(df)
     #generate_graph_total(df)
     fig.show()
     fig.write_html("test.html")
