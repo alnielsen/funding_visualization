@@ -103,6 +103,8 @@ def rescale_to_range(number_list, new_max, new_min):
     """
     Rescales a list to a new range
     """
+    if len(number_list)== 0:
+        return [0]
     old_range = max(number_list) - min(number_list)
     new_range = (new_max - new_min)
     scaled_list = []
@@ -362,13 +364,12 @@ def create_bar_plot(df,
                             "funding": "Total Funding"},
                   color_continuous_scale = px.colors.sequential.Redor, 
                   height = 1000,
-                width = 800,
+                  width = 800,
                   title = title)
     
-    fig.update_yaxes(title='y', visible=False, showticklabels=False)
-    fig.update_layout(coloraxis_colorbar_title_text = color_label, margin=dict(b=50,l=50,r=50,t=150))
+    fig.update_yaxes(title = "")
+    fig.update_layout(coloraxis_colorbar_title_text = color_label, margin=dict(b=50,l=150,r=50,t=150))
     return fig
-
 
 def create_animated_bar(df,
                         y_col,
@@ -584,6 +585,8 @@ def create_bubble_plot(df: pd.DataFrame,
                      size_max = max_bub_size,
                      text = "word",
                      title = title,
+                     height= 1000,
+                     width = 800,
                      range_x=[min(df[x_col] - x_strech), max(df[x_col]) + x_strech],
                      range_y=[min(df[y_col]) - y_strech, max(df[y_col]) + y_strech],
                      labels={
@@ -716,6 +719,7 @@ def generate_graph_data_words(df: pd.DataFrame, words: list[str]) -> nx.Graph:
                 else:
                     G.add_edge(s_tok, targ_tok, weight = 1)
     
+
     for node, deg in G.degree():
         G.nodes[node]['total_deg'] = deg
     
@@ -861,14 +865,18 @@ def plot_graph(G,
     edge_labs_traces = go.Scatter(
         x = edge_labs_x,
         y = edge_labs_y,
-        mode = "markers",
+        mode = "markers+text",
         hoverinfo = "text",
         hovertext = edge_hover_text,
         text = weights,
         marker=dict(
-            size = 80,
+            size = 40,
             opacity = 0.0,
             line_width= 0
+        ),
+        textfont=dict(
+            size = 5,
+            color="rgb(0, 0 , 0)"
         ),
         visible = True
     )
