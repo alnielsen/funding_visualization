@@ -140,13 +140,6 @@ with st.sidebar:
         with st.expander("Filters", expanded=True):
 
             locations = st.selectbox("Choose an institution", institution)
-
-            #theme = st.selectbox("Choose a theme", omraade)
-
-            #year = st.selectbox("Year", years)
-
-            #charts = st.multiselect("Choose visualizers", ['Funding flow', 'Top funded words', 'Funding wordcloud'], default="Funding flow")
-            
             dashtype = st.radio("Choose dashboard type", ['Investigator', 'Comparer'])
 
             if locations == "All":
@@ -173,8 +166,10 @@ def dashboard(df):
             
         
         with maincol2:
+            years = df["År"]
+            years.append("All Time")
             year = st.select_slider("Year",
-                                    options=[2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,"All Time"],
+                                    options= years,
                                     value='All Time')
                                           
             
@@ -237,8 +232,6 @@ def dashboard(df):
                         options=[i for i in range(2, 81)],
                         value = 10,
                         key = "top_n_words_slider")
-            #show_graph = st.button(f"Show Top {top_n} Word Co-appearences")
-            #if show_graph:
             graph_chart = generate_graph_top_n(df, top_n)
             st.plotly_chart(graph_chart, use_container_width=True)
         "---"
@@ -292,14 +285,10 @@ def dashboard(df):
                     st.plotly_chart(graph_chart_single, use_container_width=True)   
             
             with st.expander("Explore Funding For Selected Words", expanded=False):
-                #activate_btn = st.button("Generate Bubble plot", key ="acitvate3")
-                #if activate_btn:
                 words_bub_chart = generate_bubble_words(df, words = selected_words, animated=False)
                 st.plotly_chart(words_bub_chart, use_container_width=True)
 
             with st.expander("Explore Word Frequencies"):
-                #activate_btn = st.button("Generate Bar plot", key ="acitvate4")
-                #if activate_btn:
                 barchart_words = generate_bar_chart(df, top_n = len(df) - 1, words = selected_words)
                 st.plotly_chart(barchart_words, use_container_width=True)          
         full_screen_fix()
