@@ -1,0 +1,89 @@
+\documentclass{egpubl}
+\usepackage{eurovis2023}
+\EuroVisShort  % for EuroVis additional material
+\usepackage[T1]{fontenc}
+\usepackage{dfadobe}  
+\usepackage{cite}  % comment out for biblatex with backend=biber
+\BibtexOrBiblatex
+\electronicVersion
+\PrintedOrElectronic
+\ifpdf \usepackage[pdftex]{graphicx} \pdfcompresslevel=9
+\else \usepackage[dvips]{graphicx} \fi
+\usepackage{egweblnk}
+
+
+\title[Our cool visualization project in short]%
+      {Name of our cool visualization project}
+
+\author[Name1, Name2 \& Name3]
+{\parbox{\textwidth}{\centering Name1$^{1,2}$, Name2$^{1}$ and Name3$^{1}$
+        }
+        \\
+{\parbox{\textwidth}{\centering $^1$University of Southern Denmark, Odense, Denmark\\
+         $^2$Some other nice affiliation, if there is any
+       }
+}
+}
+
+
+%-------------------------------------------------------------------------
+\begin{document}
+
+% uncomment for using teaser
+% \teaser{
+%  \includegraphics[width=\linewidth]{eg_new}
+%  \centering
+%   \caption{New EG Logo}
+% \label{fig:teaser}
+%}
+
+\maketitle
+%-------------------------------------------------------------------------
+\begin{abstract}
+
+Abstracts contain most of the following kinds of information in brief form. The body of your paper will, of course, develop and explain these ideas much more fully. As you will see in the samples below, the proportion of your abstract that you devote to each kind of information and the sequence of that information will vary, depending on the nature and genre of the paper that you are summarizing in your abstract. And in some cases, some of this information is implied, rather than stated explicitly. The Publication Manual of the American Psychological Association, which is widely used in the social sciences, gives specific guidelines for what to include in the abstract for different kinds of papers for empirical studies, literature reviews or meta-analyses, theoretical papers, methodological papers, and case studies.
+
+Here are the typical kinds of information found in most abstracts:
+(1) the context or background information for your research; the general topic under study; the specific topic of your research, (2) the central questions or statement of the problem your research addresses, (3) what’s already known about this question, what previous research has done or shown, (4) the main reason(s), the exigency, the rationale, the goals for your research. Why is it important to address these questions? Are you, for example, examining a new topic? Why is that topic worth examining? Are you filling a gap in previous research? Applying new methods to take a fresh look at existing ideas or data? Resolving a dispute within the literature in your field?, (5) your research and/or analytical methods, (6) your main findings, results, or arguments, (7) the significance or implications of your findings or arguments.
+
+Your abstract should be intelligible on its own, without a reader’s having to read your entire paper. And in an abstract, you usually do not cite references—most of your abstract will describe what you have studied in your research and what you have found and what you argue in your paper. In the body of your paper, you will cite the specific literature that informs your research.
+
+\end{abstract}  
+%-------------------------------------------------------------------------
+\section{Introduction}
+
+Introduce your project. Have a look at the examples on itslearning, which you will find via: Resources >> Materials >> Projects (last year)
+
+%-------------------------------------------------------------------------
+\section{Related Work}
+
+Describe work that relates to your project, and why your work is different from what exists. In reference to the temperature change map (Figure~\ref{fig:tchange}) there may be other projects that do visualize similar stuff.
+
+%-------------------------------------------------------------------------
+\section{Design}
+
+Describe the design of your system, maybe you can organize the section based on the What, Why and How questions... You could, e.g., also refer to the Information Seeking Mantra~\cite{InformationSeeking}, if your interface operates accordingly.
+
+%-------------------------------------------------------------------------
+\section{Results}
+
+What are the results of your project, e.g., what are the findings in Figure~\ref{fig:tchange}?
+
+\begin{figure}[tbp]
+  \includegraphics[width=\linewidth]{images/tchange.png}
+  \caption{\label{fig:tchange}%
+We can see the change of temperature by Celsius degrees for 500 weather stations across the world in the past 100 years. 
+  }
+\end{figure}
+
+%-------------------------------------------------------------------------
+\section{Conclusion}
+
+Conclude your project :)
+
+%-------------------------------------------------------------------------
+% References
+\bibliographystyle{eg-alpha-doi}
+\bibliography{references}
+
+\end{document}
