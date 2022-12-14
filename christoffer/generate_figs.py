@@ -3,8 +3,6 @@ from christoffer.text_viz import *
 import pandas as pd
 from streamlit import experimental_memo
 
-TOP_N = 50
-
 ###############
 # Word clouds #
 ###############
@@ -15,7 +13,7 @@ def generate_wordcloud_freqs(df):
     return create_wordcloud(size_dict = funding,
                             color_dict = freqs)
 
-@experimental_memo
+@experimental_memoTOP_N
 def generate_wordcloud_funding(df):
     avg_funding, funding, freqs = generate_data(df = df,
                                                 funding_thresh_hold = 0)
@@ -127,7 +125,7 @@ def generate_bubble_words(df, words, animated = False):
 @experimental_memo
 def generate_graph_top_n(df, top_n = 10):
     """
-    Wrapper for generating a graph over total word connectivity
+    Wrapper for generating a graph over total word connectivity in a dataframe
     """
     G = generate_graph_data_all(df = df, top_n = top_n)
     return plot_graph(G, title = f"Top {top_n} Most Title Co-appearences")
@@ -142,58 +140,8 @@ def generate_graph_words(df, words):
 
 @experimental_memo
 def generate_graph_single_word(df, word, top_n):
+    """
+    Wrapper for generating a graph over connectivity for a chosen word
+    """
     G = generate_graph_data_word(df = df, word = word, top_n = top_n)
     return plot_graph(G, title = f"Connectivity For '{word}'")    
-
-
-"""
-All functions returns a plotly figure.
-Moreover All functions expect to have the full data set we have scraped.
-The functions handles all filtering internally through the parameter settings.
-
-Examples of how to call the functions
-
-# Data
->>> df = pd.read_csv("../gustav/dff.csv")
-
-Word cloud where size is determiend by frequencies
->>> wordcloud_freqs = generate_wordcloud_freqs(df)
-
-Word cloud where size is determiend by funding
->>> wordcloud = generate_wordcloud_funding(df)
-
-# Buble chart with aggregated numbers
->>> bub_chart = generate_bubble_chart(df)
-
-# Bubble chart with a yearly slider
->>> animated_bub = generate_bubble_chart(df, animated = True)
-
-# Bubble chart over some chosen words
->>> my_words = ["projekt", "undersøge", "behandling", "udvikling", "data", "bedre", "første", "tool-box", "twenty", "north"]
->>> word_bub = generate_bubble_words(df, words = my_words)
-
-# Bubble chart over same chosen words by year
->>> my_words = ["projekt", "undersøge", "behandling", "udvikling", "data", "bedre", "første", "tool-box", "twenty", "north"]
->>> word_bub_animated = generate_bubble_words(df, words = my_words, animated = True)
-
-# Bar chart over total frequencies
->>> total_bar_chart = generate_bar_chart(df)
-
-# Bar chart with frequencies by year
->>> yearly_bar_chart = generate_bar_chart(df, animated = True)
-
-# Graph over total word connections
->>> graph_all_words = generate_graph_total(df, top_n = 800)
-
-# Graph over total word connections in a given year
->>> graph_2013 = generate_graph_year(df, year = 2013, top_n= 80)
-
-# Graph over Connections between chosen words
->>> my_words = ["novel", "green", "system", "transition", "study", "patients", "covid"]
->>> graph_chosen_words = generate_graph_words(df, words = my_words, top_n = 0)
-
-# Graph over connections for a single word
->>> my_word = "green"
->>> graph_green = generate_graph_single_word(df, word = "green", top_n = 20) 
-
-"""
