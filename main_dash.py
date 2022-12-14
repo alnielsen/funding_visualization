@@ -27,11 +27,12 @@ import numpy as np
 import random as rd
 
 ## CUSTOM LIBRARIES ##
-from christoffer.generate_figs import generate_wordcloud_freqs, generate_wordcloud_funding, generate_bar_chart, generate_bubble_chart, generate_bubble_words, generate_graph_total, generate_graph_year, generate_graph_words, generate_graph_single_word
+from christoffer.generate_figs import generate_wordcloud_freqs, generate_wordcloud_funding, generate_bar_chart, generate_bubble_chart, generate_bubble_words, generate_graph_top_n, generate_graph_words, generate_graph_single_word
+from christoffer.text_viz import get_all_words, generate_data
 from gustav.gustav_figs import generateSankey
 
 # Set page configuration
-st.set_page_config(page_title="Funding Visualization Project", page_icon=":moneybag:", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="Funding Visualization Project", page_icon=":mortar_board:", layout="wide", initial_sidebar_state="expanded")
 
 
 ## Styling
@@ -230,33 +231,101 @@ def dashboard(df, df2):
             st.subheader(f'{num_projects}')
             
         with metriccol5:
-            avg_fund = all_sum//num_projects
+            try:
+                avg_fund = all_sum//num_projects
+            except ZeroDivisionError:
+                avg_fund = 0    
             st.write(f"Average funding pr. project:")
             st.subheader(f'{avg_fund:,} DKK')
         
         "---"
         
-        with st.expander("Flow of funding", expanded=True):
+        with st.expander("Flow of funding", expanded=False):
             sankey = generateSankey(df, year=year, category_columns=['År','Virkemidler', 'Område'])
             st.plotly_chart(sankey, use_container_width=True)
             
-            
-
         with st.expander("Most Frequently Used Words", expanded=False):
-            barchart = generate_bar_chart(df, animated = False)
+            top_n = st.select_slider("Top Most used words",
+                        options=[i for i in range(10, 81)],
+                        value = 50,
+                        label_visibility= "hidden",
+                        key = "top_n_bar_slider")
+            barchart = generate_bar_chart(df, animated = False, top_n = top_n)
             st.plotly_chart(barchart, use_container_width=True)
 
         with st.expander("Most Funded Words", expanded=False):
-            bubchart = generate_bubble_chart(df, animated = False)
+            top_n = st.select_slider("Top Most Funded Words",
+                        options=[i for i in range(10, 81)],
+                        value = 50,
+                        label_visibility= "hidden",
+                        key = "top_n_bub_slider")
+            bubchart = generate_bubble_chart(df, top_n = top_n, animated = False)
             st.plotly_chart(bubchart, use_container_width=True)
 
         with st.expander("Word Connections", expanded=False):
+            top_n = st.select_slider("Top word connections: ",
+                        options=[i for i in range(2, 81)],
+                        value = 10,
+                        key = "top_n_words_slider")
+            graph_chart = generate_graph_top_n(df, top_n)
+            st.plotly_chart(graph_chart, use_container_width=True)
+        "---"
+        if not len(df) == 0: 
+            header_col1, header_col2 = st.columns([1, 2], gap="large")  
+            st.cache()
+            avg_funding, funding, freqs =  generate_data(df = df,
+                                                        funding_thresh_hold = 0)
+            st.cache()
+            all_words = get_all_words(df)
+            with header_col1:
+                st.subheader(f"Word Explorer")
+            with header_col2:
+                selected_words = st.multiselect("Select Word:", options = all_words, default = all_words[0], )
             
-            create_graph = st.button("Generate Network Graph")
-            if create_graph:
-                graph_chart = generate_graph_total(df, min_deg = 200)
-                st.plotly_chart(graph_chart, use_container_width=True)
+            "---"
+            word_col1, word_col2, word_col3, word_col4, word_col5, word_col7 = st.columns([1,3,3,3,3,1], gap="medium")
+            with word_col2:
+                st.write("**Selected Words:**")
+                for word in selected_words:
+                    st.write(f"{word}")
+
+            with word_col3:
+                st.write("**Combined Funding:**")
+                for word in selected_words:
+                    st.write(f"{funding[word]:,} DKK")
+            with word_col4:
+                st.write("**Average Funding:**")
+                for word in selected_words:
+                    st.write(f"{avg_funding[word]:,} DKK")   
+            with word_col5:
+                st.write("**Times used in Title:**")
+                for word in selected_words:
+                    st.write(f"{freqs[word]}")    
+            "---"
+            with st.expander("Explore Connectivity Between selected words", expanded=False):
+                
+                activate_btn = st.button("Generate Connectivty Graph", key="activate1")
+                if activate_btn:
+                    graph_chart = generate_graph_words(df, words= selected_words)
+                    st.plotly_chart(graph_chart, use_container_width=True)
+                
+            with st.expander("Explore Connectivity For Selected Word", expanded=False):      
+                select_word = st.selectbox("Choose Word:", options = selected_words)
+                top_n_investigation = st.select_slider("Top word connections: ",
+                            options=[i for i in range(2, 81)],
+                            value = 10,
+                            key = "word_investigation_slider")
+                if select_word is not None:
+                    graph_chart_single = generate_graph_single_word(df, word=select_word, top_n = top_n_investigation)
+                    st.plotly_chart(graph_chart_single, use_container_width=True)   
             
+            with st.expander("Explore Funding For Selected Words", expanded=False):
+                words_bub_chart = generate_bubble_words(df, words = selected_words, animated=False)
+                st.plotly_chart(words_bub_chart, use_container_width=True)
+
+            with st.expander("Explore Word Frequencies"):
+                barchart_words = generate_bar_chart(df, top_n = -1, words = selected_words)
+                st.plotly_chart(barchart_words, use_container_width=True)          
         full_screen_fix()
     
     if dashtype == 'Compare':
