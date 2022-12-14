@@ -47,7 +47,6 @@ def generate_bar_chart(df, top_n = None, animated = False, words = None):
                               color_label = "Average Funding pr. Grant",
                               x_label = "Frequency")
     elif words is not None:
-        
         return create_bar_plot(df = gen_chart_data(df, top_n = -1, yearly = False, sort_col = "funding", words=words),
                                x_col = "freqs",
                                color_col = "avg_funding",
@@ -59,19 +58,22 @@ def generate_bar_chart(df, top_n = None, animated = False, words = None):
 #########
 # Buble #
 #########
+X_STRETCH = 0.1
+Y_STRETCH = 0.1
 @experimental_memo
 def generate_bubble_chart(df, top_n = 50, animated = False):
     """
     Wrapper function for creating bubble charts
     """
+
     if animated:
         return create_bubble_plot(df = gen_chart_data(df, top_n= top_n, yearly = True, sort_col = "funding"),
                           y_col = "funding",
                           x_col = "avg_funding",
                           size_col = "freqs",
                           color_col= "freqs",
-                          y_strech = 10000000,
-                          x_strech = 1000000,
+                          y_strech = Y_STRETCH,
+                          x_strech = X_STRETCH,
                           title=f"Top {top_n} Most Funded Words Each Year",
                           y_lab = "Combined Funding",
                           x_lab= "Average Funding pr. Grant",
@@ -83,8 +85,8 @@ def generate_bubble_chart(df, top_n = 50, animated = False):
                                 x_col = "avg_funding",
                                 size_col = "freqs",
                                 color_col= "freqs",
-                                y_strech = 50000000,
-                                x_strech = 1000000,
+                                y_strech = Y_STRETCH,
+                                x_strech = X_STRETCH,
                                 title=f"Top {top_n} Most Funded Words",
                                 y_lab = "Combined Funding",
                                 x_lab= "Average Funding pr. Grant",
@@ -99,8 +101,8 @@ def generate_bubble_words(df, words, animated = False):
                                 x_col = "avg_funding",
                                 size_col = "freqs",
                                 color_col= "freqs",
-                                y_strech = 5000000,
-                                x_strech = 1000000,
+                                y_strech = Y_STRETCH,
+                                x_strech = X_STRETCH,
                                 title=f"Funding for Chosen words Each Year",
                                 y_lab = "Number of Grants Containing Word",
                                 x_lab= "Average funding pr. Grant",
@@ -112,8 +114,8 @@ def generate_bubble_words(df, words, animated = False):
                                 x_col = "avg_funding",
                                 size_col = "freqs",
                                 color_col= "freqs",
-                                y_strech = 10,
-                                x_strech = 1000000,
+                                y_strech = Y_STRETCH,
+                                x_strech = X_STRETCH,
                                 title=f"Funding for Chosen words",
                                 y_lab = "Combined Funding",
                                 x_lab= "Average funding pr. Grant",

@@ -579,8 +579,12 @@ def create_bubble_plot(df: pd.DataFrame,
         color_lab = color_col
     
     try:
-        x_range = [min(df[x_col] - x_strech), max(df[x_col]) + x_strech]
-        y_range = [min(df[y_col]) - y_strech, max(df[y_col]) + y_strech]
+        max_x = max(df[x_col]) + (max(df[x_col]) * x_strech)
+        min_x = min(df[x_col]) - (max(df[x_col]) * x_strech)
+        max_y = max(df[y_col]) + (max(df[y_col]) * y_strech)
+        min_y = min(df[y_col]) - (max(df[y_col]) * y_strech)
+        x_range = [min_x, max_x]
+        y_range = [min_y, max_y]
     except ValueError:
         x_range = 0
         y_range = 0
@@ -611,6 +615,7 @@ def create_bubble_plot(df: pd.DataFrame,
     fig.update_layout(coloraxis_colorbar_title_text = color_lab)
     
     hovertemplate="<br>".join([
+        f"Word: " + "%{text}",
         f"{x_lab}: " + "%{x:,.0f}",
         f"{y_lab}: " + "%{y}",
         f"{size_lab}: " + "%{marker.size:,.0f}"])
@@ -882,7 +887,7 @@ def plot_graph(G,
             line_width= 0
         ),
         textfont=dict(
-            size = 8,
+            size = 10,
             color="rgb(0, 0 , 0)"
         ),
         visible = True
