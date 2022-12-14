@@ -166,8 +166,9 @@ def dashboard(df):
             
         
         with maincol2:
-            years = list(df["År"])
-            years.append("All Time")
+            #years = df["År"]
+            #years.append("All Time")
+            years = [2015, 2016, 2017, 2018, 2019, 2020, 2022, "All Time"]
             year = st.select_slider("Year",
                                     options= years,
                                     value='All Time')
