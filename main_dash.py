@@ -32,7 +32,7 @@ from christoffer.text_viz import get_all_words, generate_data
 from gustav.gustav_figs import generateSankey
 
 # Set page configuration
-st.set_page_config(page_title="Funding Visualization Project", page_icon=":moneybag:", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="Funding Visualization Project", page_icon=":mortar_board:", layout="wide", initial_sidebar_state="expanded")
 
 
 ## Styling
@@ -135,17 +135,54 @@ with st.sidebar:
                                 "nav-link": {"font-size": "13px", "text-align": "left", "margin":"5px", "--hover-color": "#eb6d7f"},
                                 "nav-link-selected": {"background-color": "#007aaf"},
                                 }, orientation='horizontal')
+    
+    
     with st.sidebar:
         
         with st.expander("Filters", expanded=True):
 
-            locations = st.selectbox("Choose an institution", institution)
-            dashtype = st.radio("Choose dashboard type", ['Investigator', 'Comparer'])
+            dashtype = st.radio("Choose dashboard type", ['Investigate', 'Compare'])
+            if dashtype == 'Investigate':
 
-            if locations == "All":
-                df = full_df
-            else:
-                df = full_df.loc[(full_df["Institution"] == locations)]
+                locations = st.selectbox("Choose an institution", institution)
+
+                #theme = st.selectbox("Choose a theme", omraade)
+
+                #year = st.selectbox("Year", years)
+
+                #charts = st.multiselect("Choose visualizers", ['Funding flow', 'Top funded words', 'Funding wordcloud'], default="Funding flow")
+                
+                
+
+                if locations == "All":
+                    df = full_df
+                else:
+                    df = full_df.loc[(full_df["Institution"] == locations)]
+
+                df2 = full_df
+            
+            if dashtype == 'Compare':
+                locations = st.selectbox("Choose an institution", institution)
+                comp_loc = st.selectbox("Institution to compare", institution)
+
+                #theme = st.selectbox("Choose a theme", omraade)
+
+                #year = st.selectbox("Year", years)
+
+                #charts = st.multiselect("Choose visualizers", ['Funding flow', 'Top funded words', 'Funding wordcloud'], default="Funding flow")
+                
+                
+
+                if locations == "All":
+                    df = full_df
+                else:
+                    df = full_df.loc[(full_df["Institution"] == locations)]
+
+                if comp_loc == "All":
+                    df2 = full_df
+                else:
+                    df2 = full_df.loc[(full_df["Institution"] == comp_loc)]
+
             
 
         
@@ -154,11 +191,11 @@ with st.sidebar:
             st.write("How to use:")
 #### Creating the dashboard section ####
 st.cache()
-def dashboard(df):
-        
-    #### INVESTIGATOR SECTION ####
+def dashboard(df, df2):
+    
+    #### Investigate SECTION ####
 
-    if dashtype == 'Investigator':
+    if dashtype == 'Investigate':
         maincol1, maincol2 = st.columns([2,2], gap="large")  
         with maincol1:
             st.write("Institution")
@@ -166,11 +203,8 @@ def dashboard(df):
             
         
         with maincol2:
-            #years = df["År"]
-            #years.append("All Time")
-            years = [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2022, "All Time"]
             year = st.select_slider("Year",
-                                    options= years,
+                                    options=[2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,"All Time"],
                                     value='All Time')
                                           
             
@@ -294,7 +328,78 @@ def dashboard(df):
                 st.plotly_chart(barchart_words, use_container_width=True)          
         full_screen_fix()
     
-    if dashtype == 'Comparer':
+    if dashtype == 'Compare':
+        
+        maincol1, maincol2 = st.columns([3,3], gap="large")  
+        with maincol1:
+            st.write("Institutions")
+            st.subheader(f"{locations} & {comp_loc}")
+        
+            for linebreak in range(2):
+                "\n"
+        
+        
+        with maincol2:
+            year = st.select_slider("Year",
+                                    options=[2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,"All Time"],
+                                    value='All Time')
+                                          
+            
+        
+            if year == "All Time":
+                df = df
+                df2 = df2
+            if not year == "All Time":
+                df = df.loc[(df["År"] == year)]
+                df2 = df2.loc[(df2["År"] == year)]
+    
+        "---"
+        expcol1, expcol2 = st.columns([2,2])
+        
+        with expcol1:
+            with st.expander(f'{locations}', expanded=True):
+                
+                st.write("Year selected:")
+                st.subheader(year)
+                
+                all_sum1 = sum(df["Bevilliget beløb"])
+                st.write(f"Total funding:")
+                
+                st.subheader(f'{all_sum1:,} DKK')
+            
+                num_projects = len(df)
+                st.write(f"Number of funded projects:")
+                st.subheader(f'{num_projects}')
+            
+        
+                avg_fund = all_sum1//num_projects
+                st.write(f"Average funding pr. project:")
+                st.subheader(f'{avg_fund:,} DKK')
+
+        with expcol2:
+            with st.expander(f'{comp_loc}', expanded=True):
+                
+                st.write("Year selected:")
+                st.subheader(year)
+                
+                all_sum2 = sum(df2["Bevilliget beløb"])
+                st.write(f"Total funding:")
+                st.subheader(f'{all_sum2:,} DKK')
+            
+                num_projects2 = len(df2)
+                st.write(f"Number of funded projects:")
+                st.subheader(f'{num_projects2}')
+            
+        
+                avg_fund2 = all_sum2//num_projects2
+                st.write(f"Average funding pr. project:")
+                st.subheader(f'{avg_fund2:,} DKK')
+        
+                
+
+
+   
+
         
 
 
@@ -367,7 +472,7 @@ def about():
 
 
 if choose == "Dashboard":
-    dashboard(df)
+    dashboard(df, df2)
 
 if choose == "About":
     about()
