@@ -290,7 +290,7 @@ def dashboard(df):
                 st.plotly_chart(words_bub_chart, use_container_width=True)
 
             with st.expander("Explore Word Frequencies"):
-                barchart_words = generate_bar_chart(df, top_n = len(df) - 1, words = selected_words)
+                barchart_words = generate_bar_chart(df, top_n = -1, words = selected_words)
                 st.plotly_chart(barchart_words, use_container_width=True)          
         full_screen_fix()
     

@@ -27,7 +27,7 @@ def generate_wordcloud_funding(df):
 # Bar plots #
 #############
 @experimental_memo
-def generate_bar_chart(df, top_n, animated = False, words = None):
+def generate_bar_chart(df, top_n = None, animated = False, words = None):
     """
     Wrapper function for generating frequncy bar charts
     """
@@ -47,7 +47,8 @@ def generate_bar_chart(df, top_n, animated = False, words = None):
                               color_label = "Average Funding pr. Grant",
                               x_label = "Frequency")
     elif words is not None:
-        return create_bar_plot(df = gen_chart_data(df, top_n = top_n, yearly = False, sort_col = "funding", words=words),
+        
+        return create_bar_plot(df = gen_chart_data(df, top_n = -1, yearly = False, sort_col = "funding", words=words),
                                x_col = "freqs",
                                color_col = "avg_funding",
                                title = f"Frequencies for Words: {words}",
