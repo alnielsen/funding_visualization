@@ -43,7 +43,7 @@ def generate_bar_chart(df, top_n, animated = False, words = None):
         return create_bar_plot(df = gen_chart_data(df, top_n = top_n, yearly = False, sort_col = "funding"),
                               x_col = "freqs",
                               color_col = "avg_funding",
-                              title = f"Top {TOP_N} Most Used Words",
+                              title = f"Top {top_n} Most Used Words",
                               color_label = "Average Funding pr. Grant",
                               x_label = "Frequency")
     elif words is not None:

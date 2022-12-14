@@ -6,7 +6,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 from typing import Literal, Any
 import networkx as nx
-
 ####################
 # Helper functions #
 ####################
@@ -164,15 +163,28 @@ def get_stop_words(stopword_path: str = "stopord.txt") -> list[str]:
 ####################
 # Public functions #
 ####################
+def tokenize_and_stem(text: str) -> list[str]:
+    """
+    Get uniques token word stems from text string
+    """
+    stopwords = get_stop_words()
+    tokens = set()
+    replace_chars = "; ,.:;*'_#!?´-()^"
+    for char in replace_chars:
+        text = text.replace(char, " ")
+    for token in text.split():
+        token = token.lower()
+        if token not in stopwords:
+            tokens.add(token)
+    return list(tokens)
+
 
 def get_all_words(df: pd.DataFrame) -> list:
-    stopwords = get_stop_words()
-    i = 0
     word_list = []
     # Create Graph
     for text in df["Titel"]:
         # Split each token/word on whitespace
-        tokens = list(set([token.lower() for token in text.split() if token.lower() not in stopwords])) # Get unique tokens
+        tokens = tokenize_and_stem(text)
         word_list += tokens
     
     return list(set(word_list))
@@ -189,7 +201,6 @@ def dict_to_df(data_dict: dict) -> pd.DataFrame:
     data_dict (dict): a dictionary where the keys are word and they have and associated value
     """
     return pd.DataFrame({"word": data_dict.keys(), "value": data_dict.values()})
-
 
 
 def generate_data(df: pd.DataFrame,
@@ -216,25 +227,18 @@ def generate_data(df: pd.DataFrame,
     
     freqs = {} # Absolute frequencies
     funding = {} # Absolute funding recieved
-    stopwords = get_stop_words()
-    
+
     # Create dict of absolute freqs and funding
     for text, amount in zip(df["Titel"], df["Bevilliget beløb"]):
-        # Split each token/word on whitespace
-        tokens = list(set([token.lower() for token in text.split()])) # Get unique tokens
-        # COunt unique tokens in each grant application
+        tokens = tokenize_and_stem(text)
+        # Count unique tokens in each grant application
         for token in tokens:
-            token = token.lower()
-            if token in stopwords:
-                continue
-                
+            if not token in freqs:
+                freqs[token] = 1
+                funding[token] = amount
             else:
-                if not token in freqs:
-                    freqs[token] = 1
-                    funding[token] = amount
-                else:
-                    freqs[token] += 1
-                    funding[token] += amount
+                freqs[token] += 1
+                funding[token] += amount
 
     funding = _filter_dict(funding, funding_thresh_hold)
     freqs = _make_same_keys(funding, freqs)
@@ -573,6 +577,13 @@ def create_bubble_plot(df: pd.DataFrame,
         size_lab = size_col
     if color_lab == None:
         color_lab = color_col
+    
+    try:
+        x_range = [min(df[x_col] - x_strech), max(df[x_col]) + x_strech]
+        y_range = [min(df[y_col]) - y_strech, max(df[y_col]) + y_strech]
+    except ValueError:
+        x_range = 0
+        y_range = 0
     fig = px.scatter(df,
                      x=x_col,
                      y=y_col,
@@ -587,8 +598,8 @@ def create_bubble_plot(df: pd.DataFrame,
                      title = title,
                      height= 1000,
                      width = 800,
-                     range_x=[min(df[x_col] - x_strech), max(df[x_col]) + x_strech],
-                     range_y=[min(df[y_col]) - y_strech, max(df[y_col]) + y_strech],
+                     range_x= x_range,
+                     range_y= y_range,
                      labels={
                      x_col: x_lab,
                      y_col: y_lab,
@@ -613,13 +624,12 @@ def generate_graph_data_word(df: pd.DataFrame, word: str, top_n: int) -> nx.Grap
     
     avg_funding, funding, freqs = generate_data(df)
     G = nx.Graph()
-    stopwords = get_stop_words()
 
     i = 0
     # Create Graph
     for text in df["Titel"]:
         # Split each token/word on whitespace
-        tokens = list(set([token.lower() for token in text.split() if token.lower() not in stopwords])) # Get unique tokens
+        tokens = tokenize_and_stem(text)
         
         if word not in tokens:
             continue
@@ -630,7 +640,6 @@ def generate_graph_data_word(df: pd.DataFrame, word: str, top_n: int) -> nx.Grap
                    freqs = freqs[word],
                    total_deg = 0)    
               
-        source_list = []
         targ_list = []
         for token in tokens:
             if not word == token:
@@ -678,13 +687,12 @@ def generate_graph_data_words(df: pd.DataFrame, words: list[str]) -> nx.Graph:
     
     avg_funding, funding, freqs = generate_data(df)
     G = nx.Graph()
-    stopwords = get_stop_words()
 
     i = 0
     # Create Graph
     for text in df["Titel"]:
         # Split each token/word on whitespace
-        tokens = list(set([token.lower() for token in text.split() if token.lower() not in stopwords])) # Get unique tokens
+        tokens = tokenize_and_stem(text)
 
         search_words = []
         for token in tokens:
@@ -748,13 +756,12 @@ def generate_graph_data_all(df: pd.DataFrame, top_n: int = 10) -> nx.Graph:
     '''
     avg_funding, funding, freqs = generate_data(df)
     G = nx.Graph()
-    stopwords = get_stop_words()
 
     i = 0
     # Create Graph
     for text in df["Titel"]:
         # Split each token/word on whitespace
-        tokens = list(set([token.lower() for token in text.split() if token.lower() not in stopwords])) # Get unique tokens
+        tokens = tokenize_and_stem(text)
         
         source_list = []
         targ_list = []
@@ -875,7 +882,7 @@ def plot_graph(G,
             line_width= 0
         ),
         textfont=dict(
-            size = 5,
+            size = 8,
             color="rgb(0, 0 , 0)"
         ),
         visible = True
