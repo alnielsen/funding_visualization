@@ -13,7 +13,7 @@ def generate_wordcloud_freqs(df):
     return create_wordcloud(size_dict = funding,
                             color_dict = freqs)
 
-@experimental_memoTOP_N
+@experimental_memo
 def generate_wordcloud_funding(df):
     avg_funding, funding, freqs = generate_data(df = df,
                                                 funding_thresh_hold = 0)
