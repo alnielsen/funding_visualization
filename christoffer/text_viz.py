@@ -6,15 +6,19 @@ import plotly.express as px
 import plotly.graph_objects as go
 from typing import Literal, Any
 import networkx as nx
+
+
 ####################
 # Helper functions #
 ####################
+
 def _sort_tuples(tuple_list: tuple[Any, int]):
     """
     Returns a sorted list of tuple, sorted by second item
     
     """
     return sorted(tuple_list, key=lambda x: x[1], reverse=True) 
+
 
 def _make_same_keys(filtered_dict: dict,
                     non_filtered_dict: int) -> dict:
@@ -72,8 +76,13 @@ def scale_word_dict(word_dict: dict) -> dict:
         scaled_dict[key] = _color_scaling(z)
     return scaled_dict
 
+
 def _cal_percentile(number_list, percentile):
+    """
+    Helper function to 'rescale_to_percentiles' Returns the percentiles for a list of numbers
+    """
     return (max(number_list) * percentile)
+
 
 def rescale_to_percentiles(number_list,
                            lowest: int = 2,
@@ -81,7 +90,7 @@ def rescale_to_percentiles(number_list,
                            second_highest: int = 6,
                            highest: int = 8):
     """
-    Takes a list and returns a rescaled the 4 percentiles
+    Takes a list and returns a list where the values are rescaled in 4 percentiles
     """ 
     lowest_25 = _cal_percentile(number_list, 0.25)
     lowest_50 = _cal_percentile(number_list, 0.50)
@@ -97,6 +106,7 @@ def rescale_to_percentiles(number_list,
         else:
             rescaled_list.append(highest)
     return rescaled_list
+
 
 def rescale_to_range(number_list, new_max, new_min):
     """
@@ -158,8 +168,6 @@ def get_stop_words(stopword_path: str = "stopord.txt") -> list[str]:
     
     return stopwords
     
-
-
 ####################
 # Public functions #
 ####################
@@ -180,6 +188,9 @@ def tokenize_and_stem(text: str) -> list[str]:
 
 
 def get_all_words(df: pd.DataFrame) -> list:
+    """
+    Returns a list of all words in the dataframe
+    """
     word_list = []
     # Create Graph
     for text in df["Titel"]:
@@ -380,14 +391,15 @@ def create_animated_bar(df,
                         color_col,
                         color_label = "color label",
                         x_label = "value label",
-                        title = "No Title") :
+                        title = "No Title",
+                        top_n = 50) :
     """
     Creates an animated bar plot
     """
     years = [i for i in range(2013, 2022 + 1)]
     bar_df = pd.DataFrame(columns = ["word", "freqs", "funding", "avg_funding", "year"])
     for year in years:
-        temp_df = gen_chart_data(df[df["År"] == year], top_n = 50, yearly = True, sort_col = "freqs")
+        temp_df = gen_chart_data(df[df["År"] == year], top_n = top_n, yearly = True, sort_col = "freqs")
         bar_df = pd.concat([bar_df, temp_df])
     
     bar_df = bar_df.sort_values(by = ["year", y_col], ascending= [True, False])
@@ -500,12 +512,10 @@ def gen_chart_data(df: pd.DataFrame,
         sorted_df = pd.DataFrame(columns = ["word", "freqs", "funding", "avg_funding", "year"])
         for year in years:
             temp_df = df[df["year"] == year]
-            
             if sort_col is not None:
                 temp_df = temp_df.sort_values(by=sort_col, ascending = False)
             if top_n is not None:
                 temp_df = temp_df.head(top_n)
-                
             sorted_df = pd.concat([sorted_df, temp_df], ignore_index = True)
             
     else:
@@ -579,8 +589,12 @@ def create_bubble_plot(df: pd.DataFrame,
         color_lab = color_col
     
     try:
-        x_range = [min(df[x_col] - x_strech), max(df[x_col]) + x_strech]
-        y_range = [min(df[y_col]) - y_strech, max(df[y_col]) + y_strech]
+        max_x = max(df[x_col]) + (max(df[x_col]) * x_strech)
+        min_x = min(df[x_col]) - (max(df[x_col]) * x_strech)
+        max_y = max(df[y_col]) + (max(df[y_col]) * y_strech)
+        min_y = min(df[y_col]) - (max(df[y_col]) * y_strech)
+        x_range = [min_x, max_x]
+        y_range = [min_y, max_y]
     except ValueError:
         x_range = 0
         y_range = 0
@@ -611,6 +625,7 @@ def create_bubble_plot(df: pd.DataFrame,
     fig.update_layout(coloraxis_colorbar_title_text = color_lab)
     
     hovertemplate="<br>".join([
+        f"Word: " + "%{text}",
         f"{x_lab}: " + "%{x:,.0f}",
         f"{y_lab}: " + "%{y}",
         f"{size_lab}: " + "%{marker.size:,.0f}"])
@@ -882,7 +897,7 @@ def plot_graph(G,
             line_width= 0
         ),
         textfont=dict(
-            size = 8,
+            size = 10,
             color="rgb(0, 0 , 0)"
         ),
         visible = True
