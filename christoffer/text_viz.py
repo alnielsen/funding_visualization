@@ -383,7 +383,9 @@ def create_bar_plot(df,
                   title = title)
     
     fig.update_yaxes(title = "")
-    fig.update_layout(coloraxis_colorbar_title_text = color_label, margin=dict(b=50,l=150,r=50,t=150))
+    fig.update_layout(coloraxis_colorbar_title_text = color_label, margin=dict(b=50,l=150,r=50,t=50))
+    fig.update_layout(hoverlabel = dict( bgcolor = "white"),
+                      hoverlabel_font = dict(color = "rgb(0,0,0)"))    
     return fig
 
 def create_animated_bar(df,
@@ -420,6 +422,9 @@ def create_animated_bar(df,
         
     fig.update_layout(coloraxis_colorbar_title_text = color_label)
     fig.layout.updatemenus[0].buttons[0].args[1]["frame"]["duration"] = 2000
+    fig.update_traces(textfont_color="rgb(0,0,0)")
+    fig.update_layout(hoverlabel = dict( bgcolor = "white"),
+                      hoverlabel_font = dict(color = "rgb(0,0,0)"))    
     return fig
 
 
@@ -625,14 +630,17 @@ def create_bubble_plot(df: pd.DataFrame,
     fig.update_layout(coloraxis_colorbar_title_text = color_lab)
     
     hovertemplate="<br>".join([
-        f"Word: " + "%{text}",
-        f"{x_lab}: " + "%{x:,.0f}",
-        f"{y_lab}: " + "%{y}",
-        f"{size_lab}: " + "%{marker.size:,.0f}"])
+        f"<b>Word:</b> " + "%{text}",
+        f"<b>{x_lab}:</b> " + "%{x:,.0f}",
+        f"<b>{y_lab}:</b> " + "%{y}",
+        f"<b>{size_lab}:</b> " + "%{marker.size:,.0f}"])
 
     fig.update_traces(hovertemplate=hovertemplate)
     for frame in fig.frames:
         frame.data[0].hovertemplate = hovertemplate
+    fig.update_traces(textfont_color="rgb(0,0,0)")
+    fig.update_layout(hoverlabel = dict( bgcolor = "white"),
+                      hoverlabel_font = dict(color = "rgb(0,0,0)"))    
     return fig
 
 def generate_graph_data_word(df: pd.DataFrame, word: str, top_n: int) -> nx.Graph:
@@ -819,7 +827,7 @@ def generate_graph_data_all(df: pd.DataFrame, top_n: int = 10) -> nx.Graph:
 
     G.remove_edges_from(edges_remove)
     G.remove_nodes_from(list(nx.isolates(G)))
-    pos = nx.spring_layout(G, weight = "weight", k = 3)
+    pos = nx.spring_layout(G, weight = "weight", k = 4)
     for node in G.nodes():
         x = pos[node][0]
         y = pos[node][1]
@@ -857,11 +865,11 @@ def plot_graph(G,
         source_node = e[0]
         target_node = e[1]
         weight = G[source_node][target_node]["weight"]
-        edge_hover_text.append(f"Words: {e} <br> Number of Co-Appearences in Titles: {weight}")
+        edge_hover_text.append(f"<b>Words:</b> {e} <br> <b>Number of Co-Appearences in Titles:</b> {weight}")
         weights.append(weight)
 
-    edge_colors = rescale_to_range(weights, new_max = 0, new_min = 120)
-    edge_sizes = rescale_to_range(weights, new_max = 8, new_min = 1)
+    edge_colors = rescale_to_range(weights, new_max = 150, new_min = 220)
+    edge_sizes = rescale_to_range(weights, new_max = 10, new_min = 1)
     for edge in G.edges():
         x0, y0 = G.nodes[edge[0]]['pos']
         x1, y1 = G.nodes[edge[1]]['pos']
@@ -872,11 +880,10 @@ def plot_graph(G,
     edge_traces = []
     i = 0
     for ex, ey in zip(edge_x, edge_y):
-        edge_color = edge_colors[i]
         edge_size = edge_sizes[i]
         edge_trace = go.Scatter(
             x=ex, y=ey,
-            line=dict(color = f"rgb(255, {edge_color}, {edge_color})",
+            line=dict(color = f"rgba({edge_colors[i]}, 217, 245, 1)",
                     width = edge_size))
         edge_traces.append(edge_trace)
         i += 1
@@ -920,20 +927,21 @@ def plot_graph(G,
         hovertext = hover_text,
         text  = text,
         textfont=dict(
-            size = 14,
+            size = [],
             color="rgb(0, 0 , 0)"
         ),
         marker=dict(
-            color="rgb(204, 20, 42)",
+            color="rgb(245, 158, 169)",
             size= [],
             line_width= 2))
     
     node_sizes = [val for _, val in nx.get_node_attributes(G, "total_deg").items()]
     scaled_node_sizes = rescale_to_range(node_sizes, new_max = max_node_size, new_min = min_node_size)
     node_trace.marker.size = scaled_node_sizes
-    title = str(f"<b>{title}</b> <br>" + 
-                f"  - <i>Marker Size:</i> Total Word Connections <br>" +
-                f"  - <i>Line Size: </i> Connections Between Words")
+
+    #if len(node)
+    node_trace.textfont.size = rescale_to_range(node_sizes, new_max = 18, new_min = 14)
+    title = " "
     
     data = [edge_trace for edge_trace in edge_traces]
     data.append(node_trace)
@@ -946,11 +954,13 @@ def plot_graph(G,
                     titlefont_size=16,
                     showlegend=False,
                     hovermode='closest',
-                    margin=dict(t=150),
+                    margin=dict(t=50),
                     xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
                     yaxis=dict(showgrid=False, zeroline=False, showticklabels=False))
                     )
-                    
+    fig.update_traces(textfont_color="rgb(0,0,0)")
+    fig.update_layout(hoverlabel = dict( bgcolor = "white"),
+                      hoverlabel_font = dict(color = "rgb(0,0,0)"))        
     return fig
 
 

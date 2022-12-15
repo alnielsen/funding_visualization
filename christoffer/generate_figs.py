@@ -41,14 +41,14 @@ def generate_bar_chart(df, top_n = None, animated = False, words = None):
         return create_bar_plot(df = gen_chart_data(df, top_n = top_n, yearly = False, sort_col = "funding"),
                               x_col = "freqs",
                               color_col = "avg_funding",
-                              title = f"Top {top_n} Most Used Words",
+                              title = f" ",
                               color_label = "Average Funding pr. Grant",
                               x_label = "Frequency")
     elif words is not None:
-        return create_bar_plot(df = gen_chart_data(df, top_n = -1, yearly = False, sort_col = "funding", words=words),
+        return create_bar_plot(df = gen_chart_data(df, yearly = False, sort_col = "funding", words=words),
                                x_col = "freqs",
                                color_col = "avg_funding",
-                               title = f"Frequencies for Words: {words}",
+                               title = f" ",
                                color_label = "Average Funding pr. Grant",
                                x_label = "Frequency")
 
@@ -85,7 +85,7 @@ def generate_bubble_chart(df, top_n = 50, animated = False):
                                 color_col= "freqs",
                                 y_strech = Y_STRETCH,
                                 x_strech = X_STRETCH,
-                                title=f"Top {top_n} Most Funded Words",
+                                title=f" ",
                                 y_lab = "Combined Funding",
                                 x_lab= "Average Funding pr. Grant",
                                 size_lab = "Word Frequency",
@@ -114,7 +114,7 @@ def generate_bubble_words(df, words, animated = False):
                                 color_col= "freqs",
                                 y_strech = Y_STRETCH,
                                 x_strech = X_STRETCH,
-                                title=f"Funding for Chosen words",
+                                title=f" ",
                                 y_lab = "Combined Funding",
                                 x_lab= "Average funding pr. Grant",
                                 size_lab = "Frequency",
@@ -128,7 +128,7 @@ def generate_graph_top_n(df, top_n = 10):
     Wrapper for generating a graph over total word connectivity in a dataframe
     """
     G = generate_graph_data_all(df = df, top_n = top_n)
-    return plot_graph(G, title = f"Top {top_n} Most Title Co-appearences")
+    return plot_graph(G, title = f" ")
 
 @experimental_memo
 def generate_graph_words(df, words):
@@ -136,7 +136,7 @@ def generate_graph_words(df, words):
     Wrapper for generating a graph over connectivity between chosen words
     """
     G = generate_graph_data_words(df = df, words = words)
-    return plot_graph(G, title = f"Co-Appearences in Titles Between {words}")
+    return plot_graph(G, title = f" ")
 
 @experimental_memo
 def generate_graph_single_word(df, word, top_n):
@@ -144,4 +144,4 @@ def generate_graph_single_word(df, word, top_n):
     Wrapper for generating a graph over connectivity for a chosen word
     """
     G = generate_graph_data_word(df = df, word = word, top_n = top_n)
-    return plot_graph(G, title = f"Connectivity For '{word}'")    
+    return plot_graph(G, title = f" ")    
