@@ -139,7 +139,7 @@ with st.sidebar:
     
     with st.sidebar:
         
-        with st.expander("Filters :abacus:", expanded=True):
+        with st.expander("Filters", expanded=True):
 
             dashtype = st.radio("Select dashboard view", ['Investigate', 'Compare'])
             if dashtype == 'Investigate':
