@@ -442,7 +442,7 @@ def dashboard(df, df2):
         
         
         with maincol2:
-            year = st.select_slider("Use the slider below to select a year",
+            year = st.select_slider("**Use the slider below to select a year**",
                                     options=[2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,"All Time"],
                                     value='All Time')
                                           
