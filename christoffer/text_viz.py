@@ -689,7 +689,7 @@ def generate_graph_data_word(df: pd.DataFrame, word: str, top_n: int) -> nx.Grap
         t_node = e[1]
         edge_weight = G[s_node][t_node]["weight"]
         edge_weights.append((e, edge_weight))
-    
+    #
     top_n_edges = [e for e, _ in _sort_tuples(edge_weights)[ : top_n - 1]]
     edges_remove = []
     for e in G.edges():
