@@ -69,3 +69,17 @@ def generateSankey(df, year, category_columns):
     fig.update_layout(title_text="Funding of Research Grants in " + str(year) + "<br>Source: <a href='https://dff.dk/'>Danmarks Frie Forskningsfond</a>",
                         font_size=10, height = 1000, width = 800)
     return fig
+
+
+# stacked area chart
+def generateStacked(df, y_funding, color_group):
+    df_stacked = df.groupby(['År', color_group]).agg({y_funding:'sum'}).reset_index()
+    fig = px.area(df_stacked, x="År", y=y_funding, color=color_group)
+    fig.update_layout(
+        height = 1000,
+        width = 800,
+        xaxis = dict(
+        tickmode = 'linear',
+        dtick = 1))
+    
+    return fig

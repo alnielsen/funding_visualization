@@ -112,8 +112,6 @@ def rescale_to_range(number_list, new_max, new_min):
     """
     Rescales a list to a new range
     """
-    if len(number_list)== 0:
-        return [0]
     old_range = max(number_list) - min(number_list)
     new_range = (new_max - new_min)
     scaled_list = []
@@ -364,7 +362,7 @@ def create_bar_plot(df,
     - data_dict and color_dict contains the same keys.
     
     """
-
+    df["word"] = df["word"].astype(str)
     df = df.sort_values(by = x_col, ascending=True) 
     df = df.head(top_n)
     # I have no Idea why I have to sort it in ascending order to get the words with highest value on top
@@ -385,7 +383,8 @@ def create_bar_plot(df,
     fig.update_yaxes(title = "")
     fig.update_layout(coloraxis_colorbar_title_text = color_label, margin=dict(b=50,l=150,r=50,t=50))
     fig.update_layout(hoverlabel = dict( bgcolor = "white"),
-                      hoverlabel_font = dict(color = "rgb(0,0,0)"))    
+                      hoverlabel_font = dict(color = "rgb(0,0,0)"))
+    fig.update_layout(yaxis_type='category')    
     return fig
 
 def create_animated_bar(df,
@@ -844,6 +843,8 @@ def plot_graph(G,
 
     hover_text = []
     node_index = 0
+    if len(G.nodes()) < 2:
+        return None
     for node in G.nodes():
 
         avg_funding_txt = f"{G.nodes[node]['avg_funding']:,}"
@@ -934,6 +935,7 @@ def plot_graph(G,
             color="rgb(245, 158, 169)",
             size= [],
             line_width= 2))
+    
     
     node_sizes = [val for _, val in nx.get_node_attributes(G, "total_deg").items()]
     scaled_node_sizes = rescale_to_range(node_sizes, new_max = max_node_size, new_min = min_node_size)
