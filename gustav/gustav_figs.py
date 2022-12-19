@@ -66,7 +66,7 @@ def generateSankey(df, year, category_columns):
             color = colorlist_source_rgba
         ))])
 
-    fig.update_layout(title_text="Funding of Research Grants in " + str(year) + "<br>Source: <a href='https://dff.dk/'>Danmarks Frie Forskningsfond</a>",
+    fig.update_layout(title_text="Funding of Research Grants in " + str(year),
                         font_size=10, height = 1000, width = 800)
     return fig
 
