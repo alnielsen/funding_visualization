@@ -19,7 +19,7 @@ def generateSankey(df, year, category_columns, is_comparisson: bool = False, com
     if is_comparisson == True:
         category_columns.append('Institution') # add instituion to category_columns argument
         df_sankey = df.loc[:,category_columns + ['Bevilliget beløb']] # if True we include the Institution column to compare
-        df_sankey = df_sankey.loc[(df_sankey['Institution']==comparer_institution)] # after selecting the Institution column, we sort for the two institutions we want to compare
+        df_sankey = df_sankey.loc[(df_sankey['Institution'].isin(comparer_institution))] # after selecting the Institution column, we sort for the two institutions we want to compare
     else:
         df_sankey = df.loc[:,category_columns + ['Bevilliget beløb']] # if False we do not include the Institution column
 
