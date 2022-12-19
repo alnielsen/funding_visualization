@@ -19,7 +19,7 @@ def generateSankey(df, year, category_columns, is_comparisson: bool = False, com
     if is_comparisson == True:
         category_columns.append('Institution') # add instituion to category_columns argument
         df_sankey = df.loc[:,category_columns + ['Bevilliget beløb']] # if True we include the Institution column to compare
-        df_sankey = df_sankey[df_sankey['Institution'].isin(comparer_institution)] # after selecting the Institution column, we sort for the two institutions we want to compare
+        df_sankey = df_sankey.loc[(df_sankey['Institution']==comparer_institution)] # after selecting the Institution column, we sort for the two institutions we want to compare
     else:
         df_sankey = df.loc[:,category_columns + ['Bevilliget beløb']] # if False we do not include the Institution column
 
@@ -72,7 +72,7 @@ def generateSankey(df, year, category_columns, is_comparisson: bool = False, com
         ))])
 
     fig.update_layout(title_text="Time Period: " + str(year),
-                        font_size=10, height = 1000, width = 800)
+                        font_size=13, height = 550, width = 600)
     return fig
 
 
@@ -81,7 +81,7 @@ def generateStacked(df, y_funding, color_group):
     df_stacked = df.groupby(['År', color_group]).agg({y_funding:'sum'}).reset_index()
     fig = px.area(df_stacked, x="År", y=y_funding, color=color_group)
     fig.update_layout(
-        height = 600,
+        height = 550,
         width = 600,
         xaxis = dict(
         tickmode = 'linear',
