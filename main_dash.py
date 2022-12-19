@@ -29,7 +29,7 @@ import random as rd
 ## CUSTOM LIBRARIES ##
 from christoffer.generate_figs import generate_bar_chart, generate_bubble_chart, generate_bubble_words, generate_graph_top_n, generate_graph_words, generate_graph_single_word
 from christoffer.text_viz import get_all_words, generate_data
-from gustav.gustav_figs import generateSankey, generateStacked
+from gustav import gustav_figs
 
 # Set page configuration
 st.set_page_config(page_title="Funding Visualization Project", page_icon=":moneybag:", layout="wide", initial_sidebar_state="expanded")
@@ -258,7 +258,7 @@ def dashboard(df, stacked_df, df2):
             By hovering over each bar, you can get more detailed information about the funding flow and the exact amount of funding.   
             """)
          
-            sankey = generateSankey(df, year=year, category_columns=['År','Virkemidler', 'Område'])
+            sankey = gustav_figs.generateSankey(df, year=year, category_columns=['År','Virkemidler', 'Område'])
             st.plotly_chart(sankey, use_container_width=True)     
 
 
@@ -463,17 +463,21 @@ def dashboard(df, stacked_df, df2):
                 df = df
                 df2 = df2
                 stacked_df = stacked_df
+                sankey_df = df
+
             if not year == "All Time":
                 df = df.loc[(df["År"] == year)]
                 df2 = df2.loc[(df2["År"] == year)]
                 stacked_df = stacked_df.loc[(stacked_df["År"] <= year)]
+                sankey_df = df.loc[(df["År"] == year)]
+
         comp_tab1, comp_tab2 = st.tabs(['**Compare Funding over time**', '**Compare Funding flow**'])      
         with comp_tab1:
-            stacked_plot = generateStacked(stacked_df, 'Bevilliget beløb', "Institution")
-            st.plotly_chart(stacked_plot, use_container_width=True) 
+            comp_stacked = gustav_figs.generateStacked(stacked_df, 'Bevilliget beløb', "Institution")
+            st.plotly_chart(comp_stacked, use_container_width=True) 
         with comp_tab2:
-            sankey = generateSankey(df, year=year, category_columns=['År','Virkemidler', 'Område'], is_comparisson=True, comparer_institution=[locations, comp_loc])
-            st.plotly_chart(sankey, use_container_width=True)  
+            comp_sank = gustav_figs.generateSankey(stacked_df, year=year, category_columns=['År','Virkemidler', 'Område'], is_comparisson=True, comparer_institution=[locations, comp_loc])
+            st.plotly_chart(comp_sank, use_container_width=True)  
             
         
         expcol1, expcol2 = st.columns([2,2])
