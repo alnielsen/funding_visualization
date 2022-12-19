@@ -13,4 +13,5 @@ geopandas
 shapely
 networkx
 extra_streamlit_components
+ipywidgets
 
