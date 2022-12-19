@@ -153,7 +153,8 @@ with st.sidebar:
                     df = full_df.loc[(full_df["Institution"] == locations)]
 
                 df2 = full_df
-                stacked_df = pd.DataFrame() # Not need for the investigator view, but intialized to avoid NameErrors
+                stacked_df = pd.DataFrame()
+                
 
             if dashtype == 'Compare':
                 locations = st.selectbox("Select institution", institution)
@@ -167,21 +168,26 @@ with st.sidebar:
                     df = full_df
                     stacked_df = full_df.loc[(full_df["Institution"] != comp_loc)]
                     stacked_df = stacked_df.assign(Institution = "All")
+                    
                 else:
                     df = full_df.loc[(full_df["Institution"] == locations)]
                     stacked_df = df
+                    
                 
                 if comp_loc == "All":
                     df2 = full_df
                     stacked_df = full_df.loc[(full_df["Institution"] != locations)]
                     stacked_df = stacked_df.assign(Institution = "All")
+                    
                 else:
                     df2 = full_df.loc[(full_df["Institution"] == comp_loc)]
                 
                 if comp_loc == "All":
                     stacked_df = pd.concat([stacked_df, df])
+                    
                 else:
                     stacked_df = pd.concat([stacked_df, df2])
+                    
 
         with st.expander('Need instructions?'):
 
@@ -451,7 +457,6 @@ def dashboard(df, stacked_df, df2):
             for linebreak in range(2):
                 "\n"
         
-        
         with maincol2:
             year = st.select_slider("**Use the slider below to select a year**",
                                     options=[2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,"All Time"],
@@ -463,21 +468,33 @@ def dashboard(df, stacked_df, df2):
                 df = df
                 df2 = df2
                 stacked_df = stacked_df
-                sankey_df = df
+                
+
+                
 
             if not year == "All Time":
                 df = df.loc[(df["År"] == year)]
                 df2 = df2.loc[(df2["År"] == year)]
                 stacked_df = stacked_df.loc[(stacked_df["År"] <= year)]
-                sankey_df = df.loc[(df["År"] == year)]
+                
 
-        comp_tab1, comp_tab2 = st.tabs(['**Compare Funding over time**', '**Compare Funding flow**'])      
+        comp_tab1, comp_tab2 = st.tabs(['**Compare Funding over time**', '**Compare Funding flow**'])  
+        sank_col1, sank_col2 = st.columns([2,2])    
         with comp_tab1:
             comp_stacked = gustav_figs.generateStacked(stacked_df, 'Bevilliget beløb', "Institution")
             st.plotly_chart(comp_stacked, use_container_width=True) 
         with comp_tab2:
-            comp_sank = gustav_figs.generateSankey(stacked_df, year=year, category_columns=['År','Virkemidler', 'Område'], is_comparisson=True, comparer_institution=[locations, comp_loc])
-            st.plotly_chart(comp_sank, use_container_width=True)  
+            main_sank = comp_sank = gustav_figs.generateSankey(df, year=year, category_columns=['År','Virkemidler', 'Område'])
+            if not comp_loc == 'All':
+                comp_sank = gustav_figs.generateSankey(df2.loc[(df2["Institution"] == comp_loc)], year=year, category_columns=['År','Virkemidler', 'Område'])
+            else:
+                comp_sank = gustav_figs.generateSankey(df2, year=year, category_columns=['År','Virkemidler', 'Område'])
+                
+            with sank_col1:
+                st.plotly_chart(main_sank, use_container_width=True)
+            with sank_col2:
+                st.plotly_chart(comp_sank, use_container_width=True)
+
             
         
         expcol1, expcol2 = st.columns([2,2])

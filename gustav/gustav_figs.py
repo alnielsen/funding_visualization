@@ -11,7 +11,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning) # ignores warning
 
 # function to generate sankey diagram 
 def generateSankey(df, year, category_columns, is_comparisson: bool = False, comparer_institution=None):
-    print(comparer_institution)
+    
     colorpalette = px.colors.qualitative.Dark24 + px.colors.qualitative.Light24 + px.colors.qualitative.Alphabet # hex values
     opacity = 0.5
 
