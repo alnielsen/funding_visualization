@@ -491,9 +491,11 @@ def dashboard(df, stacked_df, df2):
                 comp_sank = gustav_figs.generateSankey(df2, year=year, category_columns=['År','Virkemidler', 'Område'])
                 
             with sank_col1:
-                st.plotly_chart(main_sank, use_container_width=True)
+                with st.expander(f'{locations}', expanded=True):
+                    st.plotly_chart(main_sank, use_container_width=True)
             with sank_col2:
-                st.plotly_chart(comp_sank, use_container_width=True)
+                with st.expander(f'{comp_loc}', expanded=True):
+                    st.plotly_chart(comp_sank, use_container_width=True)
 
             
         
