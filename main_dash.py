@@ -141,8 +141,8 @@ with st.sidebar:
         
         with st.expander("Filters", expanded=True):
 
-            dashtype = st.radio("Select dashboard view", ['Investigate', 'Compare'])
-            if dashtype == 'Investigate':
+            dashtype = st.radio("Select dashboard view", ['Explore', 'Compare'])
+            if dashtype == 'Explore':
 
                 locations = st.selectbox("Select institution", institution)
                 
@@ -194,7 +194,7 @@ with st.sidebar:
             st.write(
                 """
                 You can choose either *Invesitigate* or *Compare* view.
-                Investigate lets you see a detailed visualization of funding, word usage and other statistics for an insitution. \n
+                Explore lets you see a detailed visualization of funding, word usage and other statistics for an insitution. \n
                 Compare lets you compare general statistics between each chosen instituions.
                 When using compare view, you need to select multiple institutions from the selectboxes above.
                 """)
@@ -202,13 +202,16 @@ with st.sidebar:
 
 st.cache()
 def dashboard(df, stacked_df, df2):
-    #### Investigate SECTION ####
-    if dashtype == 'Investigate':
+    #### Explore SECTION ####
+    if dashtype == 'Explore':
         maincol1, maincol2 = st.columns([2,2], gap="large")  
         with maincol1:
-            st.title("Funding overview")
-            st.write("Institution")
+            st.title("Institution Explorer")
+            st.write("Institution:")
             st.subheader(f"{locations}")
+            
+            
+            
             
         
         with maincol2:
@@ -345,7 +348,7 @@ def dashboard(df, stacked_df, df2):
                             else:
                                 st.write("**You need to choose at least two words to create the connecticity Graph!**")
                         
-                    with st.expander("**Explore Which Words Most Often Appear in the Same Title as a Chosen Word**", expanded=False):      
+                    with st.expander("**Explore Which Words Most Often Appear in the Same Title as a Chosen Word**", expanded=True):      
                         st.write(
                         """
                         This Connectivity Graphs takes a single selected word and generates a network graph.
@@ -372,7 +375,7 @@ def dashboard(df, stacked_df, df2):
                             graph_chart_single = generate_graph_single_word(df, word=select_word, top_n = top_n_investigation)
                             st.plotly_chart(graph_chart_single, use_container_width=True)   
                     
-                    with st.expander("**Explore Combined Funding and Average Funding for Selected Words**", expanded=False):
+                    with st.expander("**Explore Combined Funding and Average Funding for Selected Words**", expanded=True):
                         st.write(
                             """
                             This bubble plot displays the combined funding vertically and the average funding horizontally for each of the selected words.
@@ -383,7 +386,7 @@ def dashboard(df, stacked_df, df2):
                         words_bub_chart = generate_bubble_words(df, words = selected_words, animated=False)
                         st.plotly_chart(words_bub_chart, use_container_width=True)
 
-                    with st.expander("**Explore Word Frequencies for Selected Words**"):
+                    with st.expander("**Explore Word Frequencies for Selected Words**", expanded=True):
                         st.write(
                             """
                             This barchart displays the frequencies of all the selected words.
@@ -394,7 +397,7 @@ def dashboard(df, stacked_df, df2):
                         st.plotly_chart(barchart_words, use_container_width=True) 
 
                 if all_specific == 'All Words':
-                    with st.expander("**Explore Which Words Most Frequently Appear in the Same Title**", expanded=False):
+                    with st.expander("**Explore Which Words Most Frequently Appear in the Same Title**", expanded=True):
                         st.write(
                         """
                         This network graph displays which words (stopwords excluded) most frequently appear in the same title.
@@ -413,7 +416,7 @@ def dashboard(df, stacked_df, df2):
                         graph_chart = generate_graph_top_n(df, top_n)
                         st.plotly_chart(graph_chart, use_container_width=True)
                     
-                    with st.expander("**Words With Highest Combined Funding**", expanded=False):
+                    with st.expander("**Words With Highest Combined Funding**", expanded=True):
                         st.write(
                             """
                             This bubble plot shows the words with the highest combined funding and plots it.
@@ -429,7 +432,7 @@ def dashboard(df, stacked_df, df2):
                         bubchart = generate_bubble_chart(df, top_n = top_n, animated = False)
                         st.plotly_chart(bubchart, use_container_width=True)
                     
-                    with st.expander("**Words Used in Most Titles**"):
+                    with st.expander("**Words Used in Most Titles**", expanded=True):
                         st.write(
                             """
                             This barchart displays the words which appears in most titles.
