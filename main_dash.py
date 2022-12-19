@@ -254,7 +254,8 @@ def dashboard(df, stacked_df, df2):
             """
             This Sankey chart takes your previous filters and displays how the funding is flowing from a given year to a funding mechanism, and to a scientific area.
             By hovering over each bar, you can get more detailed information about the funding flow and the exact amount of funding.   
-            """)  
+            """)
+         
             sankey = generateSankey(df, year=year, category_columns=['År','Virkemidler', 'Område'])
             st.plotly_chart(sankey, use_container_width=True)     
 
@@ -464,9 +465,14 @@ def dashboard(df, stacked_df, df2):
                 df = df.loc[(df["År"] == year)]
                 df2 = df2.loc[(df2["År"] == year)]
                 stacked_df = stacked_df.loc[(stacked_df["År"] <= year)]
-                
-        stacked_plot = generateStacked(stacked_df, 'Bevilliget beløb', "Institution")
-        st.plotly_chart(stacked_plot, use_container_width=True) 
+        comp_tab1, comp_tab2 = st.tabs(['**Compare Funding over time**', '**Compare Funding flow**'])      
+        with comp_tab1:
+            stacked_plot = generateStacked(stacked_df, 'Bevilliget beløb', "Institution")
+            st.plotly_chart(stacked_plot, use_container_width=True) 
+        with comp_tab2:
+            sankey = generateSankey(df, year=year, category_columns=['År','Virkemidler', 'Område'], is_comparisson=True, comparer_institution=comp_loc)
+            st.plotly_chart(sankey, use_container_width=True)  
+            
         
         expcol1, expcol2 = st.columns([2,2])
         
@@ -508,6 +514,8 @@ def dashboard(df, stacked_df, df2):
                 avg_fund2 = all_sum2//num_projects2
                 st.write(f"Average funding pr. project:")
                 st.subheader(f'{avg_fund2:,} DKK')
+
+        full_screen_fix()
         "---"
         
         
@@ -530,11 +538,6 @@ def dashboard(df, stacked_df, df2):
 def about():
     
     source = 'All data is soruced from: [Danmarks Frie Forskningsfond](https://dff.dk/forskningsprojekter)'
-    
-    st.title("About the Visualizer")
-    ("How do i use the visualizer and what can it tell me?")
-
-    st.markdown("***")
 
     st.title("About the Data")
     
@@ -584,7 +587,7 @@ def about():
             (gc_git)
             st.markdown("***")
 
-    st.dataframe(df)
+   
 
 
 
