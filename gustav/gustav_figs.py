@@ -81,8 +81,8 @@ def generateStacked(df, y_funding, color_group):
     df_stacked = df.groupby(['År', color_group]).agg({y_funding:'sum'}).reset_index()
     fig = px.area(df_stacked, x="År", y=y_funding, color=color_group)
     fig.update_layout(
-        height = 1000,
-        width = 800,
+        height = 600,
+        width = 600,
         xaxis = dict(
         tickmode = 'linear',
         dtick = 1))

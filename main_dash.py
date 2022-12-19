@@ -439,6 +439,7 @@ def dashboard(df, stacked_df, df2):
     
     if dashtype == 'Compare':
         
+        
         maincol1, maincol2 = st.columns([3,3], gap="large")  
         with maincol1:
             st.write("Institutions")
@@ -453,7 +454,7 @@ def dashboard(df, stacked_df, df2):
                                     options=[2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,"All Time"],
                                     value='All Time')
                                           
-            
+        
         
             if year == "All Time":
                 df = df
@@ -464,12 +465,13 @@ def dashboard(df, stacked_df, df2):
                 df2 = df2.loc[(df2["År"] == year)]
                 stacked_df = stacked_df.loc[(stacked_df["År"] <= year)]
                 
-    
-        "---"
+        stacked_plot = generateStacked(stacked_df, 'Bevilliget beløb', "Institution")
+        st.plotly_chart(stacked_plot, use_container_width=True) 
+        
         expcol1, expcol2 = st.columns([2,2])
         
         with expcol1:
-            with st.expander(f'{locations}', expanded=True):
+            with st.expander(f'**Metrics for {locations}**', expanded=False):
                 
                 st.write("Year selected:")
                 st.subheader(year)
@@ -489,7 +491,7 @@ def dashboard(df, stacked_df, df2):
                 st.subheader(f'{avg_fund:,} DKK')
 
         with expcol2:
-            with st.expander(f'{comp_loc}', expanded=True):
+            with st.expander(f'**Metrics for {comp_loc}**', expanded=False):
                 
                 st.write("Year selected:")
                 st.subheader(year)
@@ -506,10 +508,10 @@ def dashboard(df, stacked_df, df2):
                 avg_fund2 = all_sum2//num_projects2
                 st.write(f"Average funding pr. project:")
                 st.subheader(f'{avg_fund2:,} DKK')
+        "---"
         
         
-        stacked_plot = generateStacked(stacked_df, 'Bevilliget beløb', "Institution")
-        st.plotly_chart(stacked_plot, use_container_width=True) 
+        
                 
 
 
