@@ -472,7 +472,7 @@ def dashboard(df, stacked_df, df2):
             stacked_plot = generateStacked(stacked_df, 'Bevilliget beløb', "Institution")
             st.plotly_chart(stacked_plot, use_container_width=True) 
         with comp_tab2:
-            sankey = generateSankey(df, year=year, category_columns=['År','Virkemidler', 'Område'], is_comparisson=True, comparer_institutions=[locations, comp_loc])
+            sankey = generateSankey(df, year=year, category_columns=['År','Virkemidler', 'Område'], is_comparisson=True, comparer_institution=[locations, comp_loc])
             st.plotly_chart(sankey, use_container_width=True)  
             
         
