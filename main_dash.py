@@ -145,6 +145,7 @@ with st.sidebar:
             if dashtype == 'Investigate':
 
                 locations = st.selectbox("Select institution", institution)
+                
 
                 if locations == "All":
                     df = full_df
@@ -160,6 +161,7 @@ with st.sidebar:
                 comp_df = full_df.loc[(full_df["Institution"] != locations)]
                 comp_institutions = [inst for inst in institution if inst != locations]
                 comp_loc = st.selectbox("Select institution to compare", comp_institutions)
+                
 
                 if locations == "All":
                     df = full_df
@@ -470,7 +472,7 @@ def dashboard(df, stacked_df, df2):
             stacked_plot = generateStacked(stacked_df, 'Bevilliget beløb', "Institution")
             st.plotly_chart(stacked_plot, use_container_width=True) 
         with comp_tab2:
-            sankey = generateSankey(df, year=year, category_columns=['År','Virkemidler', 'Område'], is_comparisson=True, comparer_institution=comp_loc)
+            sankey = generateSankey(df, year=year, category_columns=['År','Virkemidler', 'Område'], is_comparisson=True, comparer_institutions=[locations, comp_loc])
             st.plotly_chart(sankey, use_container_width=True)  
             
         
