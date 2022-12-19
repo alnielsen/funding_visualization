@@ -10,13 +10,18 @@ from PIL import ImageColor
 warnings.simplefilter(action='ignore', category=FutureWarning) # ignores warnings from pd.append()
 
 # function to generate sankey diagram 
-def generateSankey(df, year, category_columns):
+def generateSankey(df, year, category_columns, is_comparisson: bool = False, comparer_institution=None):
 
     colorpalette = px.colors.qualitative.Dark24 + px.colors.qualitative.Light24 # hex values
     opacity = 0.5
 
     # data for sankey
-    df_sankey = df.loc[:,category_columns + ['Bevilliget beløb']]
+    if is_comparisson == True:
+        category_columns.append('Institution') # add instituion to category_columns argument
+        df_sankey = df.loc[:,category_columns + ['Bevilliget beløb']] # if True we include the Institution column to compare
+        df_sankey = df_sankey[df_sankey['Institution'].isin(comparer_institution)] # after selecting the Institution column, we sort for the two institutions we want to compare
+    else:
+        df_sankey = df.loc[:,category_columns + ['Bevilliget beløb']] # if False we do not include the Institution column
 
     # create list of labels, i.e. unique values from each column except the values
     labels = []
