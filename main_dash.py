@@ -215,7 +215,7 @@ def dashboard(df, stacked_df, df2):
             
         
         with maincol2:
-            for line_break in range(6):
+            for line_break in range(7):
                 "\n"
             year = st.select_slider("**Use the slider below to select a year**",
                                     options=[2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,"All Time"],
@@ -454,13 +454,16 @@ def dashboard(df, stacked_df, df2):
         
         maincol1, maincol2 = st.columns([3,3], gap="large")  
         with maincol1:
-            st.write("Institutions")
+            st.title("Compare institutions")
+            st.write("Institutions:")
             st.subheader(f"{locations} & {comp_loc}")
         
             for linebreak in range(2):
                 "\n"
         
         with maincol2:
+            for line_break in range(7):
+                "\n"
             year = st.select_slider("**Use the slider below to select a year**",
                                     options=[2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,"All Time"],
                                     value='All Time')
@@ -482,16 +485,17 @@ def dashboard(df, stacked_df, df2):
                 
 
         comp_tab1, comp_tab2 = st.tabs(['**Compare Funding over time**', '**Compare Funding flow**'])  
-        sank_col1, sank_col2 = st.columns([2,2])    
+        sank_col1, sank_col2 = st.columns([4,4])    
         with comp_tab1:
             comp_stacked = gustav_figs.generateStacked(stacked_df, 'Bevilliget beløb', "Institution")
             st.plotly_chart(comp_stacked, use_container_width=True) 
         with comp_tab2:
-            main_sank = comp_sank = gustav_figs.generateSankey(df, year=year, category_columns=['År','Virkemidler', 'Område'])
             if not comp_loc == 'All':
                 comp_sank = gustav_figs.generateSankey(df2.loc[(df2["Institution"] == comp_loc)], year=year, category_columns=['År','Virkemidler', 'Område'])
+                main_sank = gustav_figs.generateSankey(df, year=year, category_columns=['År','Virkemidler', 'Område'])
             else:
                 comp_sank = gustav_figs.generateSankey(df2, year=year, category_columns=['År','Virkemidler', 'Område'])
+                main_sank = gustav_figs.generateSankey(df, year=year, category_columns=['År','Virkemidler', 'Område'])
                 
             with sank_col1:
                 with st.expander(f'{locations}', expanded=True):
@@ -502,10 +506,10 @@ def dashboard(df, stacked_df, df2):
 
             
         
-        expcol1, expcol2 = st.columns([2,2])
+        expcol1, expcol2 = st.columns([4,4])
         
         with expcol1:
-            with st.expander(f'**Metrics for {locations}**', expanded=False):
+            with st.expander(f'**Metrics for {locations}**', expanded=True):
                 
                 st.write("Year selected:")
                 st.subheader(year)
@@ -525,7 +529,7 @@ def dashboard(df, stacked_df, df2):
                 st.subheader(f'{avg_fund:,} DKK')
 
         with expcol2:
-            with st.expander(f'**Metrics for {comp_loc}**', expanded=False):
+            with st.expander(f'**Metrics for {comp_loc}**', expanded=True):
                 
                 st.write("Year selected:")
                 st.subheader(year)
