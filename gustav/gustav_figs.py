@@ -72,7 +72,7 @@ def generateSankey(df, year, category_columns, is_comparisson: bool = False, com
         ))])
 
     fig.update_layout(title_text="Time Period: " + str(year),
-                        font_size=13, height = 450, width = 800)
+                        font_size=13, height = 800, width = 800)
     return fig
 
 
