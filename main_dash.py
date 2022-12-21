@@ -247,7 +247,7 @@ def dashboard(df, stacked_df, df2):
     
     "\n"   
     
-    tab1, tab2, tab3 = st.tabs(["**Click to explore how funding flows**",
+    tab1, tab2, tab3 = st.tabs(["**Click to explore how funding flows  **",
                                     "**Click to explore word usage and research topics**",
                                     "**Click to compare Institution funding**"])
 
@@ -442,11 +442,10 @@ def dashboard(df, stacked_df, df2):
         
     with tab3:
         "\n"
-        """This comparer can visualize differences in funding between two institutions. 
-            You can select 'All' to compare all granted funding with funding granted to a specific institution."""  
+        st.write("This comparer can visualize differences in funding between two institutions.")
+        st.write("You can select 'All' to compare all granted funding with funding granted to a specific institution.")
         for line in range(5):
                 "\n"
-        
         maincol1, maincol2 = st.columns([3,3], gap="large")  
         with maincol2:
             comp_df = full_df.loc[(full_df["Institution"] != locations)]
