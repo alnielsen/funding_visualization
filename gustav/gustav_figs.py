@@ -83,24 +83,25 @@ def generateSankey(df, category_columns=None, is_year: bool = True, year=None, i
     return fig
 
 
-# stacked area chart
-# stacked area chart
+
+
+
 # stacked area chart
 def generateStacked_categories(df, institution_list):
     
     # categories Område - only the six biggest
     categories_list = ['Kultur og Kommunikation', 'Natur og Univers',
                        'Samfund og Erhverv', 'Sundhed og Sygdom',
-                       'Teknologi og Produktion', 'Tværrådslig']
+                       'Teknologi og Produktion', 'Tværrådslig', 'Total Funding']
 
     # data for stacked
+    df_stacked = df.groupby(['År', 'Institution']).agg({'Bevilliget beløb':'sum'}).reset_index()
+    df_stacked['Område'] = 'Total Funding'
 
-
-        
-    df_stacked = df.groupby(['År', 'Område', 'Institution']).agg({'Bevilliget beløb':'sum'}).reset_index()
-    
-    # Makes sure that there are datapoints for all years, areas and institutions
-    # If there are years without funding, this makes sure, that there will be 0 as a datapoint instead of no data point
+    prut = df.groupby(['År', 'Område', 'Institution']).agg({'Bevilliget beløb':'sum'}).reset_index()
+    df_stacked_category = prut[prut['Område'].isin(categories_list)]
+    df_stacked = pd.concat([df_stacked, df_stacked_category], axis=0)
+ 
     years = list(set(df["År"]))
     for cat in categories_list:
         test_df = df_stacked.loc[(df_stacked["Område"] == cat)]
@@ -115,10 +116,11 @@ def generateStacked_categories(df, institution_list):
                                             "Bevilliget beløb":[0]})
                     df_stacked = pd.concat([df_stacked, df_row])
     df_stacked = df_stacked.groupby(['År', 'Område', 'Institution']).agg({'Bevilliget beløb':'sum'}).reset_index()
-    
+
     df_stacked_category = df_stacked[df_stacked['Område'].isin(categories_list)]
 
-    df_stacked_all = df_stacked_category.groupby(['År', 'Område']).agg({'Bevilliget beløb':'sum'}).reset_index() # data for All Periods
+    df_stacked_all = df_stacked_category.groupby(['År', 'Område']).agg({'Bevilliget beløb':'sum'}).reset_index()
+    
     df_stacked_institution = df_stacked_category[df_stacked_category['Institution'].isin(institution_list)]
 
     # Comparisson variables
@@ -137,6 +139,7 @@ def generateStacked_categories(df, institution_list):
                   facet_col='Område',
                   color='Område',
                   title="",
+                  category_orders={"Område": categories_list},
                   height=height, width=width)
     else:
         fig = px.area(df_stacked_institution,
@@ -146,6 +149,7 @@ def generateStacked_categories(df, institution_list):
                   color='Område',
                   facet_row='Institution',
                   title="",
+                  category_orders={"Område": categories_list},
                   height=height, width=width)   
 
 

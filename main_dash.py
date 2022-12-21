@@ -140,7 +140,7 @@ with st.sidebar:
     with st.sidebar:
        
         
-        with st.expander('Need instructions?', expanded=False):
+        with st.expander('**Need instructions?**', expanded=False):
 
             st.write("**Funding overview**")
 
@@ -246,9 +246,7 @@ def dashboard():
                                     "**Click to explore word usage and research topics**"])
     
     with tab1:
-        
-
-        
+    
         if locations == 'All':
             for i in range(3):
                 "\n"
