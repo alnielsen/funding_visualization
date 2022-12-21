@@ -255,7 +255,12 @@ def dashboard():
             sankey = gustav_figs.generateSankey(full_df, year=year, category_columns=['År','Virkemidler', 'Område'], is_comparisson=False, comparer_institution=None, is_year=True)
             st.plotly_chart(sankey, use_container_width=True)    
             
-
+            stacked_temp = full_df.loc[full_df["År"] <= year] if not year == "All Time" else full_df
+            stacked_temp = stacked_temp.assign(Institution = "All")
+            stacked_temp = stacked_temp.groupby(['År', 'Område', 'Institution']).agg({'Bevilliget beløb':'sum'}).reset_index()
+            stacked = gustav_figs.generateStacked_categories(stacked_temp, institution_list=["All"])
+            st.write("This stacked area chart displays, how much funding different research areas from the selected universities have recieved up til the selected year.")
+            st.plotly_chart(stacked, use_container_width=True)
 
         
         else:
