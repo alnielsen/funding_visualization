@@ -10,16 +10,24 @@ from PIL import ImageColor
 warnings.simplefilter(action='ignore', category=FutureWarning) # ignores warnings from pd.append()
 
 # function to generate sankey diagram 
-def generateSankey(df, year, category_columns, is_comparisson: bool = False, comparer_institution=None):
-    
+def generateSankey(df, category_columns=None, is_year: bool = True, year=None, is_comparisson: bool = False, comparer_institution=None):
+
     colorpalette = px.colors.qualitative.Dark24 + px.colors.qualitative.Light24 + px.colors.qualitative.Alphabet # hex values
     opacity = 0.5
+    
+    
 
     # data for sankey
+    if not year == 'All Time':
+        df = df.loc[df['År'] == year]
+
+    
+     # get data for specified year argument
+
     if is_comparisson == True:
         category_columns.append('Institution') # add instituion to category_columns argument
         df_sankey = df.loc[:,category_columns + ['Bevilliget beløb']] # if True we include the Institution column to compare
-        df_sankey = df_sankey.loc[(df_sankey['Institution'].isin(comparer_institution))] # after selecting the Institution column, we sort for the two institutions we want to compare
+        df_sankey = df_sankey[df_sankey['Institution'].isin(comparer_institution)] # after selecting the Institution column, we sort for the two institutions we want to compare
     else:
         df_sankey = df.loc[:,category_columns + ['Bevilliget beløb']] # if False we do not include the Institution column
 
@@ -71,20 +79,87 @@ def generateSankey(df, year, category_columns, is_comparisson: bool = False, com
             color = colorlist_source_rgba
         ))])
 
-    fig.update_layout(title_text="Time Period: " + str(year),
-                        font_size=13, height = 800, width = 800)
+    fig.update_layout(title_text="Funding of Research Grants in " + str(year), font_size=10)
     return fig
 
 
 # stacked area chart
-def generateStacked(df, y_funding, color_group):
-    df_stacked = df.groupby(['År', color_group]).agg({y_funding:'sum'}).reset_index()
-    fig = px.area(df_stacked, x="År", y=y_funding, color=color_group)
-    fig.update_layout(
-        height = 550,
-        width = 600,
-        xaxis = dict(
-        tickmode = 'linear',
-        dtick = 1))
+# stacked area chart
+# stacked area chart
+def generateStacked_categories(df, institution_list):
     
+    # categories Område - only the six biggest
+    categories_list = ['Kultur og Kommunikation', 'Natur og Univers',
+                       'Samfund og Erhverv', 'Sundhed og Sygdom',
+                       'Teknologi og Produktion', 'Tværrådslig']
+
+    # data for stacked
+
+
+        
+    df_stacked = df.groupby(['År', 'Område', 'Institution']).agg({'Bevilliget beløb':'sum'}).reset_index()
+    
+    # Makes sure that there are datapoints for all years, areas and institutions
+    # If there are years without funding, this makes sure, that there will be 0 as a datapoint instead of no data point
+    years = list(set(df["År"]))
+    for cat in categories_list:
+        test_df = df_stacked.loc[(df_stacked["Område"] == cat)]
+        for year in years:
+            test_df = test_df.loc[(test_df["År"] == year)]
+            for inst in institution_list:
+                test_df = test_df.loc[(test_df["Institution"] == inst)]
+                if len(test_df) == 0:
+                    df_row = pd.DataFrame({"År":[year],
+                                            "Område":[cat],
+                                            "Institution":[inst],
+                                            "Bevilliget beløb":[0]})
+                    df_stacked = pd.concat([df_stacked, df_row])
+    df_stacked = df_stacked.groupby(['År', 'Område', 'Institution']).agg({'Bevilliget beløb':'sum'}).reset_index()
+    
+    df_stacked_category = df_stacked[df_stacked['Område'].isin(categories_list)]
+
+    df_stacked_all = df_stacked_category.groupby(['År', 'Område']).agg({'Bevilliget beløb':'sum'}).reset_index() # data for All Periods
+    df_stacked_institution = df_stacked_category[df_stacked_category['Institution'].isin(institution_list)]
+
+    # Comparisson variables
+    if len(institution_list)>=2:
+        #titel = 'Funding over time for ' + str(institution_list[0]) + ' and ' + str(institution_list[1])
+        height, width = len(institution_list)*250, 1000
+    else:
+        #titel = 'Funding over time for ' + str(institution_list[0])
+        height, width = 300, 1000
+
+    # figure
+    if any("All Periods" in string for string in institution_list): # if All Periods is checked of new figure
+        fig = px.area(df_stacked_all,
+                  x="År",
+                  y='Bevilliget beløb',
+                  facet_col='Område',
+                  color='Område',
+                  title="",
+                  height=height, width=width)
+    else:
+        fig = px.area(df_stacked_institution,
+                  x="År",
+                  y='Bevilliget beløb',
+                  facet_col='Område',
+                  color='Område',
+                  facet_row='Institution',
+                  title="",
+                  height=height, width=width)   
+
+
+
+    # remove '=' from titles
+    fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[1]))
+
+    # font size
+    fig.update_layout(font = dict(size = 10, color = "Black"), showlegend=False)
+    fig.update_xaxes(dtick=1)
+    
+
+    
+    
+
     return fig
+

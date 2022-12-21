@@ -139,9 +139,37 @@ with st.sidebar:
     
     with st.sidebar:
        
-            
+        
+        with st.expander('Need instructions?', expanded=False):
 
-        locations = st.selectbox("Select institution to explore", institution)
+            st.write("**Funding overview**")
+
+            st.write("You are first met with the funding overview of your chosen institution.")
+            st.write("Use the *selectbox* above the *year slider*, to pick an institution, that has recieved funding from Danmarks Frie Forskningsfond.")
+            st.write("Then, you will get a metrical overview of the funding your chosen institution has recieved through time. ")
+            "---"
+            st.write("**Funding flows**")
+            st.write("Clicking the *funding flow tab* will display a sankey chart, showing the funding flow of your chosen institution.")
+            st.write("If *All* are chosen in the primary selectbox, the funding flow will display all institutions.")
+            st.write("If a specific institution is chosen you have the option to compare with multiple institutions, by selecting one or more institutions in the multiselectbox above the sankey chart.")
+            "---"
+            st.write("**Word usage and research topics**")
+            st.write("With the *explore word usage and research topics* tab, you can investigate what words or topics are related to each other in terms of funding.")
+#### Creating the dashboard section ####
+
+st.cache()
+def dashboard():
+    #### Explore SECTION ####
+    
+    maincol1, maincol2 = st.columns([2,2], gap="large")  
+
+        
+    with maincol2:
+
+        for i in range(7):
+            "\n"
+
+        locations = st.selectbox("**Select institution to explore**", institution)
         
 
         if locations == "All":
@@ -163,48 +191,10 @@ with st.sidebar:
         else:
             df = full_df.loc[(full_df["Institution"] == locations)]
             stacked_df = df
-                
-            
-            
-                    
-
-        with st.expander('Need instructions?'):
-
-            st.write(
-                """
-                Use the selectbox above to pick an institution, that has recieved funding from Danmarks Frie Forskningsfond.
-                ***
-                **Funding overview**
-                ---
-                You are first met with the funding overview of your chosen institution. 
-                Here, you can get a metrical overview of the funding your chosen institution has recieved through time. 
-
-                ***
-
-                **Funding Explorer**
-                ---
-                The funding explorer section lets you explore how words, topics and grants have changed through time.
-                Use this section if you want to get a more detailed picture of grants. 
-                """)
-#### Creating the dashboard section ####
-
-st.cache()
-def dashboard(df, stacked_df, df2):
-    #### Explore SECTION ####
-    
-    maincol1, maincol2 = st.columns([2,2], gap="large")  
-    with maincol1:
-        st.title("Funding Overview")
-        st.write("Institution:")
-        st.subheader(f"{locations}")
         
+
+
         
-        
-        
-    
-    with maincol2:
-        for line_break in range(7):
-            "\n"
         year = st.select_slider("**Use the slider below to select a year**",
                                 options=[2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,"All Time"],
                                 value='All Time')
@@ -215,6 +205,15 @@ def dashboard(df, stacked_df, df2):
             df = df
         if not year == "All Time":
             df = df.loc[(df["År"] == year)]
+    
+
+    with maincol1:
+        st.title("Funding Overview")
+        for i in range(3):
+            "\n"
+        st.write("Institution:")
+        st.subheader(f"{locations}")
+
     "---"
     metriccol1, metriccol2, metriccol3, metriccol4, metriccol5, metriccol6 = st.columns([1,3,4,3,3,1], gap="medium")
     
@@ -241,35 +240,126 @@ def dashboard(df, stacked_df, df2):
         st.subheader(f'{avg_fund:,} DKK')
     
     "---"
-    for i in range(5):
-        "\n"
-    st.title(f"Funding Explorer")
+      
     
-    "\n"   
+    tab1, tab2 = st.tabs(["**Click to explore how funding flows**",
+                                    "**Click to explore word usage and research topics**"])
     
-    tab1, tab2, tab3 = st.tabs(["**Click to explore how funding flows  **",
-                                    "**Click to explore word usage and research topics**",
-                                    "**Click to compare Institution funding**"])
-
     with tab1:
-        st.write(
-        """
-        This Sankey chart takes your previous filters and displays how the funding is flowing from a given year to a funding mechanism, and to a scientific area.
-        By hovering over each bar, you can get more detailed information about the funding flow and the exact amount of funding.   
-        """)
         
-        sankey = gustav_figs.generateSankey(df, year=year, category_columns=['År','Virkemidler', 'Område'])
-        st.plotly_chart(sankey, use_container_width=True)     
 
+        
+        if locations == 'All':
+            for i in range(3):
+                "\n"
+            st.write("""This Sankey chart takes your previous filters and displays how the funding is flowing from a given year to a funding mechanism, and to a scientific area.
+            By hovering over each bar, you can get more detailed information about the funding flow and the exact amount of funding.""")
+            sankey = gustav_figs.generateSankey(full_df, year=year, category_columns=['År','Virkemidler', 'Område'], is_comparisson=False, comparer_institution=None, is_year=True)
+            st.plotly_chart(sankey, use_container_width=True)    
+            
+
+
+        
+        else:
+            for i in range(3):
+                "\n"
+            sankey_multi = st.multiselect("**Choose institutions to compare**", options=institution[1:], default=locations)
+            multi_choice = []
+            multi_choice.extend(sankey_multi)
+            for i in range(3):
+                "\n"
+
+
+            with st.expander("**Funding Flows**", expanded=True):
+                if len(multi_choice) == 0:
+                    st.write("Please select some institutions")
+                else:
+
+                    st.write(
+                """
+                This Sankey chart lets you compare how multiple universities are funded.
+                It takes your previous filters and displays,
+                how the funding is flowing from a given year to a funding mechanism, to a scientific area
+                and lastly to the selected university.
+                By hovering over each bar, you can get more detailed information about the funding flow and the exact amount of funding.   
+                """)
+
+                    sankey = gustav_figs.generateSankey(full_df, year=year, category_columns=['År','Virkemidler', 'Område'], is_comparisson=True, comparer_institution=multi_choice, is_year=True)
+                    st.plotly_chart(sankey, use_container_width=True)
+
+            with st.expander(f"**Funding over time for** {multi_choice}", expanded=True):
+                if len(multi_choice) == 0:
+
+                    st.write("Please select some institutions")
+                
+                else:
+                    st.write("""
+                    This stacked area chart displays,
+                    how much funding different research areas from the selected universities have recieved up til the selected year. 
+                    """)
+                    stacked_temp = full_df.loc[full_df["År"] <= year] if not year == "All Time" else full_df
+                    stacked = gustav_figs.generateStacked_categories(stacked_temp, institution_list=multi_choice)
+                    st.plotly_chart(stacked, use_container_width=True)
+
+            metriccol8, metriccol9, metriccol10, metriccol11 = st.columns([5,3,3,3], gap="medium")
+            
+            with metriccol8:
+                st.write("**Institution:**")
+            with metriccol9:
+                st.write(f"**Total funding:**")
+            with metriccol10:                   
+                st.write(f"**Number of funded projects:**")
+            with metriccol11:
+                st.write(f"**Average funding pr. project:**")
+
+
+            
+            for inst_choice in multi_choice:
+                
+                temp_df = full_df.loc[(full_df["Institution"] == inst_choice)]
+                
+                if not year == "All Time":
+                    temp_df = temp_df.loc[(temp_df["År"] == year)]
+
+                all_sum = sum(temp_df["Bevilliget beløb"])
+                num_projects = len(temp_df)
+                
+                try:
+                    avg_fund = all_sum//num_projects
+                except ZeroDivisionError:
+                    avg_fund = 0    
+                
+                with metriccol8:
+                    st.write(f'{inst_choice}')
+                    
+                
+                with metriccol9:
+                    st.write(f'{all_sum:,} DKK')
+                    
+                    
+                with metriccol10:                   
+                    
+                    st.write(f'{num_projects}')
+                
+                
+                with metriccol11:
+                    
+                    st.write(f'{avg_fund:,} DKK')
+
+        
+                       
+                
 
     
     with tab2:
-        if not len(df) == 0: 
+        if not df.empty: 
             st.cache()
             avg_funding, funding, freqs =  generate_data(df = df,
                                                         funding_thresh_hold = 0)
             st.cache()
             all_words = get_all_words(df)
+            for i in range(2):
+                "\n"
             st.write(
                 """
                 The word explorer lets you explore how often words are used, how titles, containing certain words are funded, and how often certain words appears together titles.
@@ -428,134 +518,20 @@ def dashboard(df, stacked_df, df2):
                         You can hover over the bars to get the exact numbers for its funding and appearences in titles (frequency).
                     """)
                     top_n = st.select_slider("Use the slider below to change how many words you want to display.",
-                                options=[i for i in range(10, 81)],
+                                options=[i for i in range(10, 51)],
                                 value = 50,
                                 key = "top_n_bar_slider")
                     barchart = generate_bar_chart(df, animated = False, top_n = top_n)
                     st.plotly_chart(barchart, use_container_width=True)
-                
+                    full_screen_fix()
+        else:
+            st.write("**No data to display. Please select a different year!**")                
 
-            full_screen_fix()
-         
-    
-    
+            
         
-    with tab3:
-        "\n"
-        st.write("This comparer can visualize differences in funding between two institutions.")
-        st.write("You can select 'All' to compare all granted funding with funding granted to a specific institution.")
-        for line in range(5):
-                "\n"
-        maincol1, maincol2 = st.columns([3,3], gap="large")  
-        with maincol2:
-            comp_df = full_df.loc[(full_df["Institution"] != locations)]
-            comp_institutions = [inst for inst in institution if inst != locations]
-            comp_loc = st.selectbox("Select institution to compare", comp_institutions)
-            if comp_loc == "All":
-                df2 = full_df
-                stacked_df = full_df.loc[(full_df["Institution"] != locations)]
-                stacked_df = stacked_df.assign(Institution = "All")
-                
-            else:
-                df2 = full_df.loc[(full_df["Institution"] == comp_loc)]
-            
-            if comp_loc == "All":
-                stacked_df = pd.concat([stacked_df, df])
-                
-            else:
-                stacked_df = pd.concat([stacked_df, df2])
-            
-                                            
+    
 
-
-            if year == "All Time":
-                df = df
-                df2 = df2
-                stacked_df = stacked_df
-                
-
-        
-            if not year == "All Time":
-                df = df.loc[(df["År"] == year)]
-                df2 = df2.loc[(df2["År"] == year)]
-                stacked_df = stacked_df.loc[(stacked_df["År"] <= year)]
-
-            year = st.select_slider("**Use  the slider below to select a year**",
-                                        options=[2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,"All Time"],
-                                        value='All Time')
-        with maincol1:
-
-            st.write("Institutions:")
-            st.subheader(f"{locations} & {comp_loc}")
-
-
-        expcol1, expcol2 = st.columns([4,4])
-
-        with expcol1:
-            with st.expander(f'**Metrics for {locations}**', expanded=True):
-                
-                st.write("year selected:")
-                st.subheader(year)
-                
-                all_sum1 = sum(df["Bevilliget beløb"])
-                st.write(f"Total funding:")
-                
-                st.subheader(f'{all_sum1:,} DKK')
-            
-                num_projects = len(df)
-                st.write(f"Number of funded projects:")
-                st.subheader(f'{num_projects}')
-            
-
-                avg_fund = all_sum1//num_projects
-                st.write(f"Average funding pr. project:")
-                st.subheader(f'{avg_fund:,} DKK')
-
-        with expcol2:
-            with st.expander(f'**Metrics for {comp_loc}**', expanded=True):
-                
-                st.write("year selected:")
-                st.subheader(year)
-                
-                all_sum2 = sum(df2["Bevilliget beløb"])
-                st.write(f"Total funding:")
-                st.subheader(f'{all_sum2:,} DKK')
-            
-                num_projects2 = len(df2)
-                st.write(f"Number of funded projects:")
-                st.subheader(f'{num_projects2}')
-            
-
-                avg_fund2 = all_sum2//num_projects2
-                st.write(f"Average funding pr. project:")
-                st.subheader(f'{avg_fund2:,} DKK')
-                
-
-        comp_tab1, comp_tab2 = st.tabs(['**Compare Funding over time**', '**Compare Funding flow**'])  
-        sank_col1, sank_col2 = st.columns([4,4])    
-        with comp_tab1:
-            comp_stacked = gustav_figs.generateStacked(stacked_df, 'Bevilliget beløb', "Institution")
-            st.plotly_chart(comp_stacked, use_container_width=True) 
-        with comp_tab2:
-            if not comp_loc == 'All':
-                comp_sank = gustav_figs.generateSankey(df2.loc[(df2["Institution"] == comp_loc)], year=year, category_columns=['År','Virkemidler', 'Område'])
-                main_sank = gustav_figs.generateSankey(df, year=year, category_columns=['År','Virkemidler', 'Område'])
-            else:
-                comp_sank = gustav_figs.generateSankey(df2, year=year, category_columns=['År','Virkemidler', 'Område'])
-                main_sank = gustav_figs.generateSankey(df, year=year, category_columns=['År','Virkemidler', 'Område'])
-                
-            with sank_col1:
-                with st.expander(f'{locations}', expanded=True):
-                    st.plotly_chart(main_sank, use_container_width=True)
-            with sank_col2:
-                with st.expander(f'{comp_loc}', expanded=True):
-                    st.plotly_chart(comp_sank, use_container_width=True)
-
-                
-            
-            
-
-            full_screen_fix()
+        full_screen_fix()  
         "---"
         
         
@@ -632,7 +608,7 @@ def about():
 
 
 if choose == "Dashboard":
-    dashboard(df, stacked_df, df2)
+    dashboard()
 
 if choose == "About":
     about()
