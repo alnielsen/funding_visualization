@@ -140,7 +140,8 @@ def generateStacked_categories(df, institution_list):
                   color='Område',
                   title="",
                   category_orders={"Område": categories_list},
-                  height=height, width=width)
+                  height=height, width=width,
+                  labels={"År": "Year", "Bevilliget beløb": "Granted amount"})
     else:
         fig = px.area(df_stacked_institution,
                   x="År",
@@ -150,7 +151,8 @@ def generateStacked_categories(df, institution_list):
                   facet_row='Institution',
                   title="",
                   category_orders={"Område": categories_list},
-                  height=height, width=width)   
+                  height=height, width=width,
+                  labels={"År": "Year", "Bevilliget beløb": "Granted amount"})   
 
 
 
