@@ -9,22 +9,7 @@ import extra_streamlit_components as stx
 
 ## DATAFRAMES LIBRRIES ##
 import pandas as pd
-import geopandas as gpd
 
-## MAP LIBRARIES ##
-import geopy
-from geopy.geocoders import Nominatim
-from geopy.extra.rate_limiter import RateLimiter
-import folium
-from streamlit_folium import st_folium
-
-## PLOT AND GEOMETRY LIBRARIES
-import plotly.express as px
-import plotly.graph_objects as go
-from shapely.geometry import Point, Polygon
-import matplotlib.pyplot as plt
-import numpy as np
-import random as rd
 
 ## CUSTOM LIBRARIES ##
 from christoffer.generate_figs import generate_bar_chart, generate_bubble_chart, generate_bubble_words, generate_graph_top_n, generate_graph_words, generate_graph_single_word
