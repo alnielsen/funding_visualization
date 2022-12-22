@@ -54,7 +54,7 @@ full_df = pd.read_csv('gustav/dff.csv', index_col=False)
 institution = ['All']
 
 for i in full_df['Institution']:
-    if i not in institution:
+    if i not in institution and str(i) != 'nan':
         institution.append(i)
 
 
