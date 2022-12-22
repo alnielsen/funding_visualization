@@ -145,11 +145,11 @@ with st.sidebar:
             st.write("**Funding overview**")
 
             st.write("You are first met with the funding overview of your chosen institution.")
-            st.write("Use the *selectbox* above the *year slider*, to pick an institution, that has recieved funding from Danmarks Frie Forskningsfond.")
+            st.write("Use the *selectbox* above the *year slider* to the right, to pick an institution, that has recieved funding from Independent Research Fund Denmark.")
             st.write("Then, you will get a metrical overview of the funding your chosen institution has recieved through time. ")
             "---"
             st.write("**Funding flows**")
-            st.write("Clicking the *funding flow tab* will display a sankey chart, showing the funding flow of your chosen institution.")
+            st.write("Clicking the *funding flow tab*, located under the funding metrics, will display a sankey chart, showing the funding flow of your chosen institution.")
             st.write("If *All* are chosen in the primary selectbox, the funding flow will display all institutions.")
             st.write("If a specific institution is chosen you have the option to compare with multiple institutions, by selecting one or more institutions in the multiselectbox above the sankey chart.")
             "---"
@@ -259,7 +259,7 @@ def dashboard():
             stacked_temp = stacked_temp.assign(Institution = "All")
             stacked_temp = stacked_temp.groupby(['År', 'Område', 'Institution']).agg({'Bevilliget beløb':'sum'}).reset_index()
             stacked = gustav_figs.generateStacked_categories(stacked_temp, institution_list=["All"])
-            st.write("This stacked area chart displays, how much funding different research areas from the selected universities have recieved up til the selected year.")
+            st.write("This stacked area chart displays, how much funding different research areas from the selected universities have recieved up till the selected year.")
             st.plotly_chart(stacked, use_container_width=True)
 
         
@@ -556,7 +556,7 @@ def dashboard():
 #### Creating the About section ####
 def about():
     
-    source = 'All data is soruced from: [Danmarks Frie Forskningsfond](https://dff.dk/forskningsprojekter)'
+    source = 'All data is soruced from: [Independent Research Fund Denmark](https://dff.dk/en/grants/database?set_language=en)'
 
     st.title("About the Data")
     
