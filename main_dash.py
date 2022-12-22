@@ -259,9 +259,40 @@ def dashboard():
             sankey_multi = st.multiselect("**Choose institutions to compare**", options=institution[1:], default=locations)
             multi_choice = []
             multi_choice.extend(sankey_multi)
-            for i in range(3):
-                "\n"
+            
+            # Display institution metrics
+            metriccol8, metriccol9, metriccol10, metriccol11 = st.columns([5,3,3,3], gap="medium")
+            with metriccol8:
+                st.write("**Institution:**")
+            with metriccol9:
+                st.write(f"**Total funding:**")
+            with metriccol10:                   
+                st.write(f"**Number of funded projects:**")
+            with metriccol11:
+                st.write(f"**Average funding pr. project:**")
+            for inst_choice in multi_choice:                
+                temp_df = full_df.loc[(full_df["Institution"] == inst_choice)]                
+                if not year == "All Time":
+                    temp_df = temp_df.loc[(temp_df["År"] == year)]
+                all_sum = sum(temp_df["Bevilliget beløb"])
+                num_projects = len(temp_df)
+                try:
+                    avg_fund = all_sum//num_projects
+                except ZeroDivisionError:
+                    avg_fund = 0                    
+                with metriccol8:
+                    st.write(f'{inst_choice}')               
+                with metriccol9:
+                    st.write(f'{all_sum:,} DKK')                    
+                with metriccol10:                   
+                    
+                    st.write(f'{num_projects}')
+                with metriccol11:
+                    st.write(f'{avg_fund:,} DKK')
 
+            # Some extra white space
+            "\n"
+            "\n"
 
             with st.expander("**Expand to show funding flows**", expanded=False):
                 if len(multi_choice) == 0:
@@ -293,51 +324,6 @@ def dashboard():
                     stacked_temp = full_df.loc[full_df["År"] <= year] if not year == "All Time" else full_df
                     stacked = gustav_figs.generateStacked_categories(stacked_temp, institution_list=multi_choice)
                     st.plotly_chart(stacked, use_container_width=True)
-
-            metriccol8, metriccol9, metriccol10, metriccol11 = st.columns([5,3,3,3], gap="medium")
-            
-            with metriccol8:
-                st.write("**Institution:**")
-            with metriccol9:
-                st.write(f"**Total funding:**")
-            with metriccol10:                   
-                st.write(f"**Number of funded projects:**")
-            with metriccol11:
-                st.write(f"**Average funding pr. project:**")
-
-
-            
-            for inst_choice in multi_choice:
-                
-                temp_df = full_df.loc[(full_df["Institution"] == inst_choice)]
-                
-                if not year == "All Time":
-                    temp_df = temp_df.loc[(temp_df["År"] == year)]
-
-                all_sum = sum(temp_df["Bevilliget beløb"])
-                num_projects = len(temp_df)
-                
-                try:
-                    avg_fund = all_sum//num_projects
-                except ZeroDivisionError:
-                    avg_fund = 0    
-                
-                with metriccol8:
-                    st.write(f'{inst_choice}')
-                    
-                
-                with metriccol9:
-                    st.write(f'{all_sum:,} DKK')
-                    
-                    
-                with metriccol10:                   
-                    
-                    st.write(f'{num_projects}')
-                
-                
-                with metriccol11:
-                    
-                    st.write(f'{avg_fund:,} DKK')
 
         
                        
@@ -408,17 +394,16 @@ def dashboard():
                     Moreover, the size of the word marker is determined by its general connectivity.
                     The general connectivity is a number for how many unique words a given word appears together with across all titles.\n
                     """)
-                    activate_btn = st.button("*Click here to display Connectivty Graph*", key="activate1")
-                    if activate_btn:
-                        if len(selected_words) > 1: 
-                            graph_chart = generate_graph_words(df, words= selected_words)
-                            if graph_chart is None:
-                                st.write(f"*The words **{selected_words}** does not appear in the same title!*")
-                            else:
-                                st.plotly_chart(graph_chart, use_container_width=True)
+
+                    if len(selected_words) > 1: 
+                        graph_chart = generate_graph_words(df, words= selected_words)
+                        if graph_chart is None:
+                            st.write(f"*The words **{selected_words}** does not appear in the same title!*")
                         else:
-                            st.write("**You need to choose at least two words to create the connecticity Graph!**")
-                    
+                            st.plotly_chart(graph_chart, use_container_width=True)
+                    else:
+                        st.write("**You need to choose at least two words to create the connecticity Graph!**")
+                
                 with st.expander("**Expand to explore which words most often appear in the same title**", expanded=False):      
                     st.write(
                     """
