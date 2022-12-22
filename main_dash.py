@@ -236,7 +236,7 @@ def dashboard():
             for i in range(3):
                 "\n"
             
-            with st.expander("Expand to show Funding flows", expanded=False):
+            with st.expander("**Expand to show Funding flows**", expanded=False):
                 st.write("""This Sankey chart takes your previous filters and displays how the funding is flowing from a given year to a funding mechanism, and to a scientific area.
                 By hovering over each bar, you can get more detailed information about the funding flow and the exact amount of funding.""")
                 sankey = gustav_figs.generateSankey(full_df, year=year, category_columns=['År','Virkemidler', 'Område'], is_comparisson=False, comparer_institution=None, is_year=True)
@@ -245,7 +245,9 @@ def dashboard():
                 stacked_temp = full_df.loc[full_df["År"] <= year] if not year == "All Time" else full_df
                 stacked_temp = stacked_temp.assign(Institution = "All")
                 stacked_temp = stacked_temp.groupby(['År', 'Område', 'Institution']).agg({'Bevilliget beløb':'sum'}).reset_index()
-            with st.expander("Expand to show Funding over time", expanded=False):
+
+
+            with st.expander("**Expand to show Funding over time**", expanded=False):
                     stacked = gustav_figs.generateStacked_categories(stacked_temp, institution_list=["All"])
                     st.write("This stacked area chart displays, how much funding different research areas from the selected universities have recieved up till the selected year.")
                     st.plotly_chart(stacked, use_container_width=True)
