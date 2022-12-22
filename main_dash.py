@@ -235,17 +235,20 @@ def dashboard():
         if locations == 'All':
             for i in range(3):
                 "\n"
-            st.write("""This Sankey chart takes your previous filters and displays how the funding is flowing from a given year to a funding mechanism, and to a scientific area.
-            By hovering over each bar, you can get more detailed information about the funding flow and the exact amount of funding.""")
-            sankey = gustav_figs.generateSankey(full_df, year=year, category_columns=['År','Virkemidler', 'Område'], is_comparisson=False, comparer_institution=None, is_year=True)
-            st.plotly_chart(sankey, use_container_width=True)    
             
-            stacked_temp = full_df.loc[full_df["År"] <= year] if not year == "All Time" else full_df
-            stacked_temp = stacked_temp.assign(Institution = "All")
-            stacked_temp = stacked_temp.groupby(['År', 'Område', 'Institution']).agg({'Bevilliget beløb':'sum'}).reset_index()
-            stacked = gustav_figs.generateStacked_categories(stacked_temp, institution_list=["All"])
-            st.write("This stacked area chart displays, how much funding different research areas from the selected universities have recieved up till the selected year.")
-            st.plotly_chart(stacked, use_container_width=True)
+            with st.expander("Expand to show Funding flows", expanded=False):
+                st.write("""This Sankey chart takes your previous filters and displays how the funding is flowing from a given year to a funding mechanism, and to a scientific area.
+                By hovering over each bar, you can get more detailed information about the funding flow and the exact amount of funding.""")
+                sankey = gustav_figs.generateSankey(full_df, year=year, category_columns=['År','Virkemidler', 'Område'], is_comparisson=False, comparer_institution=None, is_year=True)
+                st.plotly_chart(sankey, use_container_width=True)    
+                
+                stacked_temp = full_df.loc[full_df["År"] <= year] if not year == "All Time" else full_df
+                stacked_temp = stacked_temp.assign(Institution = "All")
+                stacked_temp = stacked_temp.groupby(['År', 'Område', 'Institution']).agg({'Bevilliget beløb':'sum'}).reset_index()
+            with st.expander("Expand to show Funding over time", expanded=False):
+                    stacked = gustav_figs.generateStacked_categories(stacked_temp, institution_list=["All"])
+                    st.write("This stacked area chart displays, how much funding different research areas from the selected universities have recieved up till the selected year.")
+                    st.plotly_chart(stacked, use_container_width=True)
 
         
         else:
@@ -383,7 +386,7 @@ def dashboard():
                 st.text("")
                 st.text("")
                 st.text("")
-                with st.expander("*Description*"):
+                with st.expander("*Description*", expanded=True):
                     st.write(
                         """
                         - *Combined Funding:* Sum of all funding for titles which contain the chosen word.
@@ -391,7 +394,7 @@ def dashboard():
                         - *Times Used in Title:* How many different titles The word appears in.
                         """)                
                 "---"
-                with st.expander(("**Explore How Often Selected Words Co-Appears in Titles**"), expanded=False):
+                with st.expander(("**Expand to explore how often selected words co-appears in titles**"), expanded=False):
                     st.write(
                     """
                     The Connectivity Graphs takes your previously selected words and generates a network graph.
@@ -414,7 +417,7 @@ def dashboard():
                         else:
                             st.write("**You need to choose at least two words to create the connecticity Graph!**")
                     
-                with st.expander("**Explore Which Words Most Often Appear in the Same Title as a Chosen Word**", expanded=True):      
+                with st.expander("**Expand to explore which words most often appear in the same title**", expanded=False):      
                     st.write(
                     """
                     This Connectivity Graphs takes a single selected word and generates a network graph.
@@ -441,7 +444,7 @@ def dashboard():
                         graph_chart_single = generate_graph_single_word(df, word=select_word, top_n = top_n_investigation)
                         st.plotly_chart(graph_chart_single, use_container_width=True)   
                 
-                with st.expander("**Explore Combined Funding and Average Funding for Selected Words**", expanded=True):
+                with st.expander("**Expand to explore combined funding and average funding for selected words**", expanded=False):
                     st.write(
                         """
                         This bubble plot displays the combined funding vertically and the average funding horizontally for each of the selected words.
@@ -452,7 +455,7 @@ def dashboard():
                     words_bub_chart = generate_bubble_words(df, words = selected_words, animated=False)
                     st.plotly_chart(words_bub_chart, use_container_width=True)
 
-                with st.expander("**Explore Word Frequencies for Selected Words**", expanded=True):
+                with st.expander("**Expand to explore word frequencies for selected words**", expanded=False):
                     st.write(
                         """
                         This barchart displays the frequencies of all the selected words.
@@ -463,7 +466,7 @@ def dashboard():
                     st.plotly_chart(barchart_words, use_container_width=True) 
 
             if all_specific == 'All Words':
-                with st.expander("**Explore Which Words Most Frequently Appear in the Same Title**", expanded=True):
+                with st.expander("**Expand to explore which words most frequently appear in the same title**", expanded=False):
                     st.write(
                     """
                     This network graph displays which words (stopwords excluded) most frequently appear in the same title.
@@ -482,7 +485,7 @@ def dashboard():
                     graph_chart = generate_graph_top_n(df, top_n)
                     st.plotly_chart(graph_chart, use_container_width=True)
                 
-                with st.expander("**Words With Highest Combined Funding**", expanded=True):
+                with st.expander("**Expand to show words with highest combined funding**", expanded=False):
                     st.write(
                         """
                         This bubble plot shows the words with the highest combined funding and plots it.
@@ -498,7 +501,7 @@ def dashboard():
                     bubchart = generate_bubble_chart(df, top_n = top_n, animated = False)
                     st.plotly_chart(bubchart, use_container_width=True)
                 
-                with st.expander("**Words Used in Most Titles**", expanded=True):
+                with st.expander("**Expand to show words used in most titles**", expanded=False):
                     st.write(
                         """
                         This barchart displays the words which appears in most titles.
