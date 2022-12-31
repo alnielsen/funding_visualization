@@ -514,20 +514,6 @@ def dashboard():
         
         
         
-                
-
-
-   
-
-        
-
-
-
-
-
-
-
-
 #### Creating the About section ####
 def about():
     
@@ -546,7 +532,8 @@ def about():
             label="Download Data",
             data=file,
             file_name="dff_data.csv",
-            mime="text/csv"
+            mime="text/csv",
+            disabled=True
           )
     "---"
     #st.dataframe(df)
