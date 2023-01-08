@@ -522,11 +522,8 @@ def about():
     st.title("About the Data")
     
     st.markdown(source, unsafe_allow_html=True)
-    "Data holds information about funds, institutions, themes and more."
-    for i in range(3):
-        st.write('\n')
-
     
+    "- Data holds information about funds, institutions, themes and more."
 
     for i in range(3):
         st.write('\n')
