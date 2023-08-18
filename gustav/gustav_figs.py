@@ -25,7 +25,7 @@ def generateSankey(df, category_columns=None, is_year: bool = True, year=None, i
      # get data for specified year argument
 
     if is_comparisson == True:
-        category_columns.append('Institution') # add instituion to category_columns argument
+        category_columns._append('Institution') # add instituion to category_columns argument
         df_sankey = df.loc[:,category_columns + ['Bevilliget beløb']] # if True we include the Institution column to compare
         df_sankey_institution = df_sankey[df_sankey['Institution'].isin(comparer_institution)] # after selecting the Institution column, we sort for the two institutions we want to compare
         df_sankey_other = df_sankey[~df_sankey['Institution'].isin(comparer_institution)]
@@ -53,7 +53,7 @@ def generateSankey(df, category_columns=None, is_year: bool = True, year=None, i
         else:
             temporary_df = df_sankey.groupby([category_columns[i], category_columns[i+1]]).agg({'Bevilliget beløb':'sum'}).reset_index() # loop over columns and group by column to the right, i.e. 'År' and 'Virkemidler', and then 'Virkemidler' and 'Område'
             temporary_df.columns = ['source','target','count']
-            df_link_input = df_link_input.append(temporary_df)
+            df_link_input = df_link_input._append(temporary_df)
 
     # add index for source-target pair
     df_link_input['sourceID'] = df_link_input['source'].apply(lambda x: labels.index(x))
